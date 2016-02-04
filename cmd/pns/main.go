@@ -5,11 +5,14 @@
 package main
 
 import (
+	"bytes"
 	"html/template"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golang-commonmark/markdown"
 )
 
 func main() {
@@ -17,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = t.Execute(os.Stdout, &Notes{"/test", notes})
+	err = t.Execute(os.Stdout, &Notes{"/test", notes, markdown.New()})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,6 +29,7 @@ func main() {
 type Notes struct {
 	URL   string
 	Notes []*Note
+	md    *markdown.Markdown
 }
 
 func (n *Notes) TagURL(tag string) string {
@@ -41,6 +45,15 @@ func (n *Notes) TagURL(tag string) string {
 		}
 		return n.URL + "/" + tag
 	}
+}
+
+func (n *Notes) Render(text string) (template.HTML, error) {
+	var b bytes.Buffer
+	err := n.md.Render(&b, []byte(text))
+	if err != nil {
+		return "", err
+	}
+	return template.HTML(b.String()), nil
 }
 
 type Note struct {
@@ -90,7 +103,7 @@ const layout = `
 <body>
 {{range $n := .Notes}}
 <div class="note">
-{{.Text}}
+{{$.Render .Text}}
 
 <div class="note-footer">
 
