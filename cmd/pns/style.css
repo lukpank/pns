@@ -20,26 +20,24 @@ body {
 
 .note-footer {
     margin-top: 15px;
+    font-size: 80%;
+}
+
+a {
+    color: #2196f3;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+a:visited {
+    color: #9c27b0;
 }
 
 .tag {
-    background-color: #bbdefb;
-    padding: 3px;
-    margin: 3px;
-    color: black;
-    text-decoration: none;
-}
-.tag:hover {
-    background-color: #e3f2fd;
-    cursor: pointer;
-    cursor: hand;
-}
-
-.edit {
-    margin-left: 2em;
-    margin-right: 2em;
+    color: #9c27b0;
 }
 
 .time {
-    color: #e0e0e0;
+    color: #bdbdbd;
 }
