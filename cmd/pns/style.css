@@ -12,7 +12,9 @@ body {
 
 .note {
     border: solid 1px #e0e0e0;
-    padding: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
     margin-bottom: 5px;
 }
 
