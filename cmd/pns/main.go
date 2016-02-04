@@ -106,7 +106,7 @@ const layout = `
 <a href="{{$.TagURL .}}" class="tag">{{.}}</a> ·
 {{end}}
 
-<span class="time">
+<span class="tag">
 {{.Modified.Format "2006-01-02 15:04:05 -0700"}}
 </span> ·
 
