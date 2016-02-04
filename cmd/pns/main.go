@@ -91,21 +91,15 @@ const layout = `
 <div class="note-footer">
 
 {{range .Topics}}
-<a href="{{$.TagURL .}}" class="tag">
-{{.}}
-</a>
+<a href="{{$.TagURL .}}" class="tag">{{.}}</a>
 {{end}}
 
 {{range .Tags}}
-<a href="{{$.TagURL .}}" class="tag">
-{{.}}
-</a>
+<a href="{{$.TagURL .}}" class="tag">{{.}}</a>
 {{end}}
 
 <span class="edit">
-<a href="/_/edit/{{.ID}}" class="tag">
-Edit
-</a>
+<a href="/_/edit/{{.ID}}" class="tag">Edit</a>
 </span>
 
 <span class="time">
