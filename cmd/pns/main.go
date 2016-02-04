@@ -84,6 +84,14 @@ const layout = `
 </head>
 
 <body>
+
+<ul class="topbar">
+<li><a href="/-">/pns</a></li>
+<li><a href="/pns">delme</a></li>
+</ul>
+
+<div class="content">
+
 {{range $n := .Notes}}
 <div class="note">
 {{$.Render .Text}}
@@ -109,6 +117,8 @@ const layout = `
 </div>
 </div>
 {{end}}
+
+</div>
 </body>
 </html>
 `

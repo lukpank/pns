@@ -4,8 +4,37 @@
  */
 
 body {
-    background-color: #ffffff;
+    background-color: #fafafa;
+    margin: 0;
+    padding: 0;
+}
+
+ul.topbar {
+    background-color: #757575;
+    color: #ffffff;
+    position: fixed;
+    width: 100%;
+    margin: 0;
+    list-style-type: none;
+}
+
+.topbar li {
+    float: left;
+}
+
+.topbar li a {
+    display: block;
+    color: white;
+    padding: 15px;
+}
+.topbar li a:hover {
+    background-color: #dd2c00;
+    text-decoration: line-through;
+}
+
+.content {
     width: 80%;
+    padding-top: 60px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -34,8 +63,8 @@ a:visited {
     color: #9c27b0;
 }
 
-.tag {
-    color: #9c27b0;
+.tag, .tag:visited {
+    color: #bdbdbd;
 }
 
 .time {
