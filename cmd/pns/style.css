@@ -39,6 +39,12 @@ ul.topbar {
     margin-right: auto;
 }
 
+.anchor {
+    display: block;
+    height: 60px;
+    margin: -60px 0 0 0;
+}
+
 .note {
     border: solid 1px #e0e0e0;
     padding-left: 15px;

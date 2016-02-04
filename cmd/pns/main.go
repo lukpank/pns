@@ -93,6 +93,7 @@ const layout = `
 <div class="content">
 
 {{range $n := .Notes}}
+<a id="{{.ID}}" class="anchor"></a>
 <div class="note">
 {{$.Render .Text}}
 
@@ -112,6 +113,10 @@ const layout = `
 
 <span class="tag">
 <a href="/_/edit/{{.ID}}" class="tag">Edit</a>
+</span> ·
+
+<span class="tag">
+<a href="#{{.ID}}" class="tag">#</a>
 </span>
 
 </div>
