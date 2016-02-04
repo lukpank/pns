@@ -16,6 +16,16 @@ import (
 )
 
 func main() {
+	var notes []*Note
+	var err error
+	if len(os.Args) > 1 {
+		notes, err = parseFile(os.Args[1])
+	} else {
+		notes, err = parse(os.Stdin)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 	t, err := template.New("layout").Parse(layout)
 	if err != nil {
 		log.Fatal(err)
@@ -65,38 +75,11 @@ type Note struct {
 	Text     string
 }
 
-var notes = []*Note{
-	{
-		Topics: []string{
-			"/test", "/test2",
-		},
-		Tags: []string{
-			"foo", "bar",
-		},
-		Created:  time.Now(),
-		Modified: time.Now(),
-		ID:       1,
-		Text:     "This is a **test**.",
-	},
-
-	{
-		Topics: []string{
-			"/test",
-		},
-		Tags: []string{
-			"foo", "baz",
-		},
-		Created:  time.Now(),
-		Modified: time.Now(),
-		ID:       2,
-		Text:     "This is another **test**.",
-	},
-}
-
 const layout = `
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link type="text/css" rel="stylesheet" href="style.css">
 </head>
 
