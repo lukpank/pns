@@ -1,0 +1,43 @@
+/* Copyright 2016 Łukasz Pankowski <lukpank at o2 dot pl>. All rights
+ * reserved.  This source code is licensed under the terms of the MIT
+ * license. See LICENSE file for details.
+ */
+
+body {
+    background-color: #ffffff;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.note {
+    border: solid 1px #e0e0e0;
+    padding: 15px;
+    margin-bottom: 5px;
+}
+
+.note-footer {
+    margin-top: 15px;
+}
+
+.tag {
+    background-color: #bbdefb;
+    padding: 3px;
+    margin: 3px;
+    color: black;
+    text-decoration: none;
+}
+.tag:hover {
+    background-color: #e3f2fd;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.edit {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.time {
+    color: #e0e0e0;
+}
