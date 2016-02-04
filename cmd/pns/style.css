@@ -72,3 +72,22 @@ a:visited {
 .tag, .tag:visited {
     color: #bdbdbd;
 }
+
+code {
+    font-family: Inconsolata, monospace;
+}
+
+:not(pre) > code {
+    background-color: #f5f5f5;
+    border-radius: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    border-radius: 2px;
+    padding: 10px;
+    font-family: Inconsolata, monospace;
+    overflow: auto;
+}
