@@ -5,12 +5,15 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
 	"fmt"
 	"sort"
 	"strings"
+	"text/template"
 	"time"
+	"unicode"
 
 	"github.com/mxk/go-sqlite/sqlite3"
 )
@@ -129,6 +132,73 @@ func (db *DB) Import(notes []*Note) error {
 	return nil
 }
 
+var topicsTemplate = template.Must(template.New("topics").Parse(topicsTemplateStr))
+
+const topicsTemplateStr = `
+# Topics
+
+{{range .}}[{{.}}]({{.}}) {{end}}
+`
+
+var tagsTemplate = template.Must(template.New("tags").Parse(tagsTemplateStr))
+
+const tagsTemplateStr = `
+# Tags
+
+{{range .}}[{{.}}](/-/{{.}}) {{end}}
+`
+
+func (db *DB) TopicsAndTags() ([]*Note, error) {
+	rows, err := db.db.Query("SELECT name FROM tagnames")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var topics, tags []string
+	for rows.Next() {
+		var tag string
+		if err := rows.Scan(&tag); err != nil {
+			return nil, err
+		}
+		if len(tag) > 0 && tag[0] == '/' {
+			if validTag(tag[1:]) {
+				topics = append(topics, tag)
+			}
+		} else {
+			if validTag(tag) {
+				tags = append(tags, tag)
+			}
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	sort.Strings(topics)
+	sort.Strings(tags)
+	var bTopics, bTags bytes.Buffer
+	if err = topicsTemplate.Execute(&bTopics, topics); err != nil {
+		return nil, err
+	}
+	if err = tagsTemplate.Execute(&bTags, tags); err != nil {
+		return nil, err
+	}
+	notes := []*Note{
+		{Text: bTopics.String(), NoFooter: true},
+		{Text: bTags.String(), NoFooter: true},
+	}
+	return notes, nil
+}
+
+func validTag(tag string) bool {
+	for _, r := range tag {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
 func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 	tx, err := db.db.Begin()
 	if err != nil {
@@ -137,7 +207,10 @@ func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 	done := false
 	defer commitOrRollback(tx, &done, &err)
 
-	tagIDs, err := db.tagIDs(tx, append(tags, topic))
+	if topic != "/-" || len(tags) == 0 {
+		tags = append(tags, topic)
+	}
+	tagIDs, err := db.tagIDs(tx, tags)
 	if err != nil {
 		return nil, err
 	}

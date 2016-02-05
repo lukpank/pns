@@ -6,10 +6,10 @@ package main
 
 import (
 	"bytes"
-	"fmt"
+	"flag"
 	"html/template"
-	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -17,11 +17,15 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
+var httpAddr = flag.String("http", ":8080", "listen address")
+
 func main() {
+	flag.Parse()
+	args := flag.Args()
 	var notes []*Note
 	var err error
-	if len(os.Args) > 1 {
-		notes, err = parseFile(os.Args[1])
+	if len(args) > 0 {
+		notes, err = parseFile(args[0])
 	} else {
 		notes, err = parse(os.Stdin)
 	}
@@ -38,27 +42,50 @@ func main() {
 	if err := db.Import(notes); err != nil {
 		log.Fatal(err)
 	}
-	notes2, err := db.Notes("/pns", []string{"db"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Fprintln(os.Stderr, len(notes2))
 	t, err := template.New("layout").Parse(layout)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var out io.Writer
-	if len(os.Args) > 2 {
-		out, err = os.Create(os.Args[2])
+	if len(args) > 1 {
+		out, err := os.Create(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = t.Execute(out, &Notes{"/test", notes, markdown.New()})
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		out = os.Stdout
+		http.Handle("/", &server{db, t, markdown.New()})
+		http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
+		log.Fatal(http.ListenAndServe(*httpAddr, nil))
 	}
-	err = t.Execute(out, &Notes{"/test", notes, markdown.New()})
+}
+
+type server struct {
+	db *DB
+	t  *template.Template
+	md *markdown.Markdown
+}
+
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	tags := strings.Split(path, "/")
+	var notes []*Note
+	var err error
+	if path == "/" || path == "/-" {
+		notes, err = s.db.TopicsAndTags()
+	} else {
+		notes, err = s.db.Notes("/"+tags[1], tags[2:])
+	}
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = s.t.Execute(w, &Notes{path, notes, s.md})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -83,6 +110,34 @@ func (n *Notes) TagURL(tag string) string {
 	}
 }
 
+func (n *Notes) ShowTopic() bool {
+	return n.URL != "/" && !strings.HasPrefix(n.URL, "/-")
+}
+
+func (n *Notes) AllTopicURL() string {
+	s := n.URL[1:]
+	i := strings.Index(s, "/")
+	if i < 0 {
+		return "/"
+	} else {
+		return "/-" + s[i:]
+	}
+}
+
+func (n *Notes) Tags() []string {
+	return strings.Split(n.URL[1:], "/")[1:]
+}
+
+func (n *Notes) DelTagURL(tag string) string {
+	tags := strings.Split(n.URL[1:], "/")
+	for i, t := range tags[1:] {
+		if tag == t {
+			return "/" + strings.Join(append(tags[:i+1], tags[i+2:]...), "/")
+		}
+	}
+	return n.URL
+}
+
 func (n *Notes) Render(text string) (template.HTML, error) {
 	var b bytes.Buffer
 	err := n.md.Render(&b, []byte(text))
@@ -99,6 +154,7 @@ type Note struct {
 	Modified time.Time
 	ID       int64
 	Text     string
+	NoFooter bool
 }
 
 const layout = `
@@ -106,15 +162,17 @@ const layout = `
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link type="text/css" rel="stylesheet" href="style.css">
+<link type="text/css" rel="stylesheet" href="/_/static/style.css">
 </head>
 
 <body>
 
 <div class="topbar">
 <ul>
-<li><a href="/-">/pns</a></li>
-<li><a href="/pns">delme</a></li>
+<li>{{if .ShowTopic}}<a href="{{$.AllTopicURL}}">/pns</a>{{else}}&nbsp;{{end}}</li>
+{{range .Tags}}
+<li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
+{{end}}
 </ul>
 <form>
 <input type="text" class="taginput" placeholder="Add tag"></input>
@@ -128,6 +186,7 @@ const layout = `
 <div class="note">
 {{$.Render .Text}}
 
+{{if (not .NoFooter)}}
 <div class="note-footer">
 
 {{range .Topics}}
@@ -151,6 +210,8 @@ const layout = `
 </span>
 
 </div>
+{{end}}
+
 </div>
 {{end}}
 
