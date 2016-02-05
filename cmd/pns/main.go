@@ -85,10 +85,15 @@ const layout = `
 
 <body>
 
-<ul class="topbar">
+<div class="topbar">
+<ul>
 <li><a href="/-">/pns</a></li>
 <li><a href="/pns">delme</a></li>
 </ul>
+<form>
+<input type="text" class="taginput" placeholder="Add tag"></input>
+</form>
+</div>
 
 <div class="content">
 

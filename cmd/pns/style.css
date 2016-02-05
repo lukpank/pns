@@ -9,13 +9,17 @@ body {
     padding: 0;
 }
 
-ul.topbar {
+.topbar {
     background-color: #757575;
     color: #ffffff;
     position: fixed;
     width: 100%;
     margin: 0;
+}
+
+.topbar ul {
     list-style-type: none;
+    margin: 0;
 }
 
 .topbar li {
@@ -30,6 +34,14 @@ ul.topbar {
 .topbar li a:hover {
     background-color: #dd2c00;
     text-decoration: line-through;
+}
+
+.taginput {
+    padding: 0px;
+    margin-left: 15px;
+    margin-top: 15px;
+    margin-bottom: 14px;
+    width: 80px;
 }
 
 .content {
