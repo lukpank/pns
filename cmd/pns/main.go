@@ -27,6 +27,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	db, err := OpenDB(":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Init(); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.Import(notes); err != nil {
+		log.Fatal(err)
+	}
 	t, err := template.New("layout").Parse(layout)
 	if err != nil {
 		log.Fatal(err)
