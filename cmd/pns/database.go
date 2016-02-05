@@ -7,7 +7,10 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/mxk/go-sqlite/sqlite3"
 )
@@ -16,7 +19,10 @@ type DB struct {
 	db *sql.DB
 }
 
-var ErrSingleThread = errors.New("single threaded sqlite3 is not supported")
+var (
+	ErrSingleThread = errors.New("single threaded sqlite3 is not supported")
+	ErrTagName      = errors.New("unexpected tag name in query result")
+)
 
 func OpenDB(filename string) (*DB, error) {
 	if sqlite3.SingleThread() {
@@ -123,6 +129,159 @@ func (db *DB) Import(notes []*Note) error {
 	return nil
 }
 
+func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	tagIDs, err := db.tagIDs(tx, append(tags, topic))
+	if err != nil {
+		return nil, err
+	}
+	q := strings.Repeat("?,", len(tagIDs))[:2*len(tagIDs)-1]
+	rows, err := tx.Query(fmt.Sprintf(notesQueryFormat, q), append(tagIDs, len(tagIDs))...)
+	if err != nil {
+		return nil, err
+	}
+	notes, err := notesFromRowsClose(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range notes {
+		addTags(tx, n)
+	}
+	done = true
+	return notes, nil
+
+}
+
+const notesQueryFormat = `
+SELECT
+	n.rowid,
+	n.note,
+	n.created,
+	n.modified
+FROM
+	notes AS n
+INNER JOIN
+	tags AS t
+ON
+	n.rowid = t.noteid
+AND
+	t.tagid in (%s)
+GROUP BY
+	n.rowid
+HAVING
+	COUNT(n.rowid)=?
+ORDER BY
+	n.created asc
+`
+
+func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {
+	m := make(map[string]bool)
+	for _, tag := range tags {
+		m[tag] = false
+	}
+	// tags may have duplicated tags, on tagUnique we take only unique ones
+	tagsUnique := make([]interface{}, 0)
+	for tag := range m {
+		tagsUnique = append(tagsUnique, tag)
+	}
+	q := strings.Repeat("?,", len(tags))[:2*len(tags)-1]
+	rows, err := tx.Query(fmt.Sprintf("SELECT rowid, name from tagnames where name in (%s)", q), tagsUnique...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := make([]interface{}, 0, len(tags))
+	for rows.Next() {
+		var id int64
+		var name string
+		if err = rows.Scan(&id, &name); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+		m[name] = true
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	if len(m) != len(tags) {
+		return nil, ErrTagName
+	}
+	if len(ids) != len(tags) {
+		var err NoTagsError
+		for s, present := range m {
+			if !present {
+				err = append(err, s)
+			}
+		}
+		return nil, err
+	}
+	return ids, nil
+}
+
+func notesFromRowsClose(rows *sql.Rows) ([]*Note, error) {
+	defer rows.Close()
+
+	var notes []*Note
+	for rows.Next() {
+		var note string
+		var rowid, created, modified int64
+		if err := rows.Scan(&rowid, &note, &created, &modified); err != nil {
+			return nil, err
+		}
+		notes = append(notes, &Note{ID: rowid, Text: note, Created: time.Unix(created, 0), Modified: time.Unix(modified, 0)})
+
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return notes, nil
+}
+
+func addTags(tx *sql.Tx, n *Note) error {
+	rows, err := tx.Query(addTagsQuery, n.ID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tag string
+		if err := rows.Scan(&tag); err != nil {
+			return err
+		}
+		if len(tag) > 0 && tag[0] == '/' {
+			n.Topics = append(n.Topics, tag)
+		} else {
+			n.Tags = append(n.Tags, tag)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	sort.Strings(n.Topics)
+	sort.Strings(n.Tags)
+	return nil
+}
+
+const addTagsQuery = `
+SELECT
+	n.name
+FROM
+	tags AS t
+INNER JOIN
+	tagnames AS n
+ON
+	t.noteid=?
+AND
+	t.tagid = n.rowid
+`
+
 type MultiError []error
 
 func (me MultiError) Error() string {
@@ -131,4 +290,10 @@ func (me MultiError) Error() string {
 		s = append(s, err.Error())
 	}
 	return strings.Join(s, "; ")
+}
+
+type NoTagsError []string
+
+func (e NoTagsError) Error() string {
+	return "no such tags: " + strings.Join(e, ", ")
 }

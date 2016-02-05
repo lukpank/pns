@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -37,6 +38,11 @@ func main() {
 	if err := db.Import(notes); err != nil {
 		log.Fatal(err)
 	}
+	notes2, err := db.Notes("/pns", []string{"db"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Fprintln(os.Stderr, len(notes2))
 	t, err := template.New("layout").Parse(layout)
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +97,7 @@ type Note struct {
 	Tags     []string
 	Created  time.Time
 	Modified time.Time
-	ID       int
+	ID       int64
 	Text     string
 }
 

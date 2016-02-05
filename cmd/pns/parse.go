@@ -74,7 +74,7 @@ outer:
 			break
 		}
 		if sc.Scan() {
-			n.ID, err = strconv.Atoi(sc.Text())
+			n.ID, err = strconv.ParseInt(sc.Text(), 10, 64)
 			if err != nil {
 				return nil, err
 			}
