@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"html/template"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -30,7 +31,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = t.Execute(os.Stdout, &Notes{"/test", notes, markdown.New()})
+	var out io.Writer
+	if len(os.Args) > 2 {
+		out, err = os.Create(os.Args[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		out = os.Stdout
+	}
+	err = t.Execute(out, &Notes{"/test", notes, markdown.New()})
 	if err != nil {
 		log.Fatal(err)
 	}
