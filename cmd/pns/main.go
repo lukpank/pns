@@ -88,8 +88,19 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:])
 	}
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		if _, ok := err.(NoTagsError); ok {
+			notes = nil
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	if len(notes) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		notes = append(notes, &Note{
+			Text:     "# No such notes",
+			NoFooter: true,
+		})
 	}
 	err = s.t.Execute(w, &Notes{path, notes, s.md})
 	if err != nil {
