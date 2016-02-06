@@ -161,18 +161,23 @@ func (n *Notes) TagURL(tag string) string {
 	}
 }
 
-func (n *Notes) ShowTopic() bool {
-	return n.URL != "/" && !strings.HasPrefix(n.URL, "/-")
+type topic struct {
+	URL  string
+	Name string
 }
 
-func (n *Notes) AllTopicURL() string {
+func (n *Notes) Topic() *topic {
+	if n.URL == "/" || strings.HasPrefix(n.URL, "/-") {
+		return nil
+	}
 	s := n.URL[1:]
 	i := strings.Index(s, "/")
 	if i < 0 {
-		return "/"
+		return &topic{"/", n.URL}
 	} else {
-		return "/-" + s[i:]
+		return &topic{"/-" + s[i:], n.URL[:i+1]}
 	}
+
 }
 
 func (n *Notes) Tags() []string {
@@ -220,7 +225,7 @@ const layout = `
 
 <div class="topbar">
 <ul>
-<li>{{if .ShowTopic}}<a href="{{$.AllTopicURL}}">/pns</a>{{else}}&nbsp;{{end}}</li>
+{{with .Topic}}<li><a href="{{.URL}}">{{.Name}}</a></li>{{end}}
 {{range .Tags}}
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
 {{end}}
