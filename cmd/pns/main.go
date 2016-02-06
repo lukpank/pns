@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -58,8 +59,16 @@ func main() {
 	} else {
 		http.Handle("/", &server{db, t, markdown.New()})
 		http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
-		log.Fatal(http.ListenAndServe(*httpAddr, nil))
+		log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
 	}
+}
+
+func remoteAddr(r *http.Request) string {
+	forward := r.Header.Get("X-Forwarded-For")
+	if forward != "" {
+		return fmt.Sprintf("%s (%s)", r.RemoteAddr, forward)
+	}
+	return r.RemoteAddr
 }
 
 type server struct {
@@ -87,6 +96,37 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+type logger struct{}
+
+func (logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	t := time.Now()
+	path := r.URL.Path
+	rw := &responseWriter{w, 0, false}
+	defer func() {
+		log.Println(remoteAddr(r), r.Method, path, "-", rw.status, http.StatusText(rw.status), time.Since(t))
+	}()
+	http.DefaultServeMux.ServeHTTP(rw, r)
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	status      int
+	wroteHeader bool
+}
+
+func (w *responseWriter) WriteHeader(status int) {
+	w.status = status
+	w.wroteHeader = true
+	w.ResponseWriter.WriteHeader(status)
+}
+
+func (w *responseWriter) Write(b []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(b)
 }
 
 type Notes struct {
