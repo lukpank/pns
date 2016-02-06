@@ -148,10 +148,10 @@ const tagsTemplateStr = `
 {{range .}}[{{.}}](/-/{{.}}) {{end}}
 `
 
-func (db *DB) TopicsAndTags() ([]*Note, error) {
+func (db *DB) TopicsAndTags() ([]*Note, []string, error) {
 	rows, err := db.db.Query("SELECT name FROM tagnames")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
@@ -159,7 +159,7 @@ func (db *DB) TopicsAndTags() ([]*Note, error) {
 	for rows.Next() {
 		var tag string
 		if err := rows.Scan(&tag); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if len(tag) > 0 && tag[0] == '/' {
 			if validTag(tag[1:]) {
@@ -172,22 +172,22 @@ func (db *DB) TopicsAndTags() ([]*Note, error) {
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sort.Strings(topics)
 	sort.Strings(tags)
 	var bTopics, bTags bytes.Buffer
 	if err = topicsTemplate.Execute(&bTopics, topics); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err = tagsTemplate.Execute(&bTags, tags); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	notes := []*Note{
 		{Text: bTopics.String(), NoFooter: true},
 		{Text: bTags.String(), NoFooter: true},
 	}
-	return notes, nil
+	return notes, append(topics, tags...), nil
 }
 
 func validTag(tag string) bool {

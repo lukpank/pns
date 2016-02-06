@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -52,7 +53,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = t.Execute(out, &Notes{"/test", notes, markdown.New()})
+		err = t.Execute(out, &Notes{"/test", notes, markdown.New(), nil})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -80,12 +81,20 @@ type server struct {
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	tags := strings.Split(path, "/")
+	r.ParseForm()
+	if tag := r.Form.Get("tag"); tag != "" {
+		notes := Notes{URL: path}
+		http.Redirect(w, r, notes.TagURL(tag), http.StatusMovedPermanently)
+		return
+	}
 	var notes []*Note
 	var err error
+	var availableTags []string
 	if path == "/" || path == "/-" {
-		notes, err = s.db.TopicsAndTags()
+		notes, availableTags, err = s.db.TopicsAndTags()
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:])
+		availableTags = tagsFromNotes(notes)
 	}
 	if err != nil {
 		if _, ok := err.(NoTagsError); ok {
@@ -102,7 +111,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.Execute(w, &Notes{path, notes, s.md})
+	err = s.t.Execute(w, &Notes{path, notes, s.md, availableTags})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -114,6 +123,9 @@ type logger struct{}
 func (logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	path := r.URL.Path
+	if r.URL.RawQuery != "" {
+		path += "?" + r.URL.RawQuery
+	}
 	rw := &responseWriter{w, 0, false}
 	defer func() {
 		log.Println(remoteAddr(r), r.Method, path, "-", rw.status, http.StatusText(rw.status), time.Since(t))
@@ -141,9 +153,10 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 }
 
 type Notes struct {
-	URL   string
-	Notes []*Note
-	md    *markdown.Markdown
+	URL           string
+	Notes         []*Note
+	md            *markdown.Markdown
+	AvailableTags []string
 }
 
 func (n *Notes) TagURL(tag string) string {
@@ -203,6 +216,24 @@ func (n *Notes) Render(text string) (template.HTML, error) {
 	return template.HTML(b.String()), nil
 }
 
+func tagsFromNotes(notes []*Note) []string {
+	m := make(map[string]struct{})
+	for _, n := range notes {
+		for _, s := range n.Topics {
+			m[s] = struct{}{}
+		}
+		for _, s := range n.Tags {
+			m[s] = struct{}{}
+		}
+	}
+	var tags []string
+	for s := range m {
+		tags = append(tags, s)
+	}
+	sort.Strings(tags)
+	return tags
+}
+
 type Note struct {
 	Topics   []string
 	Tags     []string
@@ -230,9 +261,14 @@ const layout = `
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
 {{end}}
 </ul>
-<form>
-<input type="text" class="taginput" placeholder="Add tag"></input>
+<form action="{{.URL}}">
+<input type="text" name="tag" class="taginput" placeholder="Add tag" list="taglist"></input>
 </form>
+<datalist id="taglist">
+{{range .AvailableTags}}
+<option>{{.}}</option>
+{{end}}
+</datalist>
 </div>
 
 <div class="content">
