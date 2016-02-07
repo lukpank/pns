@@ -44,6 +44,15 @@ body {
     width: 10%;
 }
 
+.buttons {
+    margin-right: 10%
+}
+
+.button {
+    float: right;
+    margin: 12px 0 12px 15px;
+}
+
 .content {
     width: 80%;
     padding-top: 60px;
@@ -66,6 +75,12 @@ body {
 .note-footer {
     margin-top: 15px;
     font-size: 80%;
+}
+
+.preview-note {
+    border-bottom: solid 1px #e0e0e0;
+    padding: 0 10px 10px 10px;
+    margin-bottom: 5px;
 }
 
 a {

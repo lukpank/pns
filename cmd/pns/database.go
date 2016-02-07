@@ -199,6 +199,16 @@ func validTag(tag string) bool {
 	return true
 }
 
+func (db *DB) Note(id int64) (*Note, error) {
+	var note string
+	var created, modified int64
+	err := db.db.QueryRow("SELECT note, created, modified FROM notes WHERE rowid=?", id).Scan(&note, &created, &modified)
+	if err != nil {
+		return nil, err
+	}
+	return &Note{ID: id, Text: note, Created: time.Unix(created, 0), Modified: time.Unix(modified, 0)}, nil
+}
+
 func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 	tx, err := db.db.Begin()
 	if err != nil {

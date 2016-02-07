@@ -5,11 +5,14 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/golang-commonmark/markdown"
@@ -40,7 +43,7 @@ func main() {
 	if err := db.Import(notes); err != nil {
 		log.Fatal(err)
 	}
-	t, err := template.ParseFiles("templates/layout.html")
+	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +57,11 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		http.Handle("/", &server{db, t, markdown.New()})
+		s := &server{db, t, markdown.New()}
+		http.Handle("/", s)
+		http.HandleFunc("/_/edit/", s.serveEdit)
+		http.HandleFunc("/_/edit/preview/", s.serveEditPreview)
+		http.HandleFunc("/_/edit/submit/", s.serveEditSubmit)
 		http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
 		log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
 	}
@@ -104,4 +111,80 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path, "/_/edit/")
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	note, err := s.db.Note(id)
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = s.t.ExecuteTemplate(w, "edit.html", note)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) serveEditPreview(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path, "/_/edit/preview/")
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	note, err := s.db.Note(id)
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		return
+	}
+	id, err := idFromPath(r.URL.Path, "/_/edit/submit/")
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	r.ParseForm()
+	if r.PostForm.Get("action") != "Preview" {
+		http.Error(w, "for now only preview is supported", http.StatusBadRequest)
+		_ = id // TODO use it in action Submit
+		return
+	}
+	note := &Note{Text: r.PostForm.Get("text")}
+	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+var ErrPrefixNotFound = errors.New("prefix not found")
+
+func idFromPath(path, prefix string) (int64, error) {
+	idStr := strings.TrimPrefix(path, prefix)
+	if len(idStr) == len(path) {
+		return 0, ErrPrefixNotFound
+	}
+	return strconv.ParseInt(idStr, 10, 64)
 }

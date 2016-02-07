@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="/_/static/style.css">
+<link type="text/css" rel="stylesheet" href="/_/static/edit.css">
+</head>
+
+<body>
+<form action="/_/edit/submit/{{.ID}}" method="post" target="preview">
+
+<div class="topbar">
+<div class="buttons">
+<input type="submit" name="action" value="Submit" class="button"></input>
+<input type="submit" name="action" value="Preview" class="button"></input>
+</div>
+</div>
+
+<div class="content">
+<textarea name="text">
+{{.Text}}
+</textarea>
+<iframe name="preview" src="/_/edit/preview/{{.ID}}"></iframe>
+</div>
+
+</form>
+</body>
+</html>
