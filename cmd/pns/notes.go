@@ -1,0 +1,107 @@
+// Copyright 2016 Łukasz Pankowski <lukpank at o2 dot pl>. All rights
+// reserved.  This source code is licensed under the terms of the MIT
+// license. See LICENSE file for details.
+
+package main
+
+import (
+	"bytes"
+	"html/template"
+	"sort"
+	"strings"
+	"time"
+
+	"github.com/golang-commonmark/markdown"
+)
+
+type Notes struct {
+	URL           string
+	Notes         []*Note
+	md            *markdown.Markdown
+	AvailableTags []string
+}
+
+type Note struct {
+	Topics   []string
+	Tags     []string
+	Created  time.Time
+	Modified time.Time
+	ID       int64
+	Text     string
+	NoFooter bool
+}
+
+func (n *Notes) TagURL(tag string) string {
+	tags := strings.Split(n.URL[1:], "/")
+	if strings.HasPrefix(tag, "/") {
+		tags[0] = tag
+		return strings.Join(tags, "/")
+	} else {
+		for _, t := range tags[1:] {
+			if tag == t {
+				return n.URL
+			}
+		}
+		return n.URL + "/" + tag
+	}
+}
+
+type topic struct {
+	URL  string
+	Name string
+}
+
+func (n *Notes) Topic() *topic {
+	if n.URL == "/" || strings.HasPrefix(n.URL, "/-") {
+		return nil
+	}
+	s := n.URL[1:]
+	i := strings.Index(s, "/")
+	if i < 0 {
+		return &topic{"/", n.URL}
+	} else {
+		return &topic{"/-" + s[i:], n.URL[:i+1]}
+	}
+
+}
+
+func (n *Notes) Tags() []string {
+	return strings.Split(n.URL[1:], "/")[1:]
+}
+
+func (n *Notes) DelTagURL(tag string) string {
+	tags := strings.Split(n.URL[1:], "/")
+	for i, t := range tags[1:] {
+		if tag == t {
+			return "/" + strings.Join(append(tags[:i+1], tags[i+2:]...), "/")
+		}
+	}
+	return n.URL
+}
+
+func (n *Notes) Render(text string) (template.HTML, error) {
+	var b bytes.Buffer
+	err := n.md.Render(&b, []byte(text))
+	if err != nil {
+		return "", err
+	}
+	return template.HTML(b.String()), nil
+}
+
+func tagsFromNotes(notes []*Note) []string {
+	m := make(map[string]struct{})
+	for _, n := range notes {
+		for _, s := range n.Topics {
+			m[s] = struct{}{}
+		}
+		for _, s := range n.Tags {
+			m[s] = struct{}{}
+		}
+	}
+	var tags []string
+	for s := range m {
+		tags = append(tags, s)
+	}
+	sort.Strings(tags)
+	return tags
+}
