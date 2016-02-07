@@ -59,9 +59,7 @@ body {
 
 .note {
     border: solid 1px #e0e0e0;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-bottom: 15px;
+    padding: 0 15px 15px 15px;
     margin-bottom: 5px;
 }
 
