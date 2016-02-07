@@ -44,7 +44,7 @@ func main() {
 	if err := db.Import(notes); err != nil {
 		log.Fatal(err)
 	}
-	t, err := template.New("layout").Parse(layout)
+	t, err := template.ParseFiles("templates/layout.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = t.Execute(out, &Notes{"/test", notes, markdown.New(), nil})
+		err = t.ExecuteTemplate(out, "layout.html", &Notes{"/test", notes, markdown.New(), nil})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -111,7 +111,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.Execute(w, &Notes{path, notes, s.md, availableTags})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -243,71 +243,3 @@ type Note struct {
 	Text     string
 	NoFooter bool
 }
-
-const layout = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link type="text/css" rel="stylesheet" href="/_/static/style.css">
-</head>
-
-<body>
-
-<div class="topbar">
-<ul>
-{{with .Topic}}<li><a href="{{.URL}}">{{.Name}}</a></li>{{end}}
-{{range .Tags}}
-<li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
-{{end}}
-</ul>
-<form action="{{.URL}}">
-<input type="text" name="tag" class="taginput" placeholder="Add tag" list="taglist"></input>
-</form>
-<datalist id="taglist">
-{{range .AvailableTags}}
-<option>{{.}}</option>
-{{end}}
-</datalist>
-</div>
-
-<div class="content">
-
-{{range $n := .Notes}}
-<a id="{{.ID}}" class="anchor"></a>
-<div class="note">
-{{$.Render .Text}}
-
-{{if (not .NoFooter)}}
-<div class="note-footer">
-
-{{range .Topics}}
-<a href="{{$.TagURL .}}" class="tag">{{.}}</a> ·
-{{end}}
-
-{{range .Tags}}
-<a href="{{$.TagURL .}}" class="tag">{{.}}</a> ·
-{{end}}
-
-<span class="tag">
-{{.Modified.Format "2006-01-02 15:04:05 -0700"}}
-</span> ·
-
-<span class="tag">
-<a href="/_/edit/{{.ID}}" class="tag">Edit</a>
-</span> ·
-
-<span class="tag">
-<a href="#{{.ID}}" class="tag">#</a>
-</span>
-
-</div>
-{{end}}
-
-</div>
-{{end}}
-
-</div>
-</body>
-</html>
-`
