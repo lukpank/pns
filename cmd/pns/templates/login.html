@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="/_/static/style.css">
+</head>
+
+<body>
+
+<div class="topbar">
+<span class="topbar-message">
+Note to login you need to have
+<a href="https://en.wikipedia.org/wiki/HTTP_cookie">cookies</a> enabled.
+</span>
+</div>
+
+<div class="content">
+<form action="/_/login" method="post">
+<table class="login">
+
+<tr>
+<td class="R"><label for="login">Login:</label></td>
+<td><input type="text" name="login" autofocus></td>
+</tr>
+
+<tr>
+<td class="R"><label for="password">Password:</label></td>
+<td><input type="password" name="password"></td>
+</tr>
+
+<tr>
+<td></td>
+<td class="R">
+<input type="hidden" name="redirect" value="{{.Redirect}}">
+<input type="submit" value="Submit">
+</td>
+</tr>
+
+{{with .Message}}<tr><td class="login-message" colspan="2">{{.}}</td></tr>{{end}}
+
+</table>
+</form>
+</div>
+
+</body>
+</html>

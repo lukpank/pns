@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/mxk/go-sqlite/sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DB struct {
@@ -25,6 +26,7 @@ type DB struct {
 var (
 	ErrSingleThread = errors.New("single threaded sqlite3 is not supported")
 	ErrTagName      = errors.New("unexpected tag name in query result")
+	ErrAuth         = errors.New("failed to authenticate: incorect login or password")
 )
 
 func OpenDB(filename string) (*DB, error) {
@@ -51,6 +53,16 @@ func (db *DB) Init() (err error) {
 	}
 	if err == nil {
 		_, err = tx.Exec("CREATE TABLE tagnames(name TEXT UNIQUE)")
+	}
+	if err == nil {
+		_, err = tx.Exec("CREATE TABLE users(login TEXT UNIQUE, passwordhash BLOB)")
+	}
+	var p []byte
+	if err == nil {
+		p, err = bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
+	}
+	if err == nil {
+		_, err = tx.Exec("INSERT INTO users (login, passwordhash) VALUES (?, ?)", "test", p)
 	}
 	if err != nil {
 		return err
@@ -130,6 +142,21 @@ func (db *DB) Import(notes []*Note) error {
 	}
 	done = true
 	return nil
+}
+
+func (db *DB) AuthenticateUser(login string, password []byte) error {
+	var h []byte
+	if err := db.db.QueryRow("SELECT passwordhash FROM users WHERE login=?", login).Scan(&h); err != nil {
+		if err == sql.ErrNoRows {
+			return ErrAuth
+		}
+		return err
+	}
+	err := bcrypt.CompareHashAndPassword(h, password)
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return ErrAuth
+	}
+	return err
 }
 
 var topicsTemplate = template.Must(template.New("topics").Parse(topicsTemplateStr))

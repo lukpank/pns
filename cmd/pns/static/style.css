@@ -37,20 +37,41 @@ body {
     text-decoration: line-through;
 }
 
+.topbar-message {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+}
+
+.topbar-message a, .topbar-message a:visited {
+    text-decoration: underline;
+    color: #ffffff;
+}
+
 .taginput {
-    float: right;
+    margin: 12px 5px 11px 0;
     padding: 0;
-    margin: 15px 10% 12px 0;
-    width: 10%;
+    width: 10em;
+    height: 20px;
+    float:right;
 }
 
 .buttons {
-    margin-right: 10%
+    float: right;
+    margin: 12px 10% 11px 0;
+    padding: 0;
 }
 
 .button {
-    float: right;
-    margin: 12px 0 12px 15px;
+    margin: 0;
+    padding: 0 5px 0 5px;
+    height: 25px;
+    font-size: 15px;
+}
+
+.inline {
+    display: inline;
 }
 
 .content {
@@ -115,4 +136,21 @@ pre {
     padding: 10px;
     font-family: Inconsolata, monospace;
     overflow: auto;
+}
+
+.login {
+     border: solid 1px #e0e0e0;
+     padding: 30px;
+     margin: 30% auto 0 auto;
+}
+
+.login-message {
+    color: red;
+    text-align: center;
+    height: 30px;
+    vertical-align: bottom;
+}
+
+.R {
+    text-align: right;
 }

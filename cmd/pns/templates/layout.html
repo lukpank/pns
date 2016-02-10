@@ -14,8 +14,14 @@
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
 {{end}}
 </ul>
+<div class="buttons">
+<input type="submit" name="action" value="Add note" class="button" tabindex="2"></input>
+<form action="/_/logout{{.URL}}" class="inline">
+<input type="submit" value="Logout" class="button" tabindex="3"></input>
+</form>
+</div>
 <form action="{{.URL}}">
-<input type="text" name="tag" class="taginput" placeholder="Add tag" list="taglist"></input>
+<input type="text" name="tag" class="taginput" placeholder="Add tag" list="taglist" autofocus tabindex="1"></input>
 </form>
 <datalist id="taglist">
 {{range .AvailableTags}}

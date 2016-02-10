@@ -14,9 +14,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/golang-commonmark/markdown"
 )
+
+const cookieMaxAge = 3600
 
 var httpAddr = flag.String("http", ":8080", "listen address")
 
@@ -43,7 +46,7 @@ func main() {
 	if err := db.Import(notes); err != nil {
 		log.Fatal(err)
 	}
-	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html")
+	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,12 +60,14 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		s := &server{db, t, markdown.New()}
-		http.Handle("/", s)
-		http.HandleFunc("/_/edit/", s.serveEdit)
-		http.HandleFunc("/_/edit/preview/", s.serveEditPreview)
-		http.HandleFunc("/_/edit/submit/", s.serveEditSubmit)
+		s := &server{db, t, markdown.New(), NewSessions()}
+		http.Handle("/", s.authenticate(s.ServeHTTP))
+		http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
+		http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
+		http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
 		http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
+		http.HandleFunc("/_/login", s.serveLogin)
+		http.HandleFunc("/_/logout/", s.serveLogout)
 		log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
 	}
 }
@@ -71,6 +76,7 @@ type server struct {
 	db *DB
 	t  *template.Template
 	md *markdown.Markdown
+	s  *sessions
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +91,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var notes []*Note
 	var err error
 	var availableTags []string
-	if path == "/" || path == "/-" {
+	if path == "/" || path == "/-" || path == "/-/" {
 		notes, availableTags, err = s.db.TopicsAndTags()
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:])
@@ -177,6 +183,71 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cookie, err := r.Cookie("session_id"); err == nil && s.s.ValidSession(cookie.Value) {
+			h(w, r)
+		} else {
+			s.loginPage(w, r, r.URL.Path, "")
+		}
+	}
+}
+
+func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		return
+	}
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	login := r.PostForm.Get("login")
+	password := r.PostForm.Get("password")
+	redirect := r.PostForm.Get("redirect")
+	if err := s.db.AuthenticateUser(login, []byte(password)); err != nil {
+		if err == ErrAuth {
+			w.WriteHeader(http.StatusUnauthorized)
+			s.loginPage(w, r, redirect, "Incorrect login or password.")
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+	sid, err := s.s.NewSession(time.Hour)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	expires := time.Now().Add(cookieMaxAge * time.Second)
+	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires})
+	http.Redirect(w, r, redirect, http.StatusSeeOther)
+}
+
+func (s *server) loginPage(w http.ResponseWriter, r *http.Request, path, msg string) {
+	err := s.t.ExecuteTemplate(w, "login.html", struct{ Redirect, Message string }{path, msg})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) serveLogout(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println(err)
+	} else {
+		s.s.Remove(cookie.Value)
+	}
+	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", MaxAge: -1})
+	path := strings.TrimPrefix(r.URL.Path, "/_/logout")
+	if len(path) == len(r.URL.Path) || path == "" {
+		path = "/"
+	}
+	http.Redirect(w, r, path, http.StatusSeeOther)
 }
 
 var ErrPrefixNotFound = errors.New("prefix not found")
