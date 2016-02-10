@@ -11,65 +11,80 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/bgentry/speakeasy"
 	"github.com/golang-commonmark/markdown"
 )
 
 const cookieMaxAge = 3600
 
-var httpAddr = flag.String("http", ":8080", "listen address")
+var (
+	dbFileName = flag.String("f", "", "sqlite3 database file name")
+	dbInit     = flag.Bool("init", false, "initialize the database file")
+	dbAddUser  = flag.String("adduser", "", "add user with given login to the database file (asks for the password)")
+	importFrom = flag.String("import", "", "import notes from given file")
+	httpAddr   = flag.String("http", ":8080", "listen address")
+)
 
 func main() {
 	flag.Parse()
-	args := flag.Args()
-	var notes []*Note
-	var err error
-	if len(args) > 0 {
-		notes, err = parseFile(args[0])
-	} else {
-		notes, err = parse(os.Stdin)
+	if *dbFileName == "" {
+		log.Fatal("option -f is requiered")
 	}
+	db, err := OpenDB(*dbFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	db, err := OpenDB(":memory:")
-	if err != nil {
-		log.Fatal(err)
+	if *dbInit {
+		if err = db.Init(); err != nil {
+			log.Fatal("failed to initialize database: ", err)
+		}
 	}
-	if err = db.Init(); err != nil {
-		log.Fatal(err)
+	if *importFrom != "" {
+		notes, err := parseFile(*importFrom)
+		if err != nil {
+			log.Fatal("failed to parse imported file: ", err)
+		}
+		if err := db.Import(notes); err != nil {
+			log.Fatal("failed to import into database: ", err)
+		}
 	}
-	if err := db.Import(notes); err != nil {
-		log.Fatal(err)
+	if *dbAddUser != "" {
+		pass, err := speakeasy.Ask("Password: ")
+		if err != nil {
+			log.Fatal("failed to add user: ", err)
+		}
+		repeat, err := speakeasy.Ask("Retype password: ")
+		if err != nil {
+			log.Fatal("failed to add user: ", err)
+		}
+		if repeat != pass {
+			log.Fatal("failed to add user: passwords do not match")
+		}
+		if err = db.AddUser(*dbAddUser, []byte(pass)); err != nil {
+			log.Fatal("failed to add user: ", err)
+		}
 	}
+	if *dbInit || *importFrom != "" || *dbAddUser != "" {
+		return
+	}
+
 	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(args) > 1 {
-		out, err := os.Create(os.Args[2])
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = t.ExecuteTemplate(out, "layout.html", &Notes{"/test", notes, markdown.New(), nil})
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		s := &server{db, t, markdown.New(), NewSessions()}
-		http.Handle("/", s.authenticate(s.ServeHTTP))
-		http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
-		http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
-		http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
-		http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
-		http.HandleFunc("/_/login", s.serveLogin)
-		http.HandleFunc("/_/logout/", s.serveLogout)
-		log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
-	}
+	s := &server{db, t, markdown.New(), NewSessions()}
+	http.Handle("/", s.authenticate(s.ServeHTTP))
+	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
+	http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
+	http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
+	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
+	http.HandleFunc("/_/login", s.serveLogin)
+	http.HandleFunc("/_/logout/", s.serveLogout)
+	log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
 }
 
 type server struct {

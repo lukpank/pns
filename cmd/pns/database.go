@@ -57,13 +57,6 @@ func (db *DB) Init() (err error) {
 	if err == nil {
 		_, err = tx.Exec("CREATE TABLE users(login TEXT UNIQUE, passwordhash BLOB)")
 	}
-	var p []byte
-	if err == nil {
-		p, err = bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
-	}
-	if err == nil {
-		_, err = tx.Exec("INSERT INTO users (login, passwordhash) VALUES (?, ?)", "test", p)
-	}
 	if err != nil {
 		return err
 	}
@@ -142,6 +135,15 @@ func (db *DB) Import(notes []*Note) error {
 	}
 	done = true
 	return nil
+}
+
+func (db *DB) AddUser(login string, password []byte) error {
+	p, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	_, err = db.db.Exec("INSERT INTO users (login, passwordhash) VALUES (?, ?)", login, p)
+	return err
 }
 
 func (db *DB) AuthenticateUser(login string, password []byte) error {
