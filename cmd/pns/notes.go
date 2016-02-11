@@ -46,6 +46,48 @@ func (n *Notes) TagURL(tag string) string {
 	}
 }
 
+func tagsURL(path, expr string) string {
+	tags := strings.Split(path[1:], "/")
+	tags[0] = "/" + tags[0]
+	for _, tag := range strings.Split(expr, " ") {
+		if tag == "" {
+			continue
+		} else if strings.HasPrefix(tag, "-/") {
+			if tags[0] == tag[1:] {
+				tags[0] = "/"
+			}
+		} else if tag[0] == '/' {
+			tags[0] = tag
+		} else if tag[0] == '-' {
+			tags = delTag(tags, tag[1:])
+		} else {
+			tags = addTag(tags, tag)
+		}
+	}
+	if tags[0] == "/" && len(tags) > 1 {
+		tags[0] = "/-"
+	}
+	return strings.Join(tags, "/")
+}
+
+func delTag(tags []string, tag string) []string {
+	for i, s := range tags {
+		if tag == s {
+			return append(tags[:i], tags[i+1:]...)
+		}
+	}
+	return tags
+}
+
+func addTag(tags []string, tag string) []string {
+	for _, s := range tags {
+		if s == tag {
+			return tags
+		}
+	}
+	return append(tags, tag)
+}
+
 type topic struct {
 	URL  string
 	Name string

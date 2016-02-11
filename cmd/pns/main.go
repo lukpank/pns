@@ -99,8 +99,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tags := strings.Split(path, "/")
 	r.ParseForm()
 	if tag := r.Form.Get("tag"); tag != "" {
-		notes := Notes{URL: path}
-		http.Redirect(w, r, notes.TagURL(tag), http.StatusMovedPermanently)
+		http.Redirect(w, r, tagsURL(path, tag), http.StatusMovedPermanently)
 		return
 	}
 	var notes []*Note
