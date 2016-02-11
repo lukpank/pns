@@ -18,7 +18,7 @@ type Notes struct {
 	URL           string
 	Notes         []*Note
 	md            *markdown.Markdown
-	AvailableTags []string
+	availableTags []string
 }
 
 type Note struct {
@@ -29,6 +29,10 @@ type Note struct {
 	ID       int64
 	Text     string
 	NoFooter bool
+}
+
+func (n *Notes) AvailableTags() string {
+	return strings.Join(n.availableTags, ", ")
 }
 
 func (n *Notes) TagURL(tag string) string {

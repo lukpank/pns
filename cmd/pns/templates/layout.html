@@ -3,12 +3,15 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
+<link rel="stylesheet" href="/_/static/awesomplete.css" />
+<script src="/_/static/awesomplete.js"></script>
+<script src="/_/static/pns.js" async></script>
 </head>
 
 <body>
 
 <div class="topbar">
-<ul>
+<ul class="tagbar">
 {{with .Topic}}<li><a href="{{.URL}}">{{.Name}}</a></li>{{end}}
 {{range .Tags}}
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
@@ -21,13 +24,11 @@
 </form>
 </div>
 <form action="{{.URL}}">
-<input type="text" name="tag" class="taginput" placeholder="Add tag" list="taglist" autofocus tabindex="1"></input>
+<div class="awesomplete">
+<input type="text" name="tag" placeholder="Add tag(s)" class="taginput"
+       data-list="{{.AvailableTags}}" data-multiple autofocus tabindex="1"></input>
+</div>
 </form>
-<datalist id="taglist">
-{{range .AvailableTags}}
-<option>{{.}}</option>
-{{end}}
-</datalist>
 </div>
 
 <div class="content">

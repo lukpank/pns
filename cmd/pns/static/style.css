@@ -11,28 +11,27 @@ body {
 
 .topbar {
     background-color: #757575;
-    color: #ffffff;
     position: fixed;
     width: 100%;
     margin: 0;
 }
 
-.topbar ul {
+ul.tagbar {
     list-style-type: none;
     margin: 0 0 0 10%;
     padding: 0;
 }
 
-.topbar li {
+ul.tagbar li {
     float: left;
 }
 
-.topbar li a {
+ul.tagbar li a {
     display: block;
     color: white;
     padding: 15px;
 }
-.topbar li a:hover {
+ul.tagbar li a:hover {
     background-color: #dd2c00;
     text-decoration: line-through;
 }
@@ -44,6 +43,10 @@ body {
     padding: 15px;
 }
 
+.topbar-message {
+    color: #ffffff;
+}
+
 .topbar-message a, .topbar-message a:visited {
     text-decoration: underline;
     color: #ffffff;
@@ -52,8 +55,11 @@ body {
 .taginput {
     margin: 12px 5px 11px 0;
     padding: 0;
-    width: 10em;
+    width: 20em;
     height: 20px;
+    float:right;
+}
+div.awesomplete {
     float:right;
 }
 
