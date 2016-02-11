@@ -297,12 +297,12 @@ func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {
 	for _, tag := range tags {
 		m[tag] = false
 	}
-	// tags may have duplicated tags, on tagUnique we take only unique ones
+	// tags may have duplicated tags, on tagsUnique we take only unique ones
 	tagsUnique := make([]interface{}, 0)
 	for tag := range m {
 		tagsUnique = append(tagsUnique, tag)
 	}
-	q := strings.Repeat("?,", len(tags))[:2*len(tags)-1]
+	q := strings.Repeat("?,", len(tagsUnique))[:2*len(tagsUnique)-1]
 	rows, err := tx.Query(fmt.Sprintf("SELECT rowid, name from tagnames where name in (%s)", q), tagsUnique...)
 	if err != nil {
 		return nil, err
@@ -321,10 +321,10 @@ func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	if len(m) != len(tags) {
+	if len(m) != len(tagsUnique) {
 		return nil, ErrTagName
 	}
-	if len(ids) != len(tags) {
+	if len(ids) != len(tagsUnique) {
 		var err NoTagsError
 		for s, present := range m {
 			if !present {
