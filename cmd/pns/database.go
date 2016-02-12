@@ -255,8 +255,8 @@ func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 	if err != nil {
 		return nil, err
 	}
-	q := strings.Repeat("?,", len(tagIDs))[:2*len(tagIDs)-1]
-	rows, err := tx.Query(fmt.Sprintf(notesQueryFormat, q), append(tagIDs, len(tagIDs))...)
+	query := fmt.Sprintf(notesQueryFormat, questionMarks(len(tagIDs)))
+	rows, err := tx.Query(query, append(tagIDs, len(tagIDs))...)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +304,7 @@ func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {
 	for tag := range m {
 		tagsUnique = append(tagsUnique, tag)
 	}
-	q := strings.Repeat("?,", len(tagsUnique))[:2*len(tagsUnique)-1]
+	q := questionMarks(len(tagsUnique))
 	rows, err := tx.Query(fmt.Sprintf("SELECT rowid, name from tagnames where name in (%s)", q), tagsUnique...)
 	if err != nil {
 		return nil, err
@@ -410,4 +410,10 @@ type NoTagsError []string
 
 func (e NoTagsError) Error() string {
 	return "no such tags: " + strings.Join(e, ", ")
+}
+
+// questionMarks returns cnt comma separated question marks to be used
+// in a query string with varying number of arguments.
+func questionMarks(cnt int) string {
+	return strings.Repeat("?,", cnt)[:2*cnt-1]
 }
