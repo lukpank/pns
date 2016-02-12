@@ -7,6 +7,13 @@
 </head>
 
 <body>
+{{if .Messages}}
+<div class="messages">
+{{range .Messages}}
+<p>{{.}}</p>
+{{end}}
+</div>
+{{end}}
 <div class="preview-note">
 {{range .Notes}}
 {{$.Render .}}

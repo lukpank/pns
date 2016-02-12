@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -128,7 +129,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags, isHTML})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags, isHTML, nil})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -205,7 +206,31 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	note := &Note{Text: r.PostForm.Get("text")}
-	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md})
+
+	var messages []string
+	hasTopic := false
+	tags := strings.Fields(r.PostForm.Get("tag"))
+	for _, s := range tags {
+		if s[0] == '/' {
+			hasTopic = true
+			break
+		}
+	}
+	if !hasTopic {
+		messages = append(messages, "Please specify at least one topic.")
+	}
+	if len(tags) > 0 {
+		newTags, err := s.db.NewTags(tags)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if len(newTags) > 0 {
+			newStr := strings.Join(newTags, `" and "`)
+			messages = append(messages, fmt.Sprintf(`Note that the following tags/topics are new: "%s".`, newStr))
+		}
+	}
+	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md, Messages: messages})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

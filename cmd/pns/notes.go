@@ -20,6 +20,7 @@ type Notes struct {
 	md            *markdown.Markdown
 	availableTags []string
 	isHTML        bool
+	Messages      []string
 }
 
 type Note struct {

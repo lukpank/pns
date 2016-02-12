@@ -162,3 +162,8 @@ pre {
 .R {
     text-align: right;
 }
+
+.messages {
+    background-color: #fff59d;
+    padding: 10px 30px 10px 30px;
+}

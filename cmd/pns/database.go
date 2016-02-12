@@ -230,6 +230,39 @@ func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
 	return notes, append(topics, tags...), nil
 }
 
+// NewTags for given list of tags and topics returns those that are
+// not found in the database.
+func (db *DB) NewTags(tags []string) ([]string, error) {
+	// select rowid, * from tagnames where name in ("db", "todo", "spec");
+	var args []interface{}
+	for _, tag := range tags {
+		args = append(args, tag)
+	}
+	query := fmt.Sprintf("SELECT name FROM tagnames WHERE name IN (%s)", questionMarks(len(tags)))
+	rows, err := db.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	m := make(map[string]struct{})
+	for rows.Next() {
+		var name string
+		if err = rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		m[name] = struct{}{}
+	}
+	var newTags []string
+	for _, tag := range tags {
+		if _, present := m[tag]; !present {
+			newTags = append(newTags, tag)
+		}
+	}
+	sort.Strings(newTags)
+	return newTags, nil
+}
+
 func (db *DB) Note(id int64) (*Note, error) {
 	var note string
 	var created, modified int64
