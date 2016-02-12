@@ -106,7 +106,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var availableTags []string
 	if path == "/" || path == "/-" || path == "/-/" {
-		notes, availableTags, err = s.db.TopicsAndTags()
+		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:])
 		availableTags = tagsFromNotes(notes)
@@ -147,7 +147,18 @@ func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = s.t.ExecuteTemplate(w, "edit.html", note)
+	topics, tags, err := s.db.TopicsAndTags()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tt := append(topics, tags...)
+	noteEx := struct {
+		*Note
+		TopicsAndTagsComma string
+		TopicsAndTagsSpace string
+	}{note, strings.Join(tt, ", "), strings.Join(tt, " ")}
+	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

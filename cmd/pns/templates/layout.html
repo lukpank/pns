@@ -11,24 +11,34 @@
 <body>
 
 <div class="topbar">
+<div class="topbar-left">
 <ul class="tagbar">
 {{with .Topic}}<li><a href="{{.URL}}">{{.Name}}</a></li>{{end}}
 {{range .Tags}}
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
 {{end}}
 </ul>
-<div class="buttons">
-<input type="submit" name="action" value="Add note" class="button" tabindex="2"></input>
-<form action="/_/logout{{.URL}}" class="inline">
-<input type="submit" value="Logout" class="button" tabindex="3"></input>
-</form>
 </div>
-<form action="{{.URL}}">
+<div class="topbar-right">
+<ul class="tagbar">
+<li>
+<form action="{{.URL}}" class="inline">
 <div class="awesomplete">
 <input type="text" name="tag" placeholder="Add tag(s)" class="taginput"
        data-list="{{.AvailableTags}}" data-multiple autofocus tabindex="1"></input>
 </div>
 </form>
+</li>
+<li>
+<input type="submit" name="action" value="Add note" class="button" tabindex="2"></input>
+</li>
+<li>
+<form action="/_/logout{{.URL}}" class="inline">
+<input type="submit" value="Logout" class="button" tabindex="3"></input>
+</form>
+</li>
+</ul>
+</div>
 </div>
 
 <div class="content">

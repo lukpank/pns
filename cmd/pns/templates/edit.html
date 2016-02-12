@@ -5,16 +5,27 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link type="text/css" rel="stylesheet" href="/_/static/edit.css">
+<link rel="stylesheet" href="/_/static/awesomplete.css" />
+<script src="/_/static/awesomplete.js"></script>
+<script src="/_/static/pns.js" async></script>
 </head>
 
 <body>
 <form action="/_/edit/submit/{{.ID}}" method="post" target="preview">
 
 <div class="topbar">
+<div class="topbar-left">
+<div class="awesomplete">
+<input type="text" name="tag" placeholder="Topics and tags" class="taginput"
+       data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.TopicsAndTagsSpace}}"></input>
+</div>
+</div>
 <div class="topbar-inner">
-<div class="buttons">
-<input type="submit" name="action" value="Preview" class="button"></input>
-<input type="submit" name="action" value="Submit" class="button"></input>
+<div class="topbar-right">
+<ul class="tagbar">
+<li><input type="submit" name="action" value="Preview" class="button"></input></li>
+<li><input type="submit" name="action" value="Submit" class="button"></input></li>
+</ul>
 </div>
 </div>
 </div>

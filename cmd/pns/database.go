@@ -177,7 +177,7 @@ const tagsTemplateStr = `
 {{range .}}[{{.}}](/-/{{.}}) {{end}}
 `
 
-func (db *DB) TopicsAndTags() ([]*Note, []string, error) {
+func (db *DB) TopicsAndTags() ([]string, []string, error) {
 	rows, err := db.db.Query("SELECT name FROM tagnames")
 	if err != nil {
 		return nil, nil, err
@@ -205,6 +205,14 @@ func (db *DB) TopicsAndTags() ([]*Note, []string, error) {
 	}
 	sort.Strings(topics)
 	sort.Strings(tags)
+	return topics, tags, nil
+}
+
+func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
+	topics, tags, err := db.TopicsAndTags()
+	if err != nil {
+		return nil, nil, err
+	}
 	var bTopics, bTags bytes.Buffer
 	if err = topicsTemplate.Execute(&bTopics, topics); err != nil {
 		return nil, nil, err
