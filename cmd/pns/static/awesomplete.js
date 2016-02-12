@@ -205,6 +205,11 @@ _.prototype = {
 		var me = this;
 		var value = this.input.value;
 
+		// support for completion of word which has cursor in it
+		if (this.input.selectionStart) {
+			value = value.substring(0, this.input.selectionStart);
+		}
+
 		if (value.length >= this.minChars && this._list.length > 0) {
 			this.index = -1;
 			// Populate list with options that match
