@@ -19,6 +19,7 @@ type Notes struct {
 	Notes         []*Note
 	md            *markdown.Markdown
 	availableTags []string
+	isHTML        bool
 }
 
 type Note struct {
@@ -125,9 +126,12 @@ func (n *Notes) DelTagURL(tag string) string {
 	return n.URL
 }
 
-func (n *Notes) Render(text string) (template.HTML, error) {
+func (n *Notes) Render(note *Note) (template.HTML, error) {
+	if n.isHTML {
+		return template.HTML(note.Text), nil
+	}
 	var b bytes.Buffer
-	err := n.md.Render(&b, []byte(text))
+	err := n.md.Render(&b, []byte(note.Text))
 	if err != nil {
 		return "", err
 	}

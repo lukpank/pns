@@ -46,7 +46,7 @@
 {{range $n := .Notes}}
 <a id="{{.ID}}" class="anchor"></a>
 <div class="note">
-{{$.Render .Text}}
+{{$.Render .}}
 
 {{if (not .NoFooter)}}
 <div class="note-footer">

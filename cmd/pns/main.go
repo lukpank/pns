@@ -105,8 +105,10 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var notes []*Note
 	var err error
 	var availableTags []string
+	var isHTML bool
 	if path == "/" || path == "/-" || path == "/-/" {
 		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
+		isHTML = true
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:])
 		availableTags = tagsFromNotes(notes)
@@ -126,7 +128,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags, isHTML})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

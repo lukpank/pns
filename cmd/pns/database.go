@@ -9,11 +9,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"html/template"
 	"sort"
 	"strings"
-	"text/template"
 	"time"
-	"unicode"
 
 	"github.com/mxk/go-sqlite/sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -164,17 +163,25 @@ func (db *DB) AuthenticateUser(login string, password []byte) error {
 var topicsTemplate = template.Must(template.New("topics").Parse(topicsTemplateStr))
 
 const topicsTemplateStr = `
-# Topics
+<h1>Topics</h1>
 
-{{range .}}[{{.}}]({{.}}) {{end}}
+<p>
+{{range .}}
+<a href="{{.}}">{{.}}</a>
+{{end}}
+</p>
 `
 
 var tagsTemplate = template.Must(template.New("tags").Parse(tagsTemplateStr))
 
 const tagsTemplateStr = `
-# Tags
+<h1>Tags</h1>
 
-{{range .}}[{{.}}](/-/{{.}}) {{end}}
+<p>
+{{range .}}
+<a href="/-/{{.}}">{{.}}</a>
+{{end}}
+</p>
 `
 
 func (db *DB) TopicsAndTags() ([]string, []string, error) {
@@ -191,13 +198,9 @@ func (db *DB) TopicsAndTags() ([]string, []string, error) {
 			return nil, nil, err
 		}
 		if len(tag) > 0 && tag[0] == '/' {
-			if validTag(tag[1:]) {
-				topics = append(topics, tag)
-			}
+			topics = append(topics, tag)
 		} else {
-			if validTag(tag) {
-				tags = append(tags, tag)
-			}
+			tags = append(tags, tag)
 		}
 	}
 	if err := rows.Err(); err != nil {
@@ -225,15 +228,6 @@ func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
 		{Text: bTags.String(), NoFooter: true},
 	}
 	return notes, append(topics, tags...), nil
-}
-
-func validTag(tag string) bool {
-	for _, r := range tag {
-		if !unicode.IsLetter(r) {
-			return false
-		}
-	}
-	return true
 }
 
 func (db *DB) Note(id int64) (*Note, error) {
