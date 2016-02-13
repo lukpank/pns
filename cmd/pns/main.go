@@ -27,7 +27,10 @@ var (
 	dbInit     = flag.Bool("init", false, "initialize the database file")
 	dbAddUser  = flag.String("adduser", "", "add user with given login to the database file (asks for the password)")
 	importFrom = flag.String("import", "", "import notes from given file")
-	httpAddr   = flag.String("http", ":8080", "listen address")
+	httpAddr   = flag.String("http", "", "HTTP listen address")
+	httpsAddr  = flag.String("https", "", "HTTPS listen address")
+	certFile   = flag.String("https_cert", "", "HTTPS server certificate file")
+	keyFile    = flag.String("https_key", "", "HTTPS server private key file")
 	hostname   = flag.String("host", "", "reject requests with host other than this")
 )
 
@@ -73,12 +76,21 @@ func main() {
 	if *dbInit || *importFrom != "" || *dbAddUser != "" {
 		return
 	}
+	if *httpAddr == "" && *httpsAddr == "" {
+		log.Fatal("please specify some action (for example -http or -https)")
+	}
+	if *httpAddr != "" && *httpsAddr != "" {
+		log.Fatal("please specify either -http or -https listen address but not both")
+	}
+	if *httpsAddr != "" && (*certFile == "" || *keyFile == "") {
+		log.Fatal("-https option requires -https_cert and -https_key options")
+	}
 
 	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := &server{db, t, markdown.New(), NewSessions()}
+	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != ""}
 	http.Handle("/", s.authenticate(s.ServeHTTP))
 	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
 	http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
@@ -90,14 +102,20 @@ func main() {
 	if *hostname != "" {
 		h = newHostChecker(*hostname, h)
 	}
-	log.Fatal(http.ListenAndServe(*httpAddr, &logger{h}))
+	h = &logger{h}
+	if *httpsAddr != "" {
+		log.Fatal(http.ListenAndServeTLS(*httpsAddr, *certFile, *keyFile, h))
+	} else {
+		log.Fatal(http.ListenAndServe(*httpAddr, h))
+	}
 }
 
 type server struct {
-	db *DB
-	t  *template.Template
-	md *markdown.Markdown
-	s  *sessions
+	db     *DB
+	t      *template.Template
+	md     *markdown.Markdown
+	s      *sessions
+	secure bool
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -280,7 +298,7 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expires := time.Now().Add(cookieMaxAge * time.Second)
-	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires})
+	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires, Secure: s.secure})
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
@@ -299,7 +317,7 @@ func (s *server) serveLogout(w http.ResponseWriter, r *http.Request) {
 	} else {
 		s.s.Remove(cookie.Value)
 	}
-	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", MaxAge: -1})
+	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", MaxAge: -1, Secure: s.secure})
 	path := strings.TrimPrefix(r.URL.Path, "/_/logout")
 	if len(path) == len(r.URL.Path) || path == "" {
 		path = "/"
