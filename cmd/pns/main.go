@@ -20,7 +20,10 @@ import (
 	"github.com/golang-commonmark/markdown"
 )
 
-const cookieMaxAge = 3600
+const (
+	cookieMaxAge      = 3600
+	sessionCookieName = "pns_sid"
+)
 
 var (
 	dbFileName = flag.String("f", "", "sqlite3 database file name")
@@ -262,7 +265,7 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if cookie, err := r.Cookie("session_id"); err == nil && s.s.ValidSession(cookie.Value) {
+		if cookie, err := r.Cookie(sessionCookieName); err == nil && s.s.ValidSession(cookie.Value) {
 			h(w, r)
 		} else {
 			s.loginPage(w, r, r.URL.Path, "")
@@ -298,7 +301,7 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expires := time.Now().Add(cookieMaxAge * time.Second)
-	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires, Secure: s.secure})
+	http.SetCookie(w, &http.Cookie{Name: sessionCookieName, Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires, Secure: s.secure})
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
@@ -311,13 +314,13 @@ func (s *server) loginPage(w http.ResponseWriter, r *http.Request, path, msg str
 }
 
 func (s *server) serveLogout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
+	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		log.Println(err)
 	} else {
 		s.s.Remove(cookie.Value)
 	}
-	http.SetCookie(w, &http.Cookie{Name: "session_id", Path: "/", MaxAge: -1, Secure: s.secure})
+	http.SetCookie(w, &http.Cookie{Name: sessionCookieName, Path: "/", MaxAge: -1, Secure: s.secure})
 	path := strings.TrimPrefix(r.URL.Path, "/_/logout")
 	if len(path) == len(r.URL.Path) || path == "" {
 		path = "/"
