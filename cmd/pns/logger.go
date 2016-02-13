@@ -11,9 +11,11 @@ import (
 	"time"
 )
 
-type logger struct{}
+type logger struct {
+	handler http.Handler
+}
 
-func (logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (l *logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	path := r.URL.Path
 	if r.URL.RawQuery != "" {
@@ -23,7 +25,7 @@ func (logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		log.Println(remoteAddr(r), r.Method, path, "-", rw.status, http.StatusText(rw.status), time.Since(t))
 	}()
-	http.DefaultServeMux.ServeHTTP(rw, r)
+	l.handler.ServeHTTP(rw, r)
 }
 
 func remoteAddr(r *http.Request) string {

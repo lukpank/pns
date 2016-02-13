@@ -28,6 +28,7 @@ var (
 	dbAddUser  = flag.String("adduser", "", "add user with given login to the database file (asks for the password)")
 	importFrom = flag.String("import", "", "import notes from given file")
 	httpAddr   = flag.String("http", ":8080", "listen address")
+	hostname   = flag.String("host", "", "reject requests with host other than this")
 )
 
 func main() {
@@ -85,7 +86,11 @@ func main() {
 	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
-	log.Fatal(http.ListenAndServe(*httpAddr, logger{}))
+	var h http.Handler = http.DefaultServeMux
+	if *hostname != "" {
+		h = newHostChecker(*hostname, h)
+	}
+	log.Fatal(http.ListenAndServe(*httpAddr, &logger{h}))
 }
 
 type server struct {
@@ -310,4 +315,35 @@ func idFromPath(path, prefix string) (int64, error) {
 		return 0, ErrPrefixNotFound
 	}
 	return strconv.ParseInt(idStr, 10, 64)
+}
+
+type hostChecker struct {
+	hostName  string
+	withColon bool
+	handler   http.Handler
+}
+
+func newHostChecker(hostName string, handler http.Handler) *hostChecker {
+	withColon := strings.Index(hostName, ":") >= 0
+	return &hostChecker{hostName, withColon, handler}
+}
+
+func (hc *hostChecker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h := r.Host
+	if hc.withColon {
+		if h == hc.hostName {
+			hc.handler.ServeHTTP(w, r)
+		} else {
+			http.NotFound(w, r)
+		}
+		return
+	}
+	if i := strings.Index(h, ":"); i >= 0 {
+		h = h[:i]
+	}
+	if h == hc.hostName {
+		hc.handler.ServeHTTP(w, r)
+	} else {
+		http.NotFound(w, r)
+	}
 }
