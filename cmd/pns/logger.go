@@ -23,7 +23,7 @@ func (l *logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	rw := &responseWriter{w, 0, false}
 	defer func() {
-		log.Println(remoteAddr(r), r.Method, path, "-", rw.status, http.StatusText(rw.status), time.Since(t))
+		log.Println(remoteAddr(r), r.Host, r.Method, path, "-", rw.status, http.StatusText(rw.status), time.Since(t))
 	}()
 	l.handler.ServeHTTP(rw, r)
 }
