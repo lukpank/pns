@@ -555,6 +555,46 @@ func (db *DB) updateNote(noteID int64, text string, tags []string) (err error) {
 	return nil
 }
 
+func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	// 1. Update note.
+	now := time.Now()
+	result, err := tx.Exec("INSERT INTO notes (note, created, modified) VALUES (?, ?, ?)", text, now, now)
+	if err != nil {
+		return 0, err
+	}
+	noteID, err = result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	// 2. get tag IDs
+	ids, err := db.tagsToIDsMayInsert(tx, tags)
+	if err != nil {
+		return 0, err
+	}
+
+	// 3. associate tags with the note
+	var args []interface{}
+	for _, id := range ids {
+		args = append(args, noteID, id)
+	}
+	q := repeatNoLastChar("(?,?),", len(ids))
+	_, err = tx.Exec(fmt.Sprintf("INSERT INTO tags (noteid, tagid) VALUES %s", q), args...)
+	if err != nil {
+		return 0, err
+	}
+
+	done = true
+	return
+}
+
 type MultiError []error
 
 func (me MultiError) Error() string {

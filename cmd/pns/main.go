@@ -98,6 +98,8 @@ func main() {
 	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
 	http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
 	http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
+	http.HandleFunc("/_/add", s.authenticate(s.serveAdd))
+	http.HandleFunc("/_/add/submit", s.authenticate(s.serveAddSubmit))
 	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
@@ -187,7 +189,8 @@ func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 		*Note
 		TopicsAndTagsComma string
 		NoteTopicsAndTags  string
-	}{note, strings.Join(tt, ", "), strings.Join(ntt, " ")}
+		Edit               bool
+	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), true}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -275,6 +278,58 @@ func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) 
 func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, text, topicsAndTags string) {
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
 	err := s.db.updateNote(id, text, append(topics, tags...))
+	if err == ErrNoTags {
+		s.errorPage(w, "# Error\nPlease specify at least one topic or tag.", http.StatusBadRequest)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	path := editRedirectionPath(topics, tags, id)
+	http.Redirect(w, r, path, http.StatusSeeOther)
+}
+
+func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
+	topics, tags, err := s.db.TopicsAndTags()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tt := append(topics, tags...)
+	noteEx := struct {
+		Text               string
+		TopicsAndTagsComma string
+		NoteTopicsAndTags  string
+		Edit               bool
+	}{"", strings.Join(tt, ", "), "", false}
+	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		return
+	}
+	r.ParseForm()
+	text := r.PostForm.Get("text")
+	tags := r.PostForm.Get("tag")
+	switch r.PostForm.Get("action") {
+	case "Preview":
+		s.previewNote(w, text, strings.Fields(tags))
+	case "Submit":
+		s.addNote(w, r, text, tags)
+	default:
+		http.Error(w, "unsupported action", http.StatusBadRequest)
+	}
+}
+
+func (s *server) addNote(w http.ResponseWriter, r *http.Request, text, topicsAndTags string) {
+	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
+	id, err := s.db.addNote(text, append(topics, tags...))
 	if err == ErrNoTags {
 		s.errorPage(w, "# Error\nPlease specify at least one topic or tag.", http.StatusBadRequest)
 		return
