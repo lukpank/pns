@@ -84,7 +84,7 @@ func commitOrRollback(tx *sql.Tx, done *bool, err *error) {
 	}
 }
 
-func (db *DB) Import(notes []*Note) error {
+func (db *DB) Import(notes []*Note) (err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return err
@@ -271,7 +271,7 @@ func (db *DB) Note(id int64) (*Note, error) {
 		Topics: topics, Tags: tags}, nil
 }
 
-func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
+func (db *DB) Notes(topic string, tags []string) (notes []*Note, err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return nil, err
@@ -291,7 +291,7 @@ func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 	if err != nil {
 		return nil, err
 	}
-	notes, err := notesFromRowsClose(rows)
+	notes, err = notesFromRowsClose(rows)
 	if err != nil {
 		return nil, err
 	}
