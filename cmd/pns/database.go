@@ -26,6 +26,7 @@ var (
 	ErrSingleThread = errors.New("single threaded sqlite3 is not supported")
 	ErrTagName      = errors.New("unexpected tag name in query result")
 	ErrAuth         = errors.New("failed to authenticate: incorect login or password")
+	ErrNoTags       = errors.New("no tags specified")
 )
 
 func OpenDB(filename string) (*DB, error) {
@@ -215,12 +216,8 @@ func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
 // not found in the database.
 func (db *DB) NewTags(tags []string) ([]string, error) {
 	// select rowid, * from tagnames where name in ("db", "todo", "spec");
-	var args []interface{}
-	for _, tag := range tags {
-		args = append(args, tag)
-	}
 	query := fmt.Sprintf("SELECT name FROM tagnames WHERE name IN (%s)", questionMarks(len(tags)))
-	rows, err := db.db.Query(query, args...)
+	rows, err := db.db.Query(query, stringsAsEmptyInterface(tags)...)
 	if err != nil {
 		return nil, err
 	}
@@ -242,6 +239,20 @@ func (db *DB) NewTags(tags []string) ([]string, error) {
 	}
 	sort.Strings(newTags)
 	return newTags, nil
+}
+
+func stringsAsEmptyInterface(input []string) (output []interface{}) {
+	for _, s := range input {
+		output = append(output, s)
+	}
+	return
+}
+
+func int64sAsEmptyInterface(input []int64) (output []interface{}) {
+	for _, s := range input {
+		output = append(output, s)
+	}
+	return
 }
 
 // Note returns note with the given ID
@@ -421,6 +432,129 @@ AND
 	t.tagid = n.rowid
 `
 
+// tagsToIDsMayInsert returns slice of tag IDs corresponding to given
+// tag (and topic) names. Those tag names which are not in the
+// database are inserted into tagnames table and such obtained tag IDs
+// are returned. tagsToIDsMayInsert can deal with duplicated tags.
+// An empty tag list is considered an error.
+func (db *DB) tagsToIDsMayInsert(tx *sql.Tx, tags []string) ([]int64, error) {
+	if len(tags) == 0 {
+		return nil, ErrNoTags
+	}
+	q := questionMarks(len(tags))
+	rows, err := tx.Query(fmt.Sprintf("SELECT rowid, name FROM tagnames WHERE name IN (%s)", q), stringsAsEmptyInterface(tags)...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	m := make(map[string]struct{})
+	ids := make([]int64, 0, len(tags))
+	for rows.Next() {
+		var id int64
+		var name string
+		if err = rows.Scan(&id, &name); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+		m[name] = struct{}{}
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	newNames := make([]string, 0, len(tags))
+	for _, s := range tags {
+		if _, present := m[s]; !present {
+			newNames = append(newNames, s)
+		}
+		m[s] = struct{}{}
+	}
+	if len(newNames) == 0 {
+		return ids, nil
+	}
+
+	for _, s := range newNames {
+		result, err := tx.Exec("INSERT INTO tagnames (name) VALUES (?)", s)
+		if err != nil {
+			return nil, err
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+func (db *DB) updateNote(noteID int64, text string, tags []string) (err error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	// 1. Update note.
+	now := time.Now()
+	_, err = tx.Exec("UPDATE notes SET note=?, modified=? where rowid=?", text, now, noteID)
+	if err != nil {
+		return err
+	}
+
+	// 2. get tag IDs
+	ids, err := db.tagsToIDsMayInsert(tx, tags)
+	if err != nil {
+		return err
+	}
+
+	// 3. Delete tags no longer associated with the note
+	q := questionMarks(len(ids))
+	query := fmt.Sprintf("DELETE FROM tags WHERE noteid=? AND tagid NOT IN (%s)", q)
+	_, err = tx.Exec(query, append([]interface{}{noteID}, int64sAsEmptyInterface(ids)...)...)
+	if err != nil {
+		return err
+	}
+
+	// 3. leave only those tags which are not yet associated with the note
+	rows, err := tx.Query("SELECT tagid FROM tags WHERE noteid=?", noteID)
+	if err != nil {
+		return err
+	}
+	m := make(map[int64]struct{})
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return err
+		}
+		m[id] = struct{}{}
+	}
+	newIDs := make([]int64, 0, len(ids)-len(m))
+	for _, id := range ids {
+		if _, present := m[id]; !present {
+			newIDs = append(newIDs, id)
+		}
+	}
+	if len(newIDs) == 0 {
+		done = true
+		return nil
+	}
+
+	// 4. associate new tags with the note
+	var args []interface{}
+	for _, id := range newIDs {
+		args = append(args, noteID, id)
+	}
+	q = repeatNoLastChar("(?,?),", len(newIDs))
+	_, err = tx.Exec(fmt.Sprintf("INSERT INTO tags (noteid, tagid) VALUES %s", q), args...)
+	if err != nil {
+		return err
+	}
+
+	done = true
+	return nil
+}
+
 type MultiError []error
 
 func (me MultiError) Error() string {
@@ -441,4 +575,9 @@ func (e NoTagsError) Error() string {
 // in a query string with varying number of arguments.
 func questionMarks(cnt int) string {
 	return strings.Repeat("?,", cnt)[:2*cnt-1]
+}
+
+func repeatNoLastChar(s string, cnt int) string {
+	t := strings.Repeat(s, cnt)
+	return t[:len(t)-1]
 }

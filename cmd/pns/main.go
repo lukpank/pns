@@ -227,16 +227,23 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.PostForm.Get("action") != "Preview" {
-		http.Error(w, "for now only preview is supported", http.StatusBadRequest)
-		_ = id // TODO use it in action Submit
-		return
+	text := r.PostForm.Get("text")
+	tags := r.PostForm.Get("tag")
+	switch r.PostForm.Get("action") {
+	case "Preview":
+		s.previewNote(w, text, strings.Fields(tags))
+	case "Submit":
+		s.updateNote(w, r, id, text, tags)
+	default:
+		http.Error(w, "unsupported action", http.StatusBadRequest)
 	}
-	note := &Note{Text: r.PostForm.Get("text")}
+}
 
+// previewNote serves preview of a note intended for the iframe
+// element of the edit page.
+func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) {
 	var messages []string
 	hasTopic := false
-	tags := strings.Fields(r.PostForm.Get("tag"))
 	for _, s := range tags {
 		if s[0] == '/' {
 			hasTopic = true
@@ -257,10 +264,53 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 			messages = append(messages, fmt.Sprintf(`Note that the following tags/topics are new: "%s".`, newStr))
 		}
 	}
-	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md, Messages: messages})
+	note := &Note{Text: text}
+	err := s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md, Messages: messages})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+}
+
+func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, text, topicsAndTags string) {
+	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
+	err := s.db.updateNote(id, text, append(topics, tags...))
+	if err == ErrNoTags {
+		s.errorPage(w, "# Error\nPlease specify at least one topic or tag.", http.StatusBadRequest)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	path := editRedirectionPath(topics, tags, id)
+	http.Redirect(w, r, path, http.StatusSeeOther)
+}
+
+func (s *server) errorPage(w http.ResponseWriter, text string, code int) {
+	w.WriteHeader(code)
+	n := &Note{Text: text, NoFooter: true}
+	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, false, nil})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func editRedirectionPath(topics, tags []string, id int64) string {
+	var topic string
+	if len(topics) > 0 {
+		topic = topics[0]
+	} else if len(tags) > 0 {
+		topic = "/-"
+	} else {
+		topic = "/"
+	}
+	if len(tags) > 0 {
+		return fmt.Sprintf("%s/%s#%d", topic, strings.Join(tags, "/"), id)
+	} else if topic != "/" {
+		return fmt.Sprintf("%s#%d", topic, id)
+	} else {
+		return "/"
 	}
 }
 

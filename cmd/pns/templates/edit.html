@@ -11,7 +11,7 @@
 </head>
 
 <body>
-<form action="/_/edit/submit/{{.ID}}" method="post" target="preview">
+<form action="/_/edit/submit/{{.ID}}" method="post" id="form">
 
 <div class="topbar">
 <div class="topbar-left">
@@ -23,8 +23,8 @@
 <div class="topbar-inner">
 <div class="topbar-right">
 <ul class="tagbar">
-<li><input type="submit" name="action" value="Preview" class="button"></input></li>
-<li><input type="submit" name="action" value="Submit" class="button"></input></li>
+<li><input type="submit" name="action" value="Preview" class="button" onclick="setTargetPreview()"></input></li>
+<li><input type="submit" name="action" value="Submit" class="button" onclick="setTargetDocument()"></input></li>
 </ul>
 </div>
 </div>

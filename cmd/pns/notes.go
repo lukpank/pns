@@ -52,13 +52,13 @@ func (n *Notes) TagURL(tag string) string {
 	}
 }
 
+// tagsURL returns destination URL from a given base URL and
+// expression specifying added and removed tags.
 func tagsURL(path, expr string) string {
 	tags := strings.Split(path[1:], "/")
 	tags[0] = "/" + tags[0]
-	for _, tag := range strings.Split(expr, " ") {
-		if tag == "" {
-			continue
-		} else if strings.HasPrefix(tag, "-/") {
+	for _, tag := range strings.Fields(expr) {
+		if strings.HasPrefix(tag, "-/") {
 			if tags[0] == tag[1:] {
 				tags[0] = "/"
 			}
@@ -74,6 +74,24 @@ func tagsURL(path, expr string) string {
 		tags[0] = "/-"
 	}
 	return strings.Join(tags, "/")
+}
+
+func topicsAndTagsFromEditField(expr string) ([]string, []string) {
+	var topics, tags []string
+	for _, tag := range strings.Fields(expr) {
+		if tag[0] == '-' {
+			if strings.HasPrefix(tag, "-/") {
+				topics = delTag(topics, tag)
+			} else {
+				tags = delTag(tags, tag)
+			}
+		} else if tag[0] == '/' {
+			topics = addTag(topics, tag)
+		} else {
+			tags = addTag(tags, tag)
+		}
+	}
+	return topics, tags
 }
 
 func delTag(tags []string, tag string) []string {
