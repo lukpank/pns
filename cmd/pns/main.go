@@ -182,11 +182,12 @@ func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tt := append(topics, tags...)
+	ntt := append(note.Topics, note.Tags...)
 	noteEx := struct {
 		*Note
 		TopicsAndTagsComma string
-		TopicsAndTagsSpace string
-	}{note, strings.Join(tt, ", "), strings.Join(tt, " ")}
+		NoteTopicsAndTags  string
+	}{note, strings.Join(tt, ", "), strings.Join(ntt, " ")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

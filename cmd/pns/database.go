@@ -39,6 +39,10 @@ func OpenDB(filename string) (*DB, error) {
 	return &DB{db}, nil
 }
 
+type Querier interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+}
+
 func (db *DB) Init() (err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
@@ -185,30 +189,7 @@ const tagsTemplateStr = `
 `
 
 func (db *DB) TopicsAndTags() ([]string, []string, error) {
-	rows, err := db.db.Query("SELECT name FROM tagnames")
-	if err != nil {
-		return nil, nil, err
-	}
-	defer rows.Close()
-
-	var topics, tags []string
-	for rows.Next() {
-		var tag string
-		if err := rows.Scan(&tag); err != nil {
-			return nil, nil, err
-		}
-		if len(tag) > 0 && tag[0] == '/' {
-			topics = append(topics, tag)
-		} else {
-			tags = append(tags, tag)
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, nil, err
-	}
-	sort.Strings(topics)
-	sort.Strings(tags)
-	return topics, tags, nil
+	return topicsAndTags(db.db, -1)
 }
 
 func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
@@ -263,6 +244,7 @@ func (db *DB) NewTags(tags []string) ([]string, error) {
 	return newTags, nil
 }
 
+// Note returns note with the given ID
 func (db *DB) Note(id int64) (*Note, error) {
 	var note string
 	var created, modified int64
@@ -270,7 +252,12 @@ func (db *DB) Note(id int64) (*Note, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Note{ID: id, Text: note, Created: time.Unix(created, 0), Modified: time.Unix(modified, 0)}, nil
+	topics, tags, err := topicsAndTags(db.db, id)
+	if err != nil {
+		return nil, err
+	}
+	return &Note{ID: id, Text: note, Created: time.Unix(created, 0), Modified: time.Unix(modified, 0),
+		Topics: topics, Tags: tags}, nil
 }
 
 func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
@@ -298,7 +285,7 @@ func (db *DB) Notes(topic string, tags []string) ([]*Note, error) {
 		return nil, err
 	}
 	for _, n := range notes {
-		addTags(tx, n)
+		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
 	}
 	done = true
 	return notes, nil
@@ -390,33 +377,38 @@ func notesFromRowsClose(rows *sql.Rows) ([]*Note, error) {
 	return notes, nil
 }
 
-func addTags(tx *sql.Tx, n *Note) error {
-	rows, err := tx.Query(addTagsQuery, n.ID)
+func topicsAndTags(tx Querier, noteID int64) (topics, tags []string, err error) {
+	var rows *sql.Rows
+	if noteID < 0 {
+		rows, err = tx.Query("SELECT name FROM tagnames")
+	} else {
+		rows, err = tx.Query(topicsAndTagsQuery, noteID)
+	}
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var tag string
 		if err := rows.Scan(&tag); err != nil {
-			return err
+			return nil, nil, err
 		}
 		if len(tag) > 0 && tag[0] == '/' {
-			n.Topics = append(n.Topics, tag)
+			topics = append(topics, tag)
 		} else {
-			n.Tags = append(n.Tags, tag)
+			tags = append(tags, tag)
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return err
+		return nil, nil, err
 	}
-	sort.Strings(n.Topics)
-	sort.Strings(n.Tags)
-	return nil
+	sort.Strings(topics)
+	sort.Strings(tags)
+	return
 }
 
-const addTagsQuery = `
+const topicsAndTagsQuery = `
 SELECT
 	n.name
 FROM
