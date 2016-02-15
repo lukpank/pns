@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
 	"flag"
@@ -146,7 +147,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if _, ok := err.(NoTagsError); ok {
 			notes = nil
 		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			s.internalError(w, err)
 			return
 		}
 	}
@@ -167,20 +168,20 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 	id, err := idFromPath(r.URL.Path, "/_/edit/")
 	if err != nil {
-		http.NotFound(w, r)
+		s.notFound(w, r)
 		return
 	}
 	note, err := s.db.Note(id)
 	if err == sql.ErrNoRows {
-		http.NotFound(w, r)
+		s.notFound(w, r)
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	topics, tags, err := s.db.TopicsAndTags()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	tt := append(topics, tags...)
@@ -209,7 +210,7 @@ func (s *server) serveEditPreview(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md})
@@ -221,7 +222,7 @@ func (s *server) serveEditPreview(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
 		return
 	}
 	id, err := idFromPath(r.URL.Path, "/_/edit/submit/")
@@ -279,10 +280,10 @@ func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, te
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
 	err := s.db.updateNote(id, text, append(topics, tags...))
 	if err == ErrNoTags {
-		s.errorPage(w, "# Error\nPlease specify at least one topic or tag.", http.StatusBadRequest)
+		s.error(w, "Error", "Please specify at least one topic or tag.", http.StatusBadRequest)
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	path := editRedirectionPath(topics, tags, id)
@@ -292,7 +293,7 @@ func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, te
 func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 	topics, tags, err := s.db.TopicsAndTags()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	tt := append(topics, tags...)
@@ -311,7 +312,7 @@ func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
 		return
 	}
 	r.ParseForm()
@@ -331,24 +332,36 @@ func (s *server) addNote(w http.ResponseWriter, r *http.Request, text, topicsAnd
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
 	id, err := s.db.addNote(text, append(topics, tags...))
 	if err == ErrNoTags {
-		s.errorPage(w, "# Error\nPlease specify at least one topic or tag.", http.StatusBadRequest)
+		s.error(w, "Error", "Please specify at least one topic or tag.", http.StatusBadRequest)
 		return
 	} else if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	path := editRedirectionPath(topics, tags, id)
 	http.Redirect(w, r, path, http.StatusSeeOther)
 }
 
-func (s *server) errorPage(w http.ResponseWriter, text string, code int) {
+var errorTemplate = template.Must(template.New("tags").Parse("<h1>{{.Title}}</h1><p>{{.Text}}</p>"))
+
+func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 	w.WriteHeader(code)
-	n := &Note{Text: text, NoFooter: true}
-	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, false, nil})
+	var b bytes.Buffer
+	errorTemplate.Execute(&b, &struct{ Title, Text string }{title, text})
+	n := &Note{Text: b.String(), NoFooter: true}
+	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, true, nil})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *server) notFound(w http.ResponseWriter, r *http.Request) {
+	s.error(w, "Page not found", "", http.StatusNotFound)
+}
+
+func (s *server) internalError(w http.ResponseWriter, err error) {
+	s.error(w, "Internal server error", err.Error(), http.StatusInternalServerError)
 }
 
 func editRedirectionPath(topics, tags []string, id int64) string {
@@ -381,12 +394,12 @@ func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
 
 func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "please use POST", http.StatusMethodNotAllowed)
+		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
 		return
 	}
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	login := r.PostForm.Get("login")
@@ -397,13 +410,13 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
 			s.loginPage(w, r, redirect, "Incorrect login or password.")
 		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			s.internalError(w, err)
 		}
 		return
 	}
 	sid, err := s.s.NewSession(time.Hour)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.internalError(w, err)
 		return
 	}
 	expires := time.Now().Add(cookieMaxAge * time.Second)
