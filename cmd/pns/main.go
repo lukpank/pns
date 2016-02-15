@@ -104,6 +104,7 @@ func main() {
 	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
+	http.HandleFunc("/_/", s.authenticate(s.notFound))
 	var h http.Handler = http.DefaultServeMux
 	if *hostname != "" {
 		h = newHostChecker(*hostname, h)
