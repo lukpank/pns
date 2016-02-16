@@ -42,3 +42,20 @@ func TestTagsURL(t *testing.T) {
 		}
 	}
 }
+
+func TestNotesSep(t *testing.T) {
+	expected := "******\n"
+	for _, s := range []string{
+		"***\n**** \n*****\t\n* *****\n ******\n\t******\n",
+		"***\n**** \n       \n** ****\n ******\n\t******\n*****",
+		"*****\n**** \n***  \n*** ***\n ******\n\t******\n",
+		"*****  \n**** \n***\n**** **\n ******\n\t******\n",
+		"***** \t\n**** \n***\n***** *\n ******\n\t******\n",
+		"***** \t\n****      \n*** ***\n ******\n\t******\n***",
+	} {
+		notes := []*Note{{Text: s}}
+		if sep := string(notesSep(notes)); sep != expected {
+			t.Errorf("for %q exected []byte(%q) but got []byte(%q)", s, expected, sep)
+		}
+	}
+}

@@ -11,8 +11,10 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -31,6 +33,8 @@ var (
 	dbInit     = flag.Bool("init", false, "initialize the database file")
 	dbAddUser  = flag.String("adduser", "", "add user with given login to the database file (asks for the password)")
 	importFrom = flag.String("import", "", "import notes from given file")
+	exportPath = flag.String("export", "", `export path, use "/" for all notes`)
+	outFile    = flag.String("o", "", "output path, use with -export")
 	httpAddr   = flag.String("http", "", "HTTP listen address")
 	httpsAddr  = flag.String("https", "", "HTTPS listen address")
 	certFile   = flag.String("https_cert", "", "HTTPS server certificate file")
@@ -77,7 +81,35 @@ func main() {
 			log.Fatal("failed to add user: ", err)
 		}
 	}
-	if *dbInit || *importFrom != "" || *dbAddUser != "" {
+	if *exportPath != "" {
+		var w io.Writer
+		if *outFile != "" {
+			f, err := os.Create(*outFile)
+			if err != nil {
+				log.Fatal("failed to export: ", err)
+			}
+			defer f.Close()
+			w = f
+		} else {
+			w = os.Stdout
+		}
+		var notes []*Note
+		if (*exportPath)[0] != '/' {
+			log.Fatal("failed to export: export path must start with '/'")
+		} else if *exportPath == "/" {
+			notes, err = db.AllNotes()
+		} else {
+			tags := strings.Split(*exportPath, "/")
+			notes, err = db.Notes("/"+tags[1], tags[2:], false)
+		}
+		if err == nil {
+			err = export(w, notes)
+		}
+		if err != nil {
+			log.Fatal("failed to export: ", err)
+		}
+	}
+	if *dbInit || *importFrom != "" || *dbAddUser != "" || *exportPath != "" {
 		return
 	}
 	if *httpAddr == "" && *httpsAddr == "" {
@@ -141,7 +173,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
 		isHTML = true
 	} else {
-		notes, err = s.db.Notes("/"+tags[1], tags[2:])
+		notes, err = s.db.Notes("/"+tags[1], tags[2:], true)
 		availableTags = tagsFromNotes(notes)
 	}
 	if err != nil {

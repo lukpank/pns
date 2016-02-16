@@ -271,7 +271,31 @@ func (db *DB) Note(id int64) (*Note, error) {
 		Topics: topics, Tags: tags}, nil
 }
 
-func (db *DB) Notes(topic string, tags []string) (notes []*Note, err error) {
+func (db *DB) AllNotes() (notes []*Note, err error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	rows, err := tx.Query("SELECT rowid, note, created, modified FROM notes ORDER BY rowid")
+	if err != nil {
+		return nil, err
+	}
+	notes, err = notesFromRowsClose(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range notes {
+		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
+	}
+	done = true
+	return notes, nil
+
+}
+
+func (db *DB) Notes(topic string, tags []string, orderedByCreated bool) (notes []*Note, err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return nil, err
@@ -286,7 +310,13 @@ func (db *DB) Notes(topic string, tags []string) (notes []*Note, err error) {
 	if err != nil {
 		return nil, err
 	}
-	query := fmt.Sprintf(notesQueryFormat, questionMarks(len(tagIDs)))
+	var orderedBy string
+	if orderedByCreated {
+		orderedBy = "n.created asc"
+	} else {
+		orderedBy = "n.rowid asc"
+	}
+	query := fmt.Sprintf(notesQueryFormat, questionMarks(len(tagIDs)), orderedBy)
 	rows, err := tx.Query(query, append(tagIDs, len(tagIDs))...)
 	if err != nil {
 		return nil, err
@@ -322,7 +352,7 @@ GROUP BY
 HAVING
 	COUNT(n.rowid)=?
 ORDER BY
-	n.created asc
+	%s
 `
 
 func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {

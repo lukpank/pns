@@ -20,8 +20,18 @@ And add a user with
 $ pns -f filename.db -adduser login
 ```
 
-You can use `-init`, `-import` and `-adduser` in a single
-command. They are executed in this order.
+Later, if you want to export all notes from the database use
+
+```
+$ pns -f filename.db -export / -o output.md
+```
+
+Or you can export notes matching a filter of the form
+`/topic/tag1/.../tagn`, where topic may be `-` for given tags on all
+topics.
+
+You can use `-init`, `-import` and `-adduser` (and even `-export`) in
+a single command. They are executed in this order.
 
 Then you can start serving HTTP with
 

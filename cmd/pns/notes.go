@@ -6,13 +6,18 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
+	"io"
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/golang-commonmark/markdown"
 )
+
+const timeLayout = "2006-01-02 15:04:05 -0700"
 
 type Notes struct {
 	URL           string
@@ -173,4 +178,73 @@ func tagsFromNotes(notes []*Note) []string {
 	}
 	sort.Strings(tags)
 	return tags
+}
+
+func (n *Note) WriteTo(w io.Writer) (int64, error) {
+	tags := strings.Join(append(n.Topics, n.Tags...), " ")
+	m, err := fmt.Fprintf(w, "%s\n%s\n%s\n%d\n\n%s\n",
+		tags, n.Created.Format(timeLayout), n.Modified.Format(timeLayout), n.ID, n.Text)
+	return int64(m), err
+}
+
+// notesSep returns the shortest slice matching the regular expression
+// "[*][*][*]+\s*\n" which does not occur on any of the notes (at the
+// begining of a line).
+func notesSep(notes []*Note) []byte {
+	m := make(map[int]struct{})
+	stars := 0
+	for _, n := range notes {
+		stars = 0
+		spaces := false
+		for _, r := range n.Text {
+			switch {
+			case r == '\n':
+				if stars >= 3 {
+					m[stars] = struct{}{}
+				}
+				stars = 0
+				spaces = false
+
+			case stars < 0:
+				continue
+
+			case unicode.IsSpace(r):
+				if stars >= 3 {
+					spaces = true
+				} else {
+					stars = -1
+				}
+
+			case r == '*' && !spaces:
+				stars++
+
+			default:
+				stars = -1
+			}
+		}
+	}
+	if stars >= 3 {
+		m[stars] = struct{}{}
+	}
+	for i := 3; ; i++ {
+		if _, present := m[i]; !present {
+			sep := bytes.Repeat([]byte{'*'}, i+1)
+			sep[i] = '\n'
+			return sep
+		}
+	}
+}
+
+func export(w io.Writer, notes []*Note) error {
+	sep := notesSep(notes)
+	for _, n := range notes {
+		_, err := w.Write(sep)
+		if err == nil {
+			_, err = n.WriteTo(w)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
