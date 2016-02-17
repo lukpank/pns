@@ -40,10 +40,17 @@ var (
 	certFile   = flag.String("https_cert", "", "HTTPS server certificate file")
 	keyFile    = flag.String("https_key", "", "HTTPS server private key file")
 	hostname   = flag.String("host", "", "reject requests with host other than this")
+	version    = flag.Bool("v", false, "show program version")
+
+	Version = "pns-0.1-(REV?)"
 )
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Println(Version)
+		return
+	}
 	if *dbFileName == "" {
 		log.Fatal("option -f is requiered")
 	}
