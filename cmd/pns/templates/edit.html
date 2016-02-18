@@ -25,8 +25,9 @@
 <div class="topbar-inner">
 <div class="topbar-right">
 <ul class="tagbar">
-<li><input type="submit" name="action" value="Preview" class="button" onclick="setTargetPreview()"></input></li>
-<li><input type="submit" name="action" value="Submit" class="button" onclick="setTargetDocument()"></input></li>
+{{with .Referer}}<li><input type="button" name="action" value="Cancel" class="button" onclick="location = {{.}}"></input></li>{{end}}
+<li><input type="submit" name="action" value="Preview" class="button" onclick="setTarget('preview')"></input></li>
+<li><input type="submit" name="action" value="Submit" class="button" onclick="setTarget('')"></input></li>
 </ul>
 </div>
 </div>

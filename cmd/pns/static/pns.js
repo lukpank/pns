@@ -25,10 +25,6 @@ new Awesomplete(Awesomplete.$('input[data-multiple]'), {
 	}
 });
 
-function setTargetDocument() {
-    document.getElementById("form").setAttribute("target", "");
-}
-
-function setTargetPreview() {
-    document.getElementById("form").setAttribute("target", "preview");
+function setTarget(target) {
+    document.getElementById("form").setAttribute("target", target);
 }

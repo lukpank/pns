@@ -231,7 +231,8 @@ func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 		TopicsAndTagsComma string
 		NoteTopicsAndTags  string
 		Edit               bool
-	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), true}
+		Referer            string
+	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), true, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -342,7 +343,8 @@ func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 		TopicsAndTagsComma string
 		NoteTopicsAndTags  string
 		Edit               bool
-	}{"", strings.Join(tt, ", "), "", false}
+		Referer            string
+	}{"", strings.Join(tt, ", "), "", false, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
