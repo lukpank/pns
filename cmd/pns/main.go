@@ -129,7 +129,7 @@ func main() {
 		log.Fatal("-https option requires -https_cert and -https_key options")
 	}
 
-	t, err := template.ParseFiles("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
+	t, err := newTemplate("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func main() {
 	http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
 	http.HandleFunc("/_/add", s.authenticate(s.serveAdd))
 	http.HandleFunc("/_/add/submit", s.authenticate(s.serveAddSubmit))
-	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(http.Dir("./static/"))))
+	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(newDir("static/"))))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
 	http.HandleFunc("/_/", s.authenticate(s.notFound))
