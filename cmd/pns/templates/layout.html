@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PNS</title>
+<title>PNS{{if (or .Topic .Tags)}}:{{end}}{{with .Topic}} {{.Name}}{{end}}{{range .Tags}} {{.}}{{end}}</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
