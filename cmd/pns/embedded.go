@@ -13,7 +13,7 @@ import (
 )
 
 // newTemplates return templates parsed from static assets
-func newTemplate(filenames ...string) (*template.Template, error) {
+func newTemplate(filenames ...string) (TemplateExecutor, error) {
 	var t *template.Template
 	for _, fn := range filenames {
 		var err error

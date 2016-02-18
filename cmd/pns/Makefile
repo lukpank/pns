@@ -10,3 +10,7 @@ pnse: $(GOFILES) embedded-assets.go
 
 embedded-assets.go: $(ASSETSFILES)
 	( echo '// +build embedded'; esc -ignore '.*~' static templates) > embedded-assets.go
+
+# pns-devel is for development of templates (no restart needed to reload a template)
+pns-devel: $(GOFILES)
+	go build -o pns-devel -tags devel -ldflags '-X main.Version=pns-0.1-$(REV)-devel'

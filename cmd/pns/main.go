@@ -158,10 +158,14 @@ func main() {
 
 type server struct {
 	db     *DB
-	t      *template.Template
+	t      TemplateExecutor
 	md     *markdown.Markdown
 	s      *sessions
 	secure bool
+}
+
+type TemplateExecutor interface {
+	ExecuteTemplate(wr io.Writer, name string, data interface{}) error
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

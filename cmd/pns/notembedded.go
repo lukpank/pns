@@ -2,7 +2,7 @@
 // reserved.  This source code is licensed under the terms of the MIT
 // license. See LICENSE file for details.
 
-// +build !embedded
+// +build !embedded,!devel
 
 package main
 
@@ -12,7 +12,7 @@ import (
 )
 
 // newTemplates return templates parsed from filesystem
-func newTemplate(filenames ...string) (*template.Template, error) {
+func newTemplate(filenames ...string) (TemplateExecutor, error) {
 	return template.ParseFiles(filenames...)
 }
 
