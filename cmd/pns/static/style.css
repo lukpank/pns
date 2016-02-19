@@ -146,6 +146,23 @@ pre {
     overflow: auto;
 }
 
+.note table, .preview-note table {
+    border: solid 1px #e0e0e0;
+    border-collapse: collapse;
+}
+.note tbody, .preview-note tbody {
+    border: solid 1px #e0e0e0;
+}
+.note td, .note th, .preview-note td, .preview-note th {
+    border-left: solid 1px #e0e0e0;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.note th, .preview-note th {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
 div.login {
     position: absolute;
     bottom: 50%;
