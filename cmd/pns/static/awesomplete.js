@@ -107,7 +107,7 @@ var _ = function (input, o) {
 
 _.prototype = {
 	set list(list) {
-		if (Array.isArray(list)) {
+		if (Array.isArray(list) || typeof list === "function") {
 			this._list = list;
 		}
 		else if (typeof list === "string" && list.indexOf(",") > -1) {
@@ -210,12 +210,16 @@ _.prototype = {
 			value = value.substring(0, this.input.selectionStart);
 		}
 
-		if (value.length >= this.minChars && this._list.length > 0) {
+		var _list = this._list
+		if (typeof _list === "function") {
+			_list = _list(value)
+		}
+		if (value.length >= this.minChars && _list.length > 0) {
 			this.index = -1;
 			// Populate list with options that match
 			this.ul.innerHTML = "";
 
-			this.suggestions = this._list
+			this.suggestions = _list
 				.filter(function(item) {
 					return me.filter(item, value);
 				})
