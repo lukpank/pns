@@ -86,12 +86,15 @@ function editKeyDown(event, referer) {
 		return false;
 	} else if (event.keyCode == 81) { // Alt+q -- quit editing note
 		document.location = referer;
+		return false;
 	} else if (event.keyCode == 82) { // Alt+r -- reload preview
 		setTargetAndAction('preview', 'Preview');
 		document.getElementById("form").submit();
+		return false;
 	} else if (event.keyCode == 83) { // Alt+s -- submit
 		setTargetAndAction('', 'Submit');
 		document.getElementById("form").submit();
+		return false;
 	}
 }
 
