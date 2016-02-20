@@ -25,6 +25,89 @@ new Awesomplete(Awesomplete.$('input[data-multiple]'), {
 	}
 });
 
-function setTarget(target) {
-    document.getElementById("form").setAttribute("target", target);
+function setTargetAndAction(target, action) {
+	document.getElementById("form").setAttribute("target", target);
+	document.getElementById("action").value = action;
+}
+
+function noteKeyDown(event) {
+	if (event.ctrlKey) {
+		return true;
+	}
+	var id = document.activeElement.id;
+	if (event.keyCode == 78) { // "n" -- next
+		if (noteMap.hasOwnProperty(id)) {
+			focusNote(noteMap[id] + 1);
+			return false;
+		}
+	} else if (event.keyCode == 80) {  // "p" -- previous
+		if (noteMap.hasOwnProperty(id)) {
+			focusNote(noteMap[id] - 1);
+			return false;
+		}
+	} else if (event.keyCode == 69 && (event.altKey || id != "tag")) { // "e" -- edit
+		if (id.substring(0, 4) == "note") {
+			var n = id.substring(4, id.length);
+			document.location = "/_/edit/" + n;
+		}
+		return false;
+	} else if (event.keyCode == 65 && (event.altKey || id != "tag")) { // "a" -- add
+		document.location = "/_/add";
+		return false;
+	} else if (event.keyCode == 76) { // "l" -- location
+		if (id == "tag") {
+			if (event.altKey) {
+				focusCurrentNote();
+			} else {
+				return true;
+			}
+		} else {
+			document.getElementById("tag").focus();
+		}
+		return false;
+	}
+	if (event.altKey && (event.keyCode == 78 || event.keyCode == 80)) { // Alt+n / Alt+p
+		focusCurrentNote();
+		return false;
+	}
+	return true;
+}
+
+function editKeyDown(event, referer) {
+	if (event.ctrlKey || !event.altKey) {
+		return true;
+	}
+	if (event.keyCode == 76) { // Alt+l -- location
+		if (document.activeElement.id == "tag") {
+			document.getElementById("text").focus();
+		} else {
+			document.getElementById("tag").focus();
+		}
+		return false;
+	} else if (event.keyCode == 81) { // Alt+q -- quit editing note
+		document.location = referer;
+	} else if (event.keyCode == 82) { // Alt+r -- reload preview
+		setTargetAndAction('preview', 'Preview');
+		document.getElementById("form").submit();
+	} else if (event.keyCode == 83) { // Alt+s -- submit
+		setTargetAndAction('', 'Submit');
+		document.getElementById("form").submit();
+	}
+}
+
+function focusNote(index) {
+	if (index >= 0 && index < noteIDs.length) {
+		location.hash = "";
+		location.hash = "#" + noteIDs[index];
+		document.getElementById("note" + noteIDs[index]).focus();
+	}
+}
+
+function focusCurrentNote() {
+    	var id = "note" + location.hash.substring(1, location.hash.length);
+	if (noteMap.hasOwnProperty(id)) {
+		focusNote(noteMap[id]);
+	} else {
+		focusNote(0);
+	}
 }

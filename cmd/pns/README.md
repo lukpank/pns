@@ -48,3 +48,29 @@ Or better use HTTPS with
 ```
 pns -f test.db -https :8080 -https_cert cert.pem -https_key key.pem -host your.host.domain.name
 ```
+
+
+Keyboard navigation
+-------------------
+
+PNS can be navigated using keyboard shortcuts.
+
+On the pages with notes the following shortcuts are available
+
+| Key     | Action
+|---------|----------------------------------------------------------------------------------------------
+| `Alt+n` | select next note (just `n` will work if some note is already selected)
+| `Alt+p` | select previous note (just `p` will work if some note is already selected)
+| `Alt+l` | switch between tag editing field and current note (just `l` if not in tag editing field)
+| `Alt+a` | add new note (just `a` will work if tag editing field is not selected; as "Add note" button)
+| `e`     | edit selected note (as "Edit" link)
+
+
+On the note editing/adding pages the following shortcuts are available
+
+| Key     | Action
+|---------|------------------------------------------------------
+| `Alt+l` | switch between tag editing field and note text field
+| `Alt+q` | quit editing note (as "Cancel" button)
+| `Alt+r` | reload preview (as "Preview" button)
+| `Alt+s` | submit note (as "Submit" button)

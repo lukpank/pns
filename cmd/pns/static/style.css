@@ -101,6 +101,11 @@ ul.tagbar li a:hover {
     margin-bottom: 5px;
 }
 
+.note:focus {
+    border: solid 1px #2196f3;
+    outline: none;
+}
+
 .note-footer {
     margin-top: 15px;
     font-size: 80%;

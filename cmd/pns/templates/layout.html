@@ -8,9 +8,16 @@
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
 <script src="/_/static/pns.js" async></script>
+<script>
+noteIDs = {{.IDs}};
+noteMap = {};
+for (var i = 0; i < noteIDs.length; i++) {
+	noteMap["note" + noteIDs[i]] = i;
+}
+</script>
 </head>
 
-<body>
+<body onkeydown="return noteKeyDown(event);">
 
 <div class="topbar">
 <div class="topbar-left">
@@ -26,7 +33,7 @@
 <li>
 <form action="{{.URL}}" class="inline">
 <div class="awesomplete">
-<input type="text" name="tag" placeholder="Add tag(s)" class="taginput"
+<input type="text" name="tag" id="tag" placeholder="Add tag(s)" class="taginput"
        data-list="{{.AvailableTags}}" data-multiple autofocus></input>
 </div>
 </form>
@@ -49,7 +56,7 @@
 
 {{range $n := .Notes}}
 <a id="{{.ID}}" class="anchor"></a>
-<div class="note">
+<div class="note" id="note{{.ID}}" tabindex="-1" >
 {{$.Render .}}
 
 {{if (not .NoFooter)}}

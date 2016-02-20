@@ -38,6 +38,16 @@ type Note struct {
 	NoFooter bool
 }
 
+// IDs return slice of IDs of notes to be displayed on a web page used
+// for selecting next/previous note using keys on the web page.
+func (n *Notes) IDs() []int64 {
+	ids := make([]int64, len(n.Notes))
+	for i, note := range n.Notes {
+		ids[i] = note.ID
+	}
+	return ids
+}
+
 func (n *Notes) AvailableTags() string {
 	return strings.Join(n.availableTags, ", ")
 }

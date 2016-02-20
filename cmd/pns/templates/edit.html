@@ -10,31 +10,35 @@
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
 <script src="/_/static/pns.js" async></script>
+<script>
+referer = {{.Referer}};
+</script>
 </head>
 
-<body>
+<body onkeydown="return editKeyDown(event, referer);">
 <form action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
+<input type="hidden" name="action" id="action" value="Preview">
 
 <div class="topbar">
 <div class="topbar-left">
 <div class="awesomplete">
-<input type="text" name="tag" placeholder="Topics and tags" class="taginput"
+<input type="text" name="tag" id="tag" placeholder="Topics and tags" class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
 </div>
 <div class="topbar-inner">
 <div class="topbar-right">
 <ul class="tagbar">
-{{with .Referer}}<li><input type="button" name="action" value="Cancel" class="button" onclick="location = {{.}}"></input></li>{{end}}
-<li><input type="submit" name="action" value="Preview" class="button" onclick="setTarget('preview')"></input></li>
-<li><input type="submit" name="action" value="Submit" class="button" onclick="setTarget('')"></input></li>
+{{with .Referer}}<li><input type="button" value="Cancel" class="button" onclick="location = referer"></input></li>{{end}}
+<li><input type="submit" value="Preview" class="button" onclick="setTargetAndAction('preview', 'Preview')"></input></li>
+<li><input type="submit" value="Submit" class="button" onclick="setTargetAndAction('', 'Submit')"></input></li>
 </ul>
 </div>
 </div>
 </div>
 
 <div class="content">
-<textarea name="text">{{.Text}}</textarea>
+<textarea name="text" id="text">{{.Text}}</textarea>
 <iframe name="preview" src="{{if .Edit}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
