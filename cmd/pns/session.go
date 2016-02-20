@@ -13,15 +13,26 @@ import (
 
 type sessions struct {
 	mu   sync.Mutex
-	m    map[string]time.Time
+	m    map[string]*session
 	next time.Time
 	del  []string
 }
 
-func NewSessions() *sessions {
-	return &sessions{m: make(map[string]time.Time)}
+type session struct {
+	expires time.Time
+	client  time.Time // the time session was send to the client
 }
 
+func NewSessions() *sessions {
+	return &sessions{m: make(map[string]*session)}
+}
+
+// NewSession returns new random session ID. It also stores the
+// session ID later authentication. It also stores session expiration
+// time and time of sending the session cookie to the client. The
+// session cookie send to the client should have max age equal to
+// twice the duration given as argument to NewSession so the session
+// is properly extended with following calls to CheckSession.
 func (s *sessions) NewSession(d time.Duration) (string, error) {
 	var a [16]byte
 	_, err := rand.Read(a[:])
@@ -32,21 +43,38 @@ func (s *sessions) NewSession(d time.Duration) (string, error) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	t := time.Now().Add(d)
+
+	now := time.Now()
+	t := now.Add(d)
 	if len(s.m) == 0 || t.Before(s.next) {
 		s.next = t
 	}
-	s.m[v] = t
+	s.m[v] = &session{t, now} // now: we treat the new session cookie as already send
 	s.expire()
 	return v, nil
 }
 
-func (s *sessions) ValidSession(v string) bool {
+// CheckSession returns error (ErrAuth) on invalid or expired sessions
+// and nil on a proper session.  Additionally the first return value
+// indicates whether a new session cookie should be send to the
+// client.  The session cookie send to the client should have max age
+// equal to twice the duration given as argument to NewSession so the
+// session is properly extended with following calls to CheckSession.
+func (s *sessions) CheckSession(v string, d time.Duration) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.expire()
-	_, present := s.m[v]
-	return present
+	entry, present := s.m[v]
+	if !present {
+		return false, ErrAuth
+	}
+	now := time.Now()
+	entry.expires = now.Add(d)
+	if now.Sub(entry.client) > d/2 {
+		entry.client = now // we treat the new session cookie as already sent
+		return true, nil
+	}
+	return false, nil
 }
 
 func (s *sessions) Remove(v string) {
@@ -66,10 +94,10 @@ func (s *sessions) expire() {
 	if s.next.Before(now) {
 		s.next = now.Add(24 * time.Hour)
 		for k, v := range s.m {
-			if v.Before(now) {
+			if v.expires.Before(now) {
 				s.del = append(s.del, k)
-			} else if v.Before(s.next) {
-				s.next = v
+			} else if v.expires.Before(s.next) {
+				s.next = v.expires
 			}
 		}
 		for _, k := range s.del {

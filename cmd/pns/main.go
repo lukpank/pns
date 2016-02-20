@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	cookieMaxAge      = 3600
+	sessionDuration   = 3600 // session duration in seconds
 	sessionCookieName = "pns_sid"
 )
 
@@ -430,11 +430,22 @@ func editRedirectionPath(topics, tags []string, id int64) string {
 
 func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if cookie, err := r.Cookie(sessionCookieName); err == nil && s.s.ValidSession(cookie.Value) {
-			h(w, r)
-		} else {
-			s.loginPage(w, r, r.URL.Path, "")
+		cookie, err := r.Cookie(sessionCookieName)
+		if err == nil {
+			var extend bool
+			if extend, err = s.s.CheckSession(cookie.Value, sessionDuration*time.Second); err == nil {
+				if extend {
+					s.setSessionCookie(w, cookie.Value, 2*sessionDuration)
+				}
+				h(w, r)
+				return
+			}
 		}
+		if err != nil && err != ErrAuth && err != http.ErrNoCookie {
+			s.internalError(w, err)
+			return
+		}
+		s.loginPage(w, r, r.URL.Path, "")
 	}
 }
 
@@ -460,14 +471,18 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	sid, err := s.s.NewSession(time.Hour)
+	sid, err := s.s.NewSession(sessionDuration * time.Second)
 	if err != nil {
 		s.internalError(w, err)
 		return
 	}
-	expires := time.Now().Add(cookieMaxAge * time.Second)
-	http.SetCookie(w, &http.Cookie{Name: sessionCookieName, Path: "/", Value: sid, MaxAge: cookieMaxAge, Expires: expires, Secure: s.secure})
+	s.setSessionCookie(w, sid, 2*sessionDuration)
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
+}
+
+func (s *server) setSessionCookie(w http.ResponseWriter, sid string, duration int) {
+	expires := time.Now().Add(time.Duration(duration) * time.Second)
+	http.SetCookie(w, &http.Cookie{Name: sessionCookieName, Path: "/", Value: sid, MaxAge: duration, Expires: expires, Secure: s.secure})
 }
 
 func (s *server) loginPage(w http.ResponseWriter, r *http.Request, path, msg string) {

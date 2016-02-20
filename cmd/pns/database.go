@@ -25,7 +25,7 @@ type DB struct {
 var (
 	ErrSingleThread = errors.New("single threaded sqlite3 is not supported")
 	ErrTagName      = errors.New("unexpected tag name in query result")
-	ErrAuth         = errors.New("failed to authenticate: incorect login or password")
+	ErrAuth         = errors.New("failed to authenticate")
 	ErrNoTags       = errors.New("no tags specified")
 )
 
