@@ -178,14 +178,23 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	var notes []*Note
 	var err error
-	var availableTags []string
+	var allTags, activeTags, availableTags []string
 	var isHTML bool
 	if path == "/" || path == "/-" || path == "/-/" {
 		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
+		allTags = availableTags
+		activeTags = make([]string, 0)
 		isHTML = true
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:], true)
 		availableTags = tagsFromNotes(notes)
+		if availableTags == nil {
+			availableTags = make([]string, 0)
+		}
+		activeTags = append([]string{"/" + tags[1]}, tags[2:]...)
+		var topics, tags []string
+		topics, tags, err = s.db.TopicsAndTags()
+		allTags = append(topics, tags...)
 	}
 	if err != nil {
 		if _, ok := err.(NoTagsError); ok {
@@ -202,7 +211,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, availableTags, isHTML, nil})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -395,7 +404,7 @@ func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 	var b bytes.Buffer
 	errorTemplate.Execute(&b, &struct{ Title, Text string }{title, text})
 	n := &Note{Text: b.String(), NoFooter: true}
-	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, true, nil})
+	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, []string{}, []string{}, true, nil})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -10,16 +10,16 @@ func TestTagsURL(t *testing.T) {
 	tests := []struct {
 		path, expr, expected string
 	}{
-		{"/a", "b", "/a/b"},
-		{"/a", "b c", "/a/b/c"},
-		{"/a/b", "c", "/a/b/c"},
-		{"/a/b", "c d", "/a/b/c/d"},
+		{"/a", "+b", "/a/b"},
+		{"/a", "+ b c", "/a/b/c"},
+		{"/a/b", "  +c", "/a/b/c"},
+		{"/a/b", " + c d", "/a/b/c/d"},
 
-		{"/a", "/b", "/b"},
-		{"/a/b", "/c", "/c/b"},
-		{"/a", "/", "/"},
-		{"/a/b", "/", "/-/b"},
-		{"/a/b/c", "/", "/-/b/c"},
+		{"/a", "+/b", "/b"},
+		{"/a/b", "+/c", "/c/b"},
+		{"/a", "+ /", "/"},
+		{"/a/b", " + /", "/-/b"},
+		{"/a/b/c", "   + /", "/-/b/c"},
 
 		{"/a/b", "-b", "/a"},
 		{"/a/b/c", "-b", "/a/c"},
@@ -31,10 +31,14 @@ func TestTagsURL(t *testing.T) {
 		{"/a", "-/b", "/a"},
 		{"/a/b", "-/c", "/a/b"},
 
-		{"/a/b", "c -b", "/a/c"},
+		{"/a/b", "+c -b", "/a/c"},
 		{"/a/b", "-b c", "/a/c"},
-		{"/a/b/c/d", "e f -b -d", "/a/c/e/f"},
+		{"/a/b/c/d", "  +  e f -b -d", "/a/c/e/f"},
 		{"/a/b/c/d", "-b e -d f", "/a/c/e/f"},
+
+		{"/a/b", "c d", "/-/c/d"},
+		{"/a", "/d e f", "/d/e/f"},
+		{"/a/b", "d /e f", "/e/d/f"},
 	}
 	for _, test := range tests {
 		if s := tagsURL(test.path, test.expr); s != test.expected {

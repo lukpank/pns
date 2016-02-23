@@ -2,28 +2,45 @@
 // reserved.  This source code is licensed under the terms of the MIT
 // license. See LICENSE file for details.
 
-new Awesomplete(Awesomplete.$('input[data-multiple]'), {
-	autoFirst: true,
-	minChars: 1,
-
-	filter: function(text, input) {
-		return Awesomplete.FILTER_CONTAINS(text, input.match(/[^- ][^ ]*$|$/)[0]);
-	},
-
-	replace: function(text) {
-		if (this.input.selectionStart) {
-			var s = this.input.value;
-			var before = s.substring(0, this.input.selectionStart).match(/^.+\s+-?|-?/)[0]
-			var after = s.substring(this.input.selectionEnd, s.lenght).match(/\s+.*|$/)[0]
-			this.input.value = before + text + " " + after;
-			var n = before.length+text.length + 1;
-			this.input.setSelectionRange(n, n);
+function getLayoutCompletions(value) {
+	var m = value.match(/\s*[+-]/);
+	if (m != null) {
+		var before = value.match(/^.+\s+-?|-?/)[0];
+		if (before.length > 0 && before[before.length - 1] == '-') {
+			return activeTags;
 		} else {
-			var before = this.input.value.match(/^.+\s+-?|-?/)[0];
-			this.input.value = before + text + " ";
+			return availableTags;
 		}
+	} else {
+		return allTags;
 	}
-});
+}
+
+function newAwesomplete(list) {
+	new Awesomplete(Awesomplete.$('input[data-multiple]'), {
+		autoFirst: true,
+		minChars: 1,
+		list: list,
+
+		filter: function(text, input) {
+			return Awesomplete.FILTER_CONTAINS(text, input.match(/[^-+ ][^ ]*$|$/)[0]);
+		},
+
+		replace: function(text) {
+			if (this.input.selectionStart) {
+				var s = this.input.value;
+				var before = s.substring(0, this.input.selectionStart).match(/^.+\s+[-+]?|[-+]?/)[0]
+				var after = s.substring(this.input.selectionEnd, s.lenght).match(/\s+.*|$/)[0]
+				this.input.value = before + text + " " + after;
+				var n = before.length+text.length + 1;
+				this.input.setSelectionRange(n, n);
+			} else {
+				var before = this.input.value.match(/^.+\s+-?|-?/)[0];
+				this.input.value = before + text + " ";
+			}
+		}
+	});
+}
 
 function setTargetAndAction(target, action) {
 	document.getElementById("form").setAttribute("target", target);

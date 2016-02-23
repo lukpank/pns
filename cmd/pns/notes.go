@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -23,7 +24,9 @@ type Notes struct {
 	URL           string
 	Notes         []*Note
 	md            *markdown.Markdown
-	availableTags []string
+	AllTags       []string
+	ActiveTags    []string
+	AvailableTags []string
 	isHTML        bool
 	Messages      []string
 }
@@ -48,10 +51,6 @@ func (n *Notes) IDs() []int64 {
 	return ids
 }
 
-func (n *Notes) AvailableTags() string {
-	return strings.Join(n.availableTags, ", ")
-}
-
 func (n *Notes) TagURL(tag string) string {
 	tags := strings.Split(n.URL[1:], "/")
 	if strings.HasPrefix(tag, "/") {
@@ -67,9 +66,21 @@ func (n *Notes) TagURL(tag string) string {
 	}
 }
 
+var spacePlusMinus = regexp.MustCompile(`\s*[+-]`)
+
 // tagsURL returns destination URL from a given base URL and
 // expression specifying added and removed tags.
 func tagsURL(path, expr string) string {
+	loc := spacePlusMinus.FindStringIndex(expr)
+	if loc != nil {
+		if expr[loc[1]-1] == '+' {
+			expr = expr[loc[1]:]
+		} else {
+			expr = expr[loc[1]-1:]
+		}
+	} else {
+		path = "/"
+	}
 	tags := strings.Split(path[1:], "/")
 	tags[0] = "/" + tags[0]
 	for _, tag := range strings.Fields(expr) {

@@ -14,10 +14,18 @@ noteMap = {};
 for (var i = 0; i < noteIDs.length; i++) {
 	noteMap["note" + noteIDs[i]] = i;
 }
+
+allTags = {{.AllTags}};
+activeTags = {{.ActiveTags}};
+availableTags = {{.AvailableTags}};
+
+function setup() {
+	newAwesomplete(getLayoutCompletions);
+}
 </script>
 </head>
 
-<body onkeydown="return noteKeyDown(event);">
+<body onload="setup();" onkeydown="return noteKeyDown(event);">
 
 <div class="topbar">
 <div class="topbar-left">
@@ -34,7 +42,7 @@ for (var i = 0; i < noteIDs.length; i++) {
 <form action="{{.URL}}" class="inline">
 <div class="awesomplete">
 <input type="text" name="tag" id="tag" placeholder="Add tag(s)" class="taginput"
-       data-list="{{.AvailableTags}}" data-multiple autofocus></input>
+       data-multiple autofocus></input>
 </div>
 </form>
 </li>

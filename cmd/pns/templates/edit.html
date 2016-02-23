@@ -12,10 +12,14 @@
 <script src="/_/static/pns.js" async></script>
 <script>
 referer = {{.Referer}};
+
+function setup() {
+	newAwesomplete(null);
+}
 </script>
 </head>
 
-<body onkeydown="return editKeyDown(event, referer);">
+<body onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 <input type="hidden" name="action" id="action" value="Preview">
 
