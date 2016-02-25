@@ -74,3 +74,24 @@ On the note editing/adding pages the following shortcuts are available
 | `Alt+q` | quit editing note (as "Cancel" button)
 | `Alt+r` | reload preview (as "Preview" button)
 | `Alt+s` | submit note (as "Submit" button)
+
+
+Upgrade database
+----------------
+
+### before commit "add two indexes on tags table"
+
+To upgrade database which does not have indices (created before
+"add two indexes on tags table" commit) start sqlite with the database
+as argument and add indexes with
+
+```
+CREATE UNIQUE INDEX tagsIds ON tags (noteid, tagid);
+CREATE INDEX tagsTagId ON tags (tagid);
+```
+
+You can check the names of defined indexes with sqlite command
+
+```
+.indexes
+```

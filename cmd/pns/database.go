@@ -56,6 +56,12 @@ func (db *DB) Init() (err error) {
 		_, err = tx.Exec("CREATE TABLE tags(noteid INTEGER, tagid INTEGER)")
 	}
 	if err == nil {
+		_, err = tx.Exec("CREATE UNIQUE INDEX tagsIds ON tags (noteid, tagid)")
+	}
+	if err == nil {
+		_, err = tx.Exec("CREATE INDEX tagsTagId ON tags (tagid)")
+	}
+	if err == nil {
 		_, err = tx.Exec("CREATE TABLE tagnames(name TEXT UNIQUE)")
 	}
 	if err == nil {
