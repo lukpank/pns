@@ -176,10 +176,15 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, tagsURL(path, tag), http.StatusMovedPermanently)
 		return
 	}
-	var notes []*Note
-	var err error
-	var allTags, activeTags, availableTags []string
-	var isHTML bool
+	var (
+		notes         []*Note
+		err           error
+		allTags       []string
+		activeTags    []string
+		availableTags []string
+		isHTML        = false
+		count         = 0
+	)
 	if path == "/" || path == "/-" || path == "/-/" {
 		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
 		allTags = availableTags
@@ -187,6 +192,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		isHTML = true
 	} else {
 		notes, err = s.db.Notes("/"+tags[1], tags[2:], true)
+		count = len(notes)
 		availableTags = tagsFromNotes(notes)
 		if availableTags == nil {
 			availableTags = make([]string, 0)
@@ -211,7 +217,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			NoFooter: true,
 		})
 	}
-	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil, count})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -404,7 +410,7 @@ func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 	var b bytes.Buffer
 	errorTemplate.Execute(&b, &struct{ Title, Text string }{title, text})
 	n := &Note{Text: b.String(), NoFooter: true}
-	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, []string{}, []string{}, true, nil})
+	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, []string{}, []string{}, true, nil, 0})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

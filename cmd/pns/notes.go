@@ -29,6 +29,7 @@ type Notes struct {
 	AvailableTags []string
 	isHTML        bool
 	Messages      []string
+	Count         int
 }
 
 type Note struct {

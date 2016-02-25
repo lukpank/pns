@@ -48,6 +48,12 @@ ul.tagbar li a:hover {
     text-decoration: line-through;
 }
 
+.topbar-count {
+    display: block;
+    padding: 15px;
+    color: #ffffff;
+}
+
 .topbar-message {
     display: block;
     width: 100%;

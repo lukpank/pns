@@ -34,6 +34,7 @@ function setup() {
 {{range .Tags}}
 <li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
 {{end}}
+{{with .Count}}<li><span class="topbar-count">({{.}})</span></li>{{end}}
 </ul>
 </div>
 <div class="topbar-right">
