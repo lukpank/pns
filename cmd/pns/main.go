@@ -107,7 +107,7 @@ func main() {
 			notes, err = db.AllNotes()
 		} else {
 			tags := strings.Split(*exportPath, "/")
-			notes, err = db.Notes("/"+tags[1], tags[2:], false)
+			notes, err = db.Notes("/"+tags[1], tags[2:], "", false)
 		}
 		if err == nil {
 			err = export(w, notes)
@@ -186,18 +186,25 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		count         = 0
 	)
 	if path == "/" || path == "/-" || path == "/-/" {
-		notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
-		allTags = availableTags
+		if q := r.Form.Get("q"); q != "" {
+			notes, err = s.db.FTS(q)
+			count = len(notes)
+		} else {
+			notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
+			allTags = availableTags
+			isHTML = true
+		}
 		activeTags = make([]string, 0)
-		isHTML = true
 	} else {
-		notes, err = s.db.Notes("/"+tags[1], tags[2:], true)
+		notes, err = s.db.Notes("/"+tags[1], tags[2:], r.Form.Get("q"), true)
 		count = len(notes)
 		availableTags = tagsFromNotes(notes)
 		if availableTags == nil {
 			availableTags = make([]string, 0)
 		}
 		activeTags = append([]string{"/" + tags[1]}, tags[2:]...)
+	}
+	if allTags == nil {
 		var topics, tags []string
 		topics, tags, err = s.db.TopicsAndTags()
 		allTags = append(topics, tags...)
@@ -216,6 +223,9 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Text:     "# No such notes",
 			NoFooter: true,
 		})
+	}
+	if r.URL.RawQuery != "" {
+		path += "?" + r.URL.RawQuery
 	}
 	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil, count})
 	if err != nil {
@@ -460,7 +470,11 @@ func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
 			s.internalError(w, err)
 			return
 		}
-		s.loginPage(w, r, r.URL.Path, "")
+		path := r.URL.Path
+		if r.URL.RawQuery != "" {
+			path += "?" + r.URL.RawQuery
+		}
+		s.loginPage(w, r, path, "")
 	}
 }
 
@@ -519,6 +533,9 @@ func (s *server) serveLogout(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/_/logout")
 	if len(path) == len(r.URL.Path) || path == "" {
 		path = "/"
+	}
+	if r.URL.RawQuery != "" {
+		path += "?" + r.URL.RawQuery
 	}
 	http.Redirect(w, r, path, http.StatusSeeOther)
 }

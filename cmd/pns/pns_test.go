@@ -4,7 +4,11 @@
 
 package main
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
 
 func TestTagsURL(t *testing.T) {
 	tests := []struct {
@@ -39,10 +43,63 @@ func TestTagsURL(t *testing.T) {
 		{"/a/b", "c d", "/-/c/d"},
 		{"/a", "/d e f", "/d/e/f"},
 		{"/a/b", "d /e f", "/e/d/f"},
+
+		{"/a/b", "'c'", "/?q=c"},
+		{"/a/b", "'c' d", "/-/d?q=c"},
+		{"/a/b", `c 'd e' f "g"`, "/-/c/f?q=d+e+%22g%22"},
+		{"/a/b", "'c' /d", "/d?q=c"},
+		{"/a/b", `c 'd e' /f "g"`, "/f/c?q=d+e+%22g%22"},
+		{"/a/b", "+'c'", "/a/b?q=c"},
+		{"/a/b", "+ 'c' d", "/a/b/d?q=c"},
+		{"/a/b", "+ c 'd e' f", "/a/b/c/f?q=d+e"},
 	}
 	for _, test := range tests {
 		if s := tagsURL(test.path, test.expr); s != test.expected {
 			t.Errorf("for (%q, %q) expected %q but got %q", test.path, test.expr, test.expected, s)
+		}
+	}
+}
+
+func TestParseSearchExpr(t *testing.T) {
+	tests := []struct {
+		expr, expected string
+	}{
+		{`a b c`, `a.b.c#`},
+		{`a b c `, `a.b.c#`},
+		{`a bbb c `, `a.bbb.c#`},
+		{`'a' b c`, `b.c#a`},
+		{`a b 'c'`, `a.b#c`},
+		{`a 'b' c`, `a.c#b`},
+		{`a'b'c`, `a.c#b`},
+		{`a 'b c' d`, `a.d#b c`},
+		{`a 'b c`, `a#b c`},
+		{`a 'b c `, `a#b c`},
+		{`a '' b c`, `a.b.c#`},
+		{`a ' ' b c`, `a.b.c#`},
+		{`a b c ''`, `a.b.c#`},
+		{`a b c ' '`, `a.b.c#`},
+		{`a '' b '' c`, `a.b.c#`},
+		{`"a" b c`, `b.c#"a"`},
+		{`a "b c" d`, `a.d#"b c"`},
+		{`a "b c`, `a#"b c"`},
+		{`a "b c `, `a#"b c"`},
+		{`a 'b' 'c' d`, `a.d#b c`},
+		{`a 'b' c 'd'`, `a.c#b d`},
+		{`a "b" "c" d`, `a.d#"b" "c"`},
+		{`a "b" c "d"`, `a.c#"b" "d"`},
+		{`a 'b' c "d e"`, `a.c#b "d e"`},
+		{`a "b c" d "e f"`, `a.d#"b c" "e f"`},
+		{`a "" b c`, `a.b.c#`},
+		{`a " " b c`, `a.b.c#`},
+		{`a "" b "" c`, `a.b.c#`},
+		{`a "" b '' c`, `a.b.c#`},
+		{`a "" b "  "`, `a.b#`},
+	}
+	for _, test := range tests {
+		tokens, fts := parseSearchExpr(test.expr)
+		s := fmt.Sprintf("%s#%s", strings.Join(tokens, "."), fts)
+		if s != test.expected {
+			t.Errorf("for %q expected %q but got %q", test.expr, test.expected, s)
 		}
 	}
 }

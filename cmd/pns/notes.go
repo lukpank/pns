@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -53,17 +54,26 @@ func (n *Notes) IDs() []int64 {
 }
 
 func (n *Notes) TagURL(tag string) string {
-	tags := strings.Split(n.URL[1:], "/")
+	s := n.URL
+	q := ""
+	if i := strings.IndexByte(s, '?'); i >= 0 {
+		q = s[i:]
+		s = s[:i]
+	}
+	if s == "/" {
+		s = "/-"
+	}
+	tags := strings.Split(s[:1], "/")
 	if strings.HasPrefix(tag, "/") {
 		tags[0] = tag
-		return strings.Join(tags, "/")
+		return strings.Join(tags, "/") + q
 	} else {
 		for _, t := range tags[1:] {
 			if tag == t {
 				return n.URL
 			}
 		}
-		return n.URL + "/" + tag
+		return s + "/" + tag + q
 	}
 }
 
@@ -82,9 +92,10 @@ func tagsURL(path, expr string) string {
 	} else {
 		path = "/"
 	}
+	newTags, fts := parseSearchExpr(expr)
 	tags := strings.Split(path[1:], "/")
 	tags[0] = "/" + tags[0]
-	for _, tag := range strings.Fields(expr) {
+	for _, tag := range newTags {
 		if strings.HasPrefix(tag, "-/") {
 			if tags[0] == tag[1:] {
 				tags[0] = "/"
@@ -100,7 +111,89 @@ func tagsURL(path, expr string) string {
 	if tags[0] == "/" && len(tags) > 1 {
 		tags[0] = "/-"
 	}
-	return strings.Join(tags, "/")
+	path = strings.Join(tags, "/")
+	if fts != "" {
+		return path + "?q=" + url.QueryEscape(fts)
+	}
+	return path
+}
+
+func parseSearchExpr(expr string) ([]string, string) {
+	const (
+		between = iota
+		inWord
+		inSingleString
+		inDoubleString
+	)
+	var (
+		tags, search []string
+		state        = between
+		start        = 0
+	)
+	for i, r := range expr {
+		switch state {
+		case between:
+			switch {
+			case r == '\'':
+				start = i + 1
+				state = inSingleString
+			case r == '"':
+				start = i + 1
+				state = inDoubleString
+			case !unicode.IsSpace(r):
+				start = i
+				state = inWord
+			}
+		case inWord:
+			switch {
+			case r == '\'':
+				tags = append(tags, expr[start:i])
+				start = i + 1
+				state = inSingleString
+			case r == '"':
+				tags = append(tags, expr[start:i])
+				start = i + 1
+				state = inDoubleString
+			case unicode.IsSpace(r):
+				tags = append(tags, expr[start:i])
+				state = between
+			}
+		case inSingleString:
+			if r == '\'' {
+				if i > start {
+					search = append(search, expr[start:i])
+				}
+				state = between
+			}
+		case inDoubleString:
+			if r == '"' {
+				if i > start {
+					s := strings.TrimSpace(expr[start:i])
+					if s != "" {
+						search = append(search, `"`+s+`"`)
+					}
+				}
+				state = between
+			}
+		}
+	}
+	i := len(expr)
+	switch state {
+	case inWord:
+		if i > start {
+			tags = append(tags, expr[start:i])
+		}
+	case inSingleString:
+		if i > start {
+			search = append(search, expr[start:i])
+		}
+	case inDoubleString:
+		s := strings.TrimSpace(expr[start:i])
+		if s != "" {
+			search = append(search, `"`+s+`"`)
+		}
+	}
+	return tags, strings.TrimSpace(strings.Join(search, " "))
 }
 
 func topicsAndTagsFromEditField(expr string) ([]string, []string) {
@@ -139,37 +232,58 @@ func addTag(tags []string, tag string) []string {
 	return append(tags, tag)
 }
 
-type topic struct {
-	URL  string
+type tagURL struct {
 	Name string
+	URL  string
 }
 
-func (n *Notes) Topic() *topic {
-	if n.URL == "/" || strings.HasPrefix(n.URL, "/-") {
-		return nil
-	}
+// ActiveTagsURLs return active topic (if any), active tags and active
+// Full text search
+func (n *Notes) ActiveTagsURLs() []tagURL {
+	var tagsURLs []tagURL
 	s := n.URL[1:]
-	i := strings.Index(s, "/")
-	if i < 0 {
-		return &topic{"/", n.URL}
-	} else {
-		return &topic{"/-" + s[i:], n.URL[:i+1]}
+	q := ""
+	if i := strings.IndexByte(s, '?'); i >= 0 {
+		q = s[i:]
+		s = s[:i]
 	}
 
-}
-
-func (n *Notes) Tags() []string {
-	return strings.Split(n.URL[1:], "/")[1:]
-}
-
-func (n *Notes) DelTagURL(tag string) string {
-	tags := strings.Split(n.URL[1:], "/")
-	for i, t := range tags[1:] {
-		if tag == t {
-			return "/" + strings.Join(append(tags[:i+1], tags[i+2:]...), "/")
+	// Topic
+	tags := strings.Split(s, "/")
+	if len(tags) > 1 && tags[0] != "-" {
+		if len(tags) > 1 {
+			i := strings.Index(s, "/")
+			tagsURLs = append(tagsURLs, tagURL{tags[0], "/-" + s[i:] + q})
+		} else {
+			tagsURLs = append(tagsURLs, tagURL{tags[0], "/" + q})
 		}
 	}
-	return n.URL
+
+	// Tags
+	for i, tag := range tags[1:] {
+		tagsURLs = append(tagsURLs, tagURL{tag, "/" + strings.Join(append(tags[:i+1:i+1], tags[i+2:]...), "/") + q})
+	}
+
+	// Full text search
+	if len(q) > 1 {
+		params := strings.Split(q[1:], "&")
+		for i, p := range params {
+			if strings.HasPrefix(p, "q=") {
+				q := strings.Join(append(params[:i], params[i+1:]...), "&")
+				if q != "" {
+					q = "?" + q
+				}
+				u, err := url.QueryUnescape(p[2:])
+				if err != nil {
+					u = p[2:]
+				}
+				tagsURLs = append(tagsURLs, tagURL{fmt.Sprintf("'%s'", u), "/" + s + q})
+				break
+			}
+		}
+	}
+
+	return tagsURLs
 }
 
 func (n *Notes) Render(note *Note) (template.HTML, error) {

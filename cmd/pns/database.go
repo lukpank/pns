@@ -53,6 +53,9 @@ func (db *DB) Init() (err error) {
 	defer commitOrRollback(tx, &done, &err)
 	_, err = tx.Exec("CREATE TABLE notes(note TEXT, created INTEGER, modified INTEGER)")
 	if err == nil {
+		_, err = tx.Exec("CREATE VIRTUAL TABLE ftsnotes USING fts4(note)")
+	}
+	if err == nil {
 		_, err = tx.Exec("CREATE TABLE tags(noteid INTEGER, tagid INTEGER)")
 	}
 	if err == nil {
@@ -126,6 +129,10 @@ func (db *DB) Import(notes []*Note) (err error) {
 			return err
 		}
 		noteid, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		_, err = tx.Exec("INSERT INTO ftsnotes (docid, note) VALUES (?, ?)", noteid, n.Text)
 		if err != nil {
 			return err
 		}
@@ -301,44 +308,6 @@ func (db *DB) AllNotes() (notes []*Note, err error) {
 
 }
 
-func (db *DB) Notes(topic string, tags []string, orderedByCreated bool) (notes []*Note, err error) {
-	tx, err := db.db.Begin()
-	if err != nil {
-		return nil, err
-	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
-
-	if topic != "/-" || len(tags) == 0 {
-		tags = append(tags, topic)
-	}
-	tagIDs, err := db.tagIDs(tx, tags)
-	if err != nil {
-		return nil, err
-	}
-	var orderedBy string
-	if orderedByCreated {
-		orderedBy = "n.created asc"
-	} else {
-		orderedBy = "n.rowid asc"
-	}
-	query := fmt.Sprintf(notesQueryFormat, questionMarks(len(tagIDs)), orderedBy)
-	rows, err := tx.Query(query, append(tagIDs, len(tagIDs))...)
-	if err != nil {
-		return nil, err
-	}
-	notes, err = notesFromRowsClose(rows)
-	if err != nil {
-		return nil, err
-	}
-	for _, n := range notes {
-		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
-	}
-	done = true
-	return notes, nil
-
-}
-
 const notesQueryFormat = `
 SELECT
 	n.rowid,
@@ -360,6 +329,110 @@ HAVING
 ORDER BY
 	%s
 `
+
+const notesQueryWithFtsFormat = `
+SELECT
+	n.rowid,
+	n.note,
+	n.created,
+	n.modified
+FROM
+	notes AS n
+INNER JOIN
+	tags AS t
+ON
+	n.rowid = t.noteid
+AND
+	t.tagid in (%s)
+AND
+	n.rowid in (SELECT rowid FROM ftsnotes WHERE note MATCH ?)
+GROUP BY
+	n.rowid
+HAVING
+	COUNT(n.rowid)=?
+ORDER BY
+	%s
+`
+
+func (db *DB) Notes(topic string, tags []string, fts string, orderedByCreated bool) (notes []*Note, err error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	if topic != "/-" || len(tags) == 0 {
+		tags = append(tags, topic)
+	}
+	tagIDs, err := db.tagIDs(tx, tags)
+	if err != nil {
+		return nil, err
+	}
+	var orderedBy string
+	if orderedByCreated {
+		orderedBy = "n.created asc"
+	} else {
+		orderedBy = "n.rowid asc"
+	}
+	var (
+		query string
+		args  []interface{}
+	)
+	if fts != "" {
+		query = fmt.Sprintf(notesQueryWithFtsFormat, questionMarks(len(tagIDs)), orderedBy)
+		args = append(tagIDs, fts, len(tagIDs))
+	} else {
+		query = fmt.Sprintf(notesQueryFormat, questionMarks(len(tagIDs)), orderedBy)
+		args = append(tagIDs, len(tagIDs))
+	}
+	rows, err := tx.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	notes, err = notesFromRowsClose(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range notes {
+		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
+	}
+	done = true
+	return notes, nil
+
+}
+
+const ftsQuery = `
+SELECT
+	rowid, note, created, modified
+FROM
+	notes
+WHERE
+        rowid in (SELECT rowid FROM ftsnotes WHERE note MATCH ?)
+`
+
+func (db *DB) FTS(q string) ([]*Note, error) {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	done := false
+	defer commitOrRollback(tx, &done, &err)
+
+	rows, err := tx.Query(ftsQuery, q)
+	if err != nil {
+		return nil, err
+	}
+	notes, err := notesFromRowsClose(rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range notes {
+		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
+	}
+	done = true
+	return notes, nil
+}
 
 func (db *DB) tagIDs(tx *sql.Tx, tags []string) ([]interface{}, error) {
 	m := make(map[string]bool)
@@ -537,6 +610,10 @@ func (db *DB) updateNote(noteID int64, text string, tags []string) (err error) {
 	if err != nil {
 		return err
 	}
+	_, err = tx.Exec("UPDATE ftsnotes SET note=? WHERE rowid=?", text, noteID)
+	if err != nil {
+		return err
+	}
 
 	// 2. get tag IDs
 	ids, err := db.tagsToIDsMayInsert(tx, tags)
@@ -606,6 +683,10 @@ func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
 		return 0, err
 	}
 	noteID, err = result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	_, err = tx.Exec("INSERT INTO ftsnotes (docid, note) VALUES (?, ?)", noteID, text)
 	if err != nil {
 		return 0, err
 	}

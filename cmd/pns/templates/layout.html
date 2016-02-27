@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PNS{{if (or .Topic .Tags)}}:{{end}}{{with .Topic}} {{.Name}}{{end}}{{range .Tags}} {{.}}{{end}}</title>
+{{$activeTagsURLs := .ActiveTagsURLs}}
+<title>PNS{{with $activeTagsURLs}}:{{range .}} {{.Name}}{{end}}{{end}}</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
@@ -30,9 +31,8 @@ function setup() {
 <div class="topbar">
 <div class="topbar-left">
 <ul class="tagbar">
-{{with .Topic}}<li><a href="{{.URL}}">{{.Name}}</a></li>{{end}}
-{{range .Tags}}
-<li><a href="{{$.DelTagURL .}}">{{.}}</a></li>
+{{range $activeTagsURLs}}
+<li><a href="{{.URL}}">{{.Name}}</a></li>
 {{end}}
 {{with .Count}}<li><span class="topbar-count">({{.}})</span></li>{{end}}
 </ul>

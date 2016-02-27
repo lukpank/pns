@@ -95,3 +95,14 @@ You can check the names of defined indexes with sqlite command
 ```
 .indexes
 ```
+
+### before commit "add full text search"
+
+To upgrade database which does not have full text search table
+(created before "add full text search" commit) start sqlite with the
+database as argument and add and populate full text index with
+
+```
+CREATE VIRTUAL TABLE ftsnotes USING fts4(note);
+INSERT INTO ftsnotes(docid, note) SELECT rowid, note FROM notes;
+```
