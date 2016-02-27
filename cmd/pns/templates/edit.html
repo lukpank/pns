@@ -35,6 +35,9 @@ function setup() {
 <ul class="tagbar">
 {{with .Referer}}<li><input type="button" value="Cancel" class="button" onclick="location = referer"></input></li>{{end}}
 <li><input type="submit" value="Preview" class="button" onclick="setTargetAndAction('preview', 'Preview')"></input></li>
+{{if .Edit}}
+<li><input type="submit" value="Diff" class="button" onclick="setTargetAndAction('preview', 'Diff')"></input></li>
+{{end}}
 <li><input type="submit" value="Submit" class="button" onclick="setTargetAndAction('', 'Submit')"></input></li>
 </ul>
 </div>

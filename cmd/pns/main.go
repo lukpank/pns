@@ -21,6 +21,7 @@ import (
 
 	"github.com/bgentry/speakeasy"
 	"github.com/golang-commonmark/markdown"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const (
@@ -129,7 +130,7 @@ func main() {
 		log.Fatal("-https option requires -https_cert and -https_key options")
 	}
 
-	t, err := newTemplate("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html")
+	t, err := newTemplate("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html", "templates/diff.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -306,6 +307,8 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 	switch r.PostForm.Get("action") {
 	case "Preview":
 		s.previewNote(w, text, strings.Fields(tags))
+	case "Diff":
+		s.diff(w, r, id, text, strings.Fields(tags))
 	case "Submit":
 		s.updateNote(w, r, id, text, tags)
 	default:
@@ -316,6 +319,50 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 // previewNote serves preview of a note intended for the iframe
 // element of the edit page.
 func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) {
+	messages, err := s.preSubmitWarnings(tags)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	note := &Note{Text: text}
+	err = s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md, Messages: messages})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text string, tags []string) {
+	dbText, err := s.db.NoteText(id)
+	if err == sql.ErrNoRows {
+		http.NotFound(w, r)
+		return
+	} else if err != nil {
+		s.internalError(w, err)
+		return
+	}
+	messages, err := s.preSubmitWarnings(tags)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	dmp := diffmatchpatch.New()
+	a, b, lines := dmp.DiffLinesToRunes(strings.Replace(dbText, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
+	diff := dmp.DiffCharsToLines(dmp.DiffMainRunes(a, b, false), lines)
+	if len(diff) == 1 && diff[0].Type == diffmatchpatch.DiffEqual {
+		messages = append(messages, "No differences found.")
+		diff = nil
+	}
+	data := struct {
+		Diff     []diffmatchpatch.Diff
+		Messages []string
+	}{diff, messages}
+	err = s.t.ExecuteTemplate(w, "diff.html", &data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) preSubmitWarnings(tags []string) ([]string, error) {
 	var messages []string
 	hasTopic := false
 	for _, s := range tags {
@@ -330,20 +377,14 @@ func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) 
 	if len(tags) > 0 {
 		newTags, err := s.db.NewTags(tags)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return nil, err
 		}
 		if len(newTags) > 0 {
 			newStr := strings.Join(newTags, `" and "`)
 			messages = append(messages, fmt.Sprintf(`Note that the following tags/topics are new: "%s".`, newStr))
 		}
 	}
-	note := &Note{Text: text}
-	err := s.t.ExecuteTemplate(w, "preview.html", &Notes{Notes: []*Note{note}, md: s.md, Messages: messages})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return messages, nil
 }
 
 func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, text, topicsAndTags string) {

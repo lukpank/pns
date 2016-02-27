@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="/_/static/style.css">
+</head>
+
+<body>
+{{if .Messages}}
+<div class="messages">
+{{range .Messages}}
+<p>{{.}}</p>
+{{end}}
+</div>
+{{end}}
+{{with .Diff}}
+<pre class="diff">{{/*
+*/}}{{range .}}{{/*
+*/}}{{if eq .Type -1}}<div class="del">{{.Text}}</div>{{/*
+*/}}{{else if eq .Type 0}}<div class="context">{{.Text}}</div>{{/*
+*/}}{{else if eq .Type 1}}<div class="ins">{{.Text}}</div>{{/*
+*/}}{{end}}{{/*
+*/}}{{end}}
+</pre>
+{{end}}
+</body>
+
+</html>

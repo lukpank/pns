@@ -201,3 +201,22 @@ table.login {
     background-color: #fff59d;
     padding: 10px 30px 10px 30px;
 }
+
+pre.diff {
+    background-color: #fafafa;
+    padding: 0 10px 0 10px;
+}
+
+.ins {
+    background-color: #ddffdd;
+    color: #22aa22;
+}
+
+.del {
+    background-color: #ffdddd;
+    color: #aa2222;
+}
+
+.context {
+    color: #7f7f7f
+}

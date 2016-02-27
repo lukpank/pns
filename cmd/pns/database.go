@@ -268,6 +268,15 @@ func int64sAsEmptyInterface(input []int64) (output []interface{}) {
 	return
 }
 
+// NoteText returns text of the note with the given ID
+func (db *DB) NoteText(id int64) (string, error) {
+	var note string
+	if err := db.db.QueryRow("SELECT note FROM notes WHERE rowid=?", id).Scan(&note); err != nil {
+		return "", err
+	}
+	return note, nil
+}
+
 // Note returns note with the given ID
 func (db *DB) Note(id int64) (*Note, error) {
 	var note string
