@@ -63,7 +63,7 @@ func (n *Notes) TagURL(tag string) string {
 	if s == "/" {
 		s = "/-"
 	}
-	tags := strings.Split(s[:1], "/")
+	tags := strings.Split(s[1:], "/")
 	if strings.HasPrefix(tag, "/") {
 		tags[0] = tag
 		return strings.Join(tags, "/") + q
@@ -238,7 +238,8 @@ type tagURL struct {
 }
 
 // ActiveTagsURLs return active topic (if any), active tags and active
-// Full text search
+// Full text search. The URLs associated with topic, tags and FTS are
+// removing given item from the search.
 func (n *Notes) ActiveTagsURLs() []tagURL {
 	var tagsURLs []tagURL
 	s := n.URL[1:]
@@ -250,18 +251,22 @@ func (n *Notes) ActiveTagsURLs() []tagURL {
 
 	// Topic
 	tags := strings.Split(s, "/")
-	if len(tags) > 1 && tags[0] != "-" {
+	if tags[0] != "" && tags[0] != "-" {
 		if len(tags) > 1 {
 			i := strings.Index(s, "/")
-			tagsURLs = append(tagsURLs, tagURL{tags[0], "/-" + s[i:] + q})
+			tagsURLs = append(tagsURLs, tagURL{"/" + tags[0], "/-" + s[i:] + q})
 		} else {
-			tagsURLs = append(tagsURLs, tagURL{tags[0], "/" + q})
+			tagsURLs = append(tagsURLs, tagURL{"/" + tags[0], "/" + q})
 		}
 	}
 
 	// Tags
-	for i, tag := range tags[1:] {
-		tagsURLs = append(tagsURLs, tagURL{tag, "/" + strings.Join(append(tags[:i+1:i+1], tags[i+2:]...), "/") + q})
+	if len(tags) == 2 && tags[0] == "-" {
+		tagsURLs = append(tagsURLs, tagURL{tags[1], "/" + q})
+	} else {
+		for i, tag := range tags[1:] {
+			tagsURLs = append(tagsURLs, tagURL{tag, "/" + strings.Join(append(tags[:i+1:i+1], tags[i+2:]...), "/") + q})
+		}
 	}
 
 	// Full text search
@@ -269,6 +274,9 @@ func (n *Notes) ActiveTagsURLs() []tagURL {
 		params := strings.Split(q[1:], "&")
 		for i, p := range params {
 			if strings.HasPrefix(p, "q=") {
+				if s == "-" {
+					s = ""
+				}
 				q := strings.Join(append(params[:i], params[i+1:]...), "&")
 				if q != "" {
 					q = "?" + q

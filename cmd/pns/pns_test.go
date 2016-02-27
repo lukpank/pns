@@ -10,6 +10,39 @@ import (
 	"testing"
 )
 
+func TestNotesTagURL(t *testing.T) {
+	tests := []struct {
+		path, tag, expected string
+	}{
+		{"/a", "/a", "/a"},
+		{"/a", "/b", "/b"},
+		{"/-", "/a", "/a"},
+		{"/-/a", "/b", "/b/a"},
+		{"/a/b", "/c", "/c/b"},
+
+		{"/", "a", "/-/a"},
+		{"/-", "a", "/-/a"},
+		{"/a", "b", "/a/b"},
+		{"/a/b", "c", "/a/b/c"},
+
+		{"/a/b", "b", "/a/b"},
+		{"/-/b", "b", "/-/b"},
+		{"/a/b/c", "b", "/a/b/c"},
+		{"/a/b/c", "c", "/a/b/c"},
+	}
+	const q = "?q=z"
+	for _, test := range tests {
+		n := Notes{URL: test.path}
+		if s := n.TagURL(test.tag); s != test.expected {
+			t.Errorf("for (URL=%q, tag=%q) expected %q but got %q", n.URL, test.tag, test.expected, s)
+		}
+		n = Notes{URL: test.path + q}
+		if s := n.TagURL(test.tag); s != test.expected+q {
+			t.Errorf("for (URL=%q, tag=%q) expected %q but got %q", n.URL, test.tag, test.expected+q, s)
+		}
+	}
+}
+
 func TestTagsURL(t *testing.T) {
 	tests := []struct {
 		path, expr, expected string
@@ -100,6 +133,103 @@ func TestParseSearchExpr(t *testing.T) {
 		s := fmt.Sprintf("%s#%s", strings.Join(tokens, "."), fts)
 		if s != test.expected {
 			t.Errorf("for %q expected %q but got %q", test.expr, test.expected, s)
+		}
+	}
+}
+
+func TestNotesActiveTagsURLs(t *testing.T) {
+	tests := []struct {
+		path     string
+		expected []tagURL
+	}{
+		{"/", nil},
+		{"/-", nil},
+		{
+			"/a", []tagURL{
+				{"/a", "/"},
+			},
+		},
+		{
+			"/a/b", []tagURL{
+				{"/a", "/-/b"},
+				{"b", "/a"},
+			},
+		},
+		{
+			"/a/b/c", []tagURL{
+				{"/a", "/-/b/c"},
+				{"b", "/a/c"},
+				{"c", "/a/b"},
+			},
+		},
+		{
+			"/-/b", []tagURL{
+				{"b", "/"},
+			},
+		},
+		{
+			"/-/b/c", []tagURL{
+				{"b", "/-/c"},
+				{"c", "/-/b"},
+			},
+		},
+
+		{
+			"/?q=z", []tagURL{
+				{"'z'", "/"},
+			},
+		},
+		{
+			"/-?q=z", []tagURL{
+				{"'z'", "/"},
+			},
+		},
+		{
+			"/a?q=y+z", []tagURL{
+				{"/a", "/?q=y+z"},
+				{"'y z'", "/a"},
+			},
+		},
+		{
+			"/a/b?q=x&other=y+z", []tagURL{
+				{"/a", "/-/b?q=x&other=y+z"},
+				{"b", "/a?q=x&other=y+z"},
+				{"'x'", "/a/b?other=y+z"},
+			},
+		},
+		{
+			"/a/b/c?q=%22z%22", []tagURL{
+				{"/a", "/-/b/c?q=%22z%22"},
+				{"b", "/a/c?q=%22z%22"},
+				{"c", "/a/b?q=%22z%22"},
+				{`'"z"'`, "/a/b/c"},
+			},
+		},
+		{
+			"/-/b?q=%22z%22&other=x+y", []tagURL{
+				{"b", "/?q=%22z%22&other=x+y"},
+				{`'"z"'`, "/-/b?other=x+y"},
+			},
+		},
+		{
+			"/-/b/c?other=w&q=%22x+y%22+z", []tagURL{
+				{"b", "/-/c?other=w&q=%22x+y%22+z"},
+				{"c", "/-/b?other=w&q=%22x+y%22+z"},
+				{`'"x y" z'`, "/-/b/c?other=w"},
+			},
+		},
+	}
+	for _, test := range tests {
+		n := Notes{URL: test.path}
+		result := n.ActiveTagsURLs()
+		if len(result) != len(test.expected) {
+			t.Errorf("for (%q) expected %d items but got %d items", test.path, len(test.expected), len(result))
+			continue
+		}
+		for i, tagURL := range result {
+			if tagURL.Name != test.expected[i].Name || tagURL.URL != test.expected[i].URL {
+				t.Errorf("for (%q)[%d].Name expected %q but got %q", test.path, i, test.expected[i], tagURL)
+			}
 		}
 	}
 }
