@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -249,20 +250,26 @@ func (s *server) serveEdit(w http.ResponseWriter, r *http.Request) {
 		s.internalError(w, err)
 		return
 	}
+	ntt := append(note.Topics, note.Tags...)
+	s.editPage(w, r, note, strings.Join(ntt, " "), note.sha1sum(), false)
+}
+
+func (s *server) editPage(w http.ResponseWriter, r *http.Request, note *Note, noteTopicsAndTags, sha1sum string, editConflict bool) {
 	topics, tags, err := s.db.TopicsAndTags()
 	if err != nil {
 		s.internalError(w, err)
 		return
 	}
 	tt := append(topics, tags...)
-	ntt := append(note.Topics, note.Tags...)
 	noteEx := struct {
 		*Note
 		TopicsAndTagsComma string
 		NoteTopicsAndTags  string
 		Edit               bool
+		EditConflict       bool
+		SHA1Sum            string
 		Referer            string
-	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), true, r.Header.Get("Referer")}
+	}{note, strings.Join(tt, ", "), noteTopicsAndTags, true, editConflict, sha1sum, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -306,11 +313,13 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 	tags := r.PostForm.Get("tag")
 	switch r.PostForm.Get("action") {
 	case "Preview":
-		s.previewNote(w, text, strings.Fields(tags))
+		s.previewNote(w, r, id, text, strings.Fields(tags))
 	case "Diff":
-		s.diff(w, r, id, text, strings.Fields(tags))
+		s.diff(w, r, id, text, strings.Fields(tags), false)
+	case "DiffConflict":
+		s.diff(w, r, id, text, strings.Fields(tags), true)
 	case "Submit":
-		s.updateNote(w, r, id, text, tags)
+		s.updateNote(w, r, id, text, tags, r.PostForm.Get("sha1sum"))
 	default:
 		http.Error(w, "unsupported action", http.StatusBadRequest)
 	}
@@ -318,8 +327,20 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 
 // previewNote serves preview of a note intended for the iframe
 // element of the edit page.
-func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) {
-	messages, err := s.preSubmitWarnings(tags)
+func (s *server) previewNote(w http.ResponseWriter, r *http.Request, id int64, text string, tags []string) {
+	var dbTags []string
+	if id >= 0 {
+		note, err := s.db.Note(id)
+		if err == sql.ErrNoRows {
+			http.NotFound(w, r)
+			return
+		} else if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dbTags = append(note.Topics, note.Tags...)
+	}
+	messages, err := s.preSubmitWarnings(tags, dbTags, id >= 0)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -331,8 +352,8 @@ func (s *server) previewNote(w http.ResponseWriter, text string, tags []string) 
 	}
 }
 
-func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text string, tags []string) {
-	dbText, err := s.db.NoteText(id)
+func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text string, tags []string, conflict bool) {
+	note, err := s.db.Note(id)
 	if err == sql.ErrNoRows {
 		http.NotFound(w, r)
 		return
@@ -340,12 +361,15 @@ func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text str
 		s.internalError(w, err)
 		return
 	}
-	messages, err := s.preSubmitWarnings(tags)
+	messages, err := s.preSubmitWarnings(tags, append(note.Topics, note.Tags...), true)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	if conflict {
+		messages = append([]string{"Conflicting edits detected. Please join the changes and click submit again when done."}, messages...)
+	}
 	dmp := diffmatchpatch.New()
-	a, b, lines := dmp.DiffLinesToRunes(strings.Replace(dbText, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
+	a, b, lines := dmp.DiffLinesToRunes(strings.Replace(note.Text, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
 	diff := dmp.DiffCharsToLines(dmp.DiffMainRunes(a, b, false), lines)
 	if len(diff) == 1 && diff[0].Type == diffmatchpatch.DiffEqual {
 		messages = append(messages, "No differences found.")
@@ -362,7 +386,7 @@ func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text str
 	}
 }
 
-func (s *server) preSubmitWarnings(tags []string) ([]string, error) {
+func (s *server) preSubmitWarnings(tags, dbTags []string, edit bool) ([]string, error) {
 	var messages []string
 	hasTopic := false
 	for _, s := range tags {
@@ -384,14 +408,60 @@ func (s *server) preSubmitWarnings(tags []string) ([]string, error) {
 			messages = append(messages, fmt.Sprintf(`Note that the following tags/topics are new: "%s".`, newStr))
 		}
 	}
+	if edit {
+		added, removed := addedRemoved(dbTags, tags)
+		if len(added) > 0 {
+			s := strings.Join(added, `" and "`)
+			messages = append(messages, fmt.Sprintf(`You are adding the following tags/topics: "%s".`, s))
+		}
+		if len(removed) > 0 {
+			s := strings.Join(removed, `" and "`)
+			messages = append(messages, fmt.Sprintf(`You are removing the following tags/topics: "%s".`, s))
+		}
+	}
 	return messages, nil
 }
 
-func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, text, topicsAndTags string) {
+func addedRemoved(old, new []string) ([]string, []string) {
+	old = append([]string{}, old...)
+	new = append([]string{}, new...)
+	sort.Strings(old)
+	sort.Strings(new)
+	var added, removed []string
+	i := 0
+	j := 0
+	for i < len(old) && j < len(new) {
+		switch {
+		case old[i] == new[j]:
+			i++
+			j++
+		case old[i] < new[j]:
+			removed = append(removed, old[i])
+			i++
+		default:
+			added = append(added, new[j])
+			j++
+		}
+	}
+	for i < len(old) {
+		removed = append(removed, old[i])
+		i++
+	}
+	for j < len(new) {
+		added = append(added, new[j])
+		j++
+	}
+	return added, removed
+}
+
+func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, text, topicsAndTags, sha1sum string) {
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
-	err := s.db.updateNote(id, text, append(topics, tags...))
+	err := s.db.updateNote(id, text, append(topics, tags...), sha1sum)
 	if err == ErrNoTags {
 		s.error(w, "Error", "Please specify at least one topic or tag.", http.StatusBadRequest)
+		return
+	} else if e, ok := err.(*EditConflictError); ok {
+		s.editPage(w, r, &Note{ID: id, Text: text}, topicsAndTags, e.SHA1Sum, true)
 		return
 	} else if err != nil {
 		s.internalError(w, err)
@@ -413,8 +483,9 @@ func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 		TopicsAndTagsComma string
 		NoteTopicsAndTags  string
 		Edit               bool
+		EditConflict       bool
 		Referer            string
-	}{"", strings.Join(tt, ", "), "", false, r.Header.Get("Referer")}
+	}{"", strings.Join(tt, ", "), "", false, false, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -432,7 +503,7 @@ func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
 	tags := r.PostForm.Get("tag")
 	switch r.PostForm.Get("action") {
 	case "Preview":
-		s.previewNote(w, text, strings.Fields(tags))
+		s.previewNote(w, r, -1, text, strings.Fields(tags))
 	case "Submit":
 		s.addNote(w, r, text, tags)
 	default:

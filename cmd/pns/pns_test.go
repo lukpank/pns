@@ -250,3 +250,26 @@ func TestNotesSep(t *testing.T) {
 		}
 	}
 }
+
+func TestAddedRemoved(t *testing.T) {
+	tests := []struct {
+		old, new, added, removed string
+	}{
+		{"a c b", "", "", "a b c"},
+		{"", "a c b", "a b c", ""},
+		{"a", "b", "b", "a"},
+		{"a c b", "b c a", "", ""},
+		{"a c b", "b c a y x", "x y", ""},
+		{"a c b y x", "b c a", "", "x y"},
+		{"a b c d e f", "d x b e y", "x y", "a c f"},
+	}
+	for _, test := range tests {
+		added, removed := addedRemoved(strings.Fields(test.old), strings.Fields(test.new))
+		if s := strings.Join(added, " "); s != test.added {
+			t.Errorf("for (%q, %q) expected added=%q but got %q", test.old, test.new, test.added, s)
+		}
+		if s := strings.Join(removed, " "); s != test.removed {
+			t.Errorf("for (%q, %q) expected added=%q but got %q", test.old, test.new, test.removed, s)
+		}
+	}
+}

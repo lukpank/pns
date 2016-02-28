@@ -268,15 +268,6 @@ func int64sAsEmptyInterface(input []int64) (output []interface{}) {
 	return
 }
 
-// NoteText returns text of the note with the given ID
-func (db *DB) NoteText(id int64) (string, error) {
-	var note string
-	if err := db.db.QueryRow("SELECT note FROM notes WHERE rowid=?", id).Scan(&note); err != nil {
-		return "", err
-	}
-	return note, nil
-}
-
 // Note returns note with the given ID
 func (db *DB) Note(id int64) (*Note, error) {
 	var note string
@@ -605,13 +596,23 @@ func (db *DB) tagsToIDsMayInsert(tx *sql.Tx, tags []string) ([]int64, error) {
 	return ids, nil
 }
 
-func (db *DB) updateNote(noteID int64, text string, tags []string) (err error) {
+func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum string) (err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return err
 	}
 	done := false
 	defer commitOrRollback(tx, &done, &err)
+
+	// 0. Check sha1sum matches db record
+	if note, err := db.Note(noteID); err != nil {
+		return err
+	} else {
+		dbSHA1Sum := note.sha1sum()
+		if dbSHA1Sum != sha1sum {
+			return &EditConflictError{dbSHA1Sum}
+		}
+	}
 
 	// 1. Update note.
 	now := time.Now()
@@ -735,6 +736,14 @@ type NoTagsError []string
 
 func (e NoTagsError) Error() string {
 	return "no such tags: " + strings.Join(e, ", ")
+}
+
+type EditConflictError struct {
+	SHA1Sum string // sha1sum of note in the DB
+}
+
+func (e *EditConflictError) Error() string {
+	return "conflicting edit detected"
 }
 
 // questionMarks returns cnt comma separated question marks to be used

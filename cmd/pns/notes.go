@@ -6,6 +6,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io"
@@ -322,6 +324,13 @@ func tagsFromNotes(notes []*Note) []string {
 	}
 	sort.Strings(tags)
 	return tags
+}
+
+func (n *Note) sha1sum() string {
+	k := len(n.Topics)
+	tags := strings.Join(append(n.Topics[:k:k], n.Tags...), " ")
+	h := sha1.Sum([]byte(tags + "\x00" + n.Text))
+	return hex.EncodeToString(h[:])
 }
 
 func (n *Note) WriteTo(w io.Writer) (int64, error) {

@@ -15,6 +15,10 @@ referer = {{.Referer}};
 
 function setup() {
 	newAwesomplete(null);
+{{if .EditConflict}}
+	setTargetAndAction('preview', 'DiffConflict');
+	document.getElementById("form").submit();
+{{end}}
 }
 </script>
 </head>
@@ -22,6 +26,7 @@ function setup() {
 <body onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 <input type="hidden" name="action" id="action" value="Preview">
+{{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
 <div class="topbar">
 <div class="topbar-left">
@@ -46,7 +51,7 @@ function setup() {
 
 <div class="content">
 <textarea name="text" id="text">{{.Text}}</textarea>
-<iframe name="preview" src="{{if .Edit}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
+<iframe name="preview" src="{{if and .Edit (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
 </form>
