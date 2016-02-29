@@ -44,6 +44,7 @@ function setup() {
 <div class="awesomplete">
 <input type="text" name="tag" id="tag" placeholder="Add tag(s)" class="taginput"
        data-multiple autofocus></input>
+{{with .FTSQuery}}<input type="hidden" name="q" value="{{.}}">{{end}}
 </div>
 </form>
 </li>

@@ -31,12 +31,17 @@ func TestNotesTagURL(t *testing.T) {
 		{"/a/b/c", "c", "/a/b/c"},
 	}
 	const q = "?q=z"
+	const q2 = "?q=z&start=100"
 	for _, test := range tests {
 		n := Notes{URL: test.path}
 		if s := n.TagURL(test.tag); s != test.expected {
 			t.Errorf("for (URL=%q, tag=%q) expected %q but got %q", n.URL, test.tag, test.expected, s)
 		}
 		n = Notes{URL: test.path + q}
+		if s := n.TagURL(test.tag); s != test.expected+q {
+			t.Errorf("for (URL=%q, tag=%q) expected %q but got %q", n.URL, test.tag, test.expected+q, s)
+		}
+		n = Notes{URL: test.path + q2}
 		if s := n.TagURL(test.tag); s != test.expected+q {
 			t.Errorf("for (URL=%q, tag=%q) expected %q but got %q", n.URL, test.tag, test.expected+q, s)
 		}
@@ -87,9 +92,20 @@ func TestTagsURL(t *testing.T) {
 		{"/a/b", "+ c 'd e' f", "/a/b/c/f?q=d+e"},
 	}
 	for _, test := range tests {
-		if s := tagsURL(test.path, test.expr); s != test.expected {
+		if s := tagsURL(test.path, test.expr, ""); s != test.expected {
 			t.Errorf("for (%q, %q) expected %q but got %q", test.path, test.expr, test.expected, s)
 		}
+		if strings.IndexByte(test.expected, '?') >= 0 {
+			if s := tagsURL(test.path, test.expr, `"z"`); s != test.expected {
+				t.Errorf("for (%q, %q) expected %q but got %q", test.path, test.expr, test.expected, s)
+			}
+		} else {
+			expected := test.expected + "?q=%22z%22"
+			if s := tagsURL(test.path, test.expr, `"z"`); s != expected {
+				t.Errorf("for (%q, %q) expected %q but got %q", test.path, test.expr, expected, s)
+			}
+		}
+
 	}
 }
 
@@ -191,10 +207,10 @@ func TestNotesActiveTagsURLs(t *testing.T) {
 			},
 		},
 		{
-			"/a/b?q=x&other=y+z", []tagURL{
-				{"/a", "/-/b?q=x&other=y+z"},
-				{"b", "/a?q=x&other=y+z"},
-				{"'x'", "/a/b?other=y+z"},
+			"/a/b?q=x&other=y+z&start=100", []tagURL{
+				{"/a", "/-/b?q=x"},
+				{"b", "/a?q=x"},
+				{"'x'", "/a/b"},
 			},
 		},
 		{
@@ -206,16 +222,16 @@ func TestNotesActiveTagsURLs(t *testing.T) {
 			},
 		},
 		{
-			"/-/b?q=%22z%22&other=x+y", []tagURL{
-				{"b", "/?q=%22z%22&other=x+y"},
-				{`'"z"'`, "/-/b?other=x+y"},
+			"/-/b?start=100&q=%22z%22&other=x+y", []tagURL{
+				{"b", "/?q=%22z%22"},
+				{`'"z"'`, "/-/b"},
 			},
 		},
 		{
-			"/-/b/c?other=w&q=%22x+y%22+z", []tagURL{
-				{"b", "/-/c?other=w&q=%22x+y%22+z"},
-				{"c", "/-/b?other=w&q=%22x+y%22+z"},
-				{`'"x y" z'`, "/-/b/c?other=w"},
+			"/-/b/c?other=w&start=100&q=%22x+y%22+z", []tagURL{
+				{"b", "/-/c?q=%22x+y%22+z"},
+				{"c", "/-/b?q=%22x+y%22+z"},
+				{`'"x y" z'`, "/-/b/c"},
 			},
 		},
 	}

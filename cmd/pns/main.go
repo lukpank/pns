@@ -175,7 +175,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	tags := strings.Split(path, "/")
 	r.ParseForm()
 	if tag := r.Form.Get("tag"); tag != "" {
-		http.Redirect(w, r, tagsURL(path, tag), http.StatusMovedPermanently)
+		http.Redirect(w, r, tagsURL(path, tag, r.Form.Get("q")), http.StatusMovedPermanently)
 		return
 	}
 	var (

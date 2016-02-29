@@ -59,7 +59,7 @@ func (n *Notes) TagURL(tag string) string {
 	s := n.URL
 	q := ""
 	if i := strings.IndexByte(s, '?'); i >= 0 {
-		q = s[i:]
+		q = qParam(s[i:])
 		s = s[:i]
 	}
 	if s == "/" {
@@ -72,18 +72,34 @@ func (n *Notes) TagURL(tag string) string {
 	} else {
 		for _, t := range tags[1:] {
 			if tag == t {
-				return n.URL
+				return s + q
 			}
 		}
 		return s + "/" + tag + q
 	}
 }
 
+// FTSQuery returns the unescaped value of FTS query parameter (named
+// `q`) from a query string or empty string if not found or unescaping
+// failed. Used in layout HTML template to initialize hidden form
+// parameter `q` to keep FTS query if new tags are added through the
+// submit of input field.
+func (n *Notes) FTSQuery() string {
+	if i := strings.IndexByte(n.URL, '?'); i >= 0 {
+		if q := qParam(n.URL[i:]); q != "" {
+			if u, err := url.QueryUnescape(q[3:]); err == nil {
+				return u
+			}
+		}
+	}
+	return ""
+}
+
 var spacePlusMinus = regexp.MustCompile(`\s*[+-]`)
 
 // tagsURL returns destination URL from a given base URL and
 // expression specifying added and removed tags.
-func tagsURL(path, expr string) string {
+func tagsURL(path, expr, ftsQuery string) string {
 	loc := spacePlusMinus.FindStringIndex(expr)
 	if loc != nil {
 		if expr[loc[1]-1] == '+' {
@@ -94,7 +110,7 @@ func tagsURL(path, expr string) string {
 	} else {
 		path = "/"
 	}
-	newTags, fts := parseSearchExpr(expr)
+	newTags, newFTSQuery := parseSearchExpr(expr)
 	tags := strings.Split(path[1:], "/")
 	tags[0] = "/" + tags[0]
 	for _, tag := range newTags {
@@ -114,8 +130,10 @@ func tagsURL(path, expr string) string {
 		tags[0] = "/-"
 	}
 	path = strings.Join(tags, "/")
-	if fts != "" {
-		return path + "?q=" + url.QueryEscape(fts)
+	if newFTSQuery != "" {
+		return path + "?q=" + url.QueryEscape(newFTSQuery)
+	} else if ftsQuery != "" {
+		return path + "?q=" + url.QueryEscape(ftsQuery)
 	}
 	return path
 }
@@ -247,7 +265,7 @@ func (n *Notes) ActiveTagsURLs() []tagURL {
 	s := n.URL[1:]
 	q := ""
 	if i := strings.IndexByte(s, '?'); i >= 0 {
-		q = s[i:]
+		q = qParam(s[i:])
 		s = s[:i]
 	}
 
@@ -273,27 +291,29 @@ func (n *Notes) ActiveTagsURLs() []tagURL {
 
 	// Full text search
 	if len(q) > 1 {
-		params := strings.Split(q[1:], "&")
-		for i, p := range params {
-			if strings.HasPrefix(p, "q=") {
-				if s == "-" {
-					s = ""
-				}
-				q := strings.Join(append(params[:i], params[i+1:]...), "&")
-				if q != "" {
-					q = "?" + q
-				}
-				u, err := url.QueryUnescape(p[2:])
-				if err != nil {
-					u = p[2:]
-				}
-				tagsURLs = append(tagsURLs, tagURL{fmt.Sprintf("'%s'", u), "/" + s + q})
-				break
-			}
+		if s == "-" {
+			s = ""
 		}
+		u, err := url.QueryUnescape(q[3:])
+		if err != nil {
+			u = q[3:]
+		}
+		tagsURLs = append(tagsURLs, tagURL{fmt.Sprintf("'%s'", u), "/" + s})
 	}
 
 	return tagsURLs
+}
+
+func qParam(q string) string {
+	if q == "" {
+		return ""
+	}
+	for _, p := range strings.Split(q[1:], "&") {
+		if strings.HasPrefix(p, "q=") {
+			return "?" + p
+		}
+	}
+	return ""
 }
 
 func (n *Notes) Render(note *Note) (template.HTML, error) {
