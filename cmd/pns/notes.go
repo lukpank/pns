@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -33,6 +34,8 @@ type Notes struct {
 	isHTML        bool
 	Messages      []string
 	Count         int
+	Start         int
+	More          bool
 }
 
 type Note struct {
@@ -314,6 +317,33 @@ func qParam(q string) string {
 		}
 	}
 	return ""
+}
+
+func (n *Notes) PrevPage() string {
+	return n.incStart(-queryLimit)
+}
+
+func (n *Notes) NextPage() string {
+	return n.incStart(queryLimit)
+}
+
+func (n *Notes) incStart(inc int) string {
+	s := n.URL
+	q := ""
+	if i := strings.IndexByte(s, '?'); i >= 0 {
+		q = qParam(s[i:])
+		s = s[:i]
+	}
+	var v string
+	k := n.Start + inc
+	if k > 0 {
+		v = strconv.Itoa(k)
+		if q == "" {
+			return s + "?start=" + v
+		}
+		return s + q + "&start=" + v
+	}
+	return s + q
 }
 
 func (n *Notes) Render(note *Note) (template.HTML, error) {

@@ -109,7 +109,7 @@ func main() {
 			notes, err = db.AllNotes()
 		} else {
 			tags := strings.Split(*exportPath, "/")
-			notes, err = db.Notes("/"+tags[1], tags[2:], "", false)
+			notes, err = db.Notes("/"+tags[1], tags[2:], "", 0, false)
 		}
 		if err == nil {
 			err = export(w, notes)
@@ -186,10 +186,20 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		availableTags []string
 		isHTML        = false
 		count         = 0
+		start         = 0
+		more          = false
 	)
 	if path == "/" || path == "/-" || path == "/-/" {
 		if q := r.Form.Get("q"); q != "" {
-			notes, err = s.db.FTS(q)
+			start, err = strconv.Atoi(r.Form.Get("start"))
+			if err != nil {
+				start = 0
+			}
+			notes, err = s.db.FTS(q, start)
+			if len(notes) > queryLimit {
+				more = true
+				notes = notes[:queryLimit]
+			}
 			count = len(notes)
 		} else {
 			notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
@@ -198,7 +208,15 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		activeTags = make([]string, 0)
 	} else {
-		notes, err = s.db.Notes("/"+tags[1], tags[2:], r.Form.Get("q"), true)
+		start, err = strconv.Atoi(r.Form.Get("start"))
+		if err != nil {
+			start = 0
+		}
+		notes, err = s.db.Notes("/"+tags[1], tags[2:], r.Form.Get("q"), start, true)
+		if len(notes) > queryLimit {
+			more = true
+			notes = notes[:queryLimit]
+		}
 		count = len(notes)
 		availableTags = tagsFromNotes(notes)
 		if availableTags == nil {
@@ -229,7 +247,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.RawQuery != "" {
 		path += "?" + r.URL.RawQuery
 	}
-	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil, count})
+	err = s.t.ExecuteTemplate(w, "layout.html", &Notes{path, notes, s.md, allTags, activeTags, availableTags, isHTML, nil, count, start, more})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -532,7 +550,7 @@ func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 	var b bytes.Buffer
 	errorTemplate.Execute(&b, &struct{ Title, Text string }{title, text})
 	n := &Note{Text: b.String(), NoFooter: true}
-	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, []string{}, []string{}, true, nil, 0})
+	err := s.t.ExecuteTemplate(w, "layout.html", &Notes{"/", []*Note{n}, s.md, []string{}, []string{}, []string{}, true, nil, 0, 0, false})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

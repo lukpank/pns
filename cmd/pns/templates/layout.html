@@ -35,6 +35,8 @@ function setup() {
 <li><a href="{{.URL}}">{{.Name}}</a></li>
 {{end}}
 {{with .Count}}<li><span class="topbar-count">({{.}})</span></li>{{end}}
+{{if gt .Start 0}}<li><a class="green" href="{{.PrevPage}}">&lt;</a></li>{{end}}
+{{if .More}}<li><a class="green" href="{{.NextPage}}">&gt;</a></li>{{end}}
 </ul>
 </div>
 <div class="topbar-right">

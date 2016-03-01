@@ -250,6 +250,42 @@ func TestNotesActiveTagsURLs(t *testing.T) {
 	}
 }
 
+func TestNotesIncStart(t *testing.T) {
+	tests := []struct {
+		path       string
+		start, inc int
+		expected   string
+	}{
+		{"/a", 0, 100, "/a?start=100"},
+		{"/a", 10, 100, "/a?start=110"},
+		{"/a?start=10", 10, 100, "/a?start=110"},
+		{"/a", 0, -1, "/a"},
+		{"/a", 30, -100, "/a"},
+		{"/a?start=30", 30, -100, "/a"},
+
+		{"/a?q=%22z%22", 0, 100, "/a?q=%22z%22&start=100"},
+		{"/a?q=%22z%22", 10, 100, "/a?q=%22z%22&start=110"},
+		{"/a?q=%22z%22&start=10", 10, 100, "/a?q=%22z%22&start=110"},
+		{"/a?q=%22z%22", 0, -1, "/a?q=%22z%22"},
+		{"/a?q=%22z%22", 30, -100, "/a?q=%22z%22"},
+		{"/a?start=30&q=%22z%22", 30, -100, "/a?q=%22z%22"},
+	}
+	for _, test := range tests {
+		paths := []string{test.path}
+		if strings.IndexByte(test.path, '?') >= 0 {
+			paths = append(paths, test.path+"&other=value", strings.Replace(test.path, "?", "?other=value&", 1))
+		} else {
+			paths = append(paths, test.path+"?other=value")
+		}
+		for _, path := range paths {
+			n := Notes{URL: path, Start: test.start}
+			if s := n.incStart(test.inc); s != test.expected {
+				t.Errorf("for (%q, %d, %d) expected %q but got %q", path, test.start, test.inc, test.expected, s)
+			}
+		}
+	}
+}
+
 func TestNotesSep(t *testing.T) {
 	expected := "******\n"
 	for _, s := range []string{

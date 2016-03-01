@@ -48,6 +48,12 @@ ul.tagbar li a:hover {
     text-decoration: line-through;
 }
 
+ul.tagbar li a.green:hover {
+    background-color: #00c853;
+    text-decoration: none;
+}
+
+
 .topbar-count {
     display: block;
     padding: 15px;

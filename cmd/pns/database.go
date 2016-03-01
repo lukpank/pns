@@ -18,6 +18,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const queryLimit = 100
+
 type DB struct {
 	db *sql.DB
 }
@@ -354,7 +356,7 @@ ORDER BY
 	%s
 `
 
-func (db *DB) Notes(topic string, tags []string, fts string, orderedByCreated bool) (notes []*Note, err error) {
+func (db *DB) Notes(topic string, tags []string, fts string, start int, orderedByCreated bool) (notes []*Note, err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return nil, err
@@ -371,7 +373,7 @@ func (db *DB) Notes(topic string, tags []string, fts string, orderedByCreated bo
 	}
 	var orderedBy string
 	if orderedByCreated {
-		orderedBy = "n.created asc"
+		orderedBy = fmt.Sprintf("n.created asc LIMIT %d OFFSET %d", queryLimit+1, start)
 	} else {
 		orderedBy = "n.rowid asc"
 	}
@@ -402,16 +404,22 @@ func (db *DB) Notes(topic string, tags []string, fts string, orderedByCreated bo
 
 }
 
-const ftsQuery = `
+const ftsQueryFormat = `
 SELECT
 	rowid, note, created, modified
 FROM
 	notes
 WHERE
         rowid in (SELECT rowid FROM ftsnotes WHERE note MATCH ?)
+ORDER BY
+        created
+LIMIT
+	%d
+OFFSET
+	%d
 `
 
-func (db *DB) FTS(q string) ([]*Note, error) {
+func (db *DB) FTS(q string, start int) ([]*Note, error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return nil, err
@@ -419,7 +427,7 @@ func (db *DB) FTS(q string) ([]*Note, error) {
 	done := false
 	defer commitOrRollback(tx, &done, &err)
 
-	rows, err := tx.Query(ftsQuery, q)
+	rows, err := tx.Query(fmt.Sprintf(ftsQueryFormat, queryLimit+1, start), q)
 	if err != nil {
 		return nil, err
 	}
