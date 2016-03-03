@@ -22,7 +22,6 @@ import (
 
 	"github.com/bgentry/speakeasy"
 	"github.com/golang-commonmark/markdown"
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const (
@@ -386,17 +385,15 @@ func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text str
 	if conflict {
 		messages = append([]string{"Conflicting edits detected. Please join the changes and click submit again when done."}, messages...)
 	}
-	dmp := diffmatchpatch.New()
-	a, b, lines := dmp.DiffLinesToRunes(strings.Replace(note.Text, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
-	diff := dmp.DiffCharsToLines(dmp.DiffMainRunes(a, b, false), lines)
-	if len(diff) == 1 && diff[0].Type == diffmatchpatch.DiffEqual {
+	var b bytes.Buffer
+	err = htmlDiff(&b, strings.Replace(note.Text, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
+	if err == NoDifference {
 		messages = append(messages, "No differences found.")
-		diff = nil
 	}
 	data := struct {
-		Diff     []diffmatchpatch.Diff
+		Diff     template.HTML
 		Messages []string
-	}{diff, messages}
+	}{template.HTML(b.String()), messages}
 	err = s.t.ExecuteTemplate(w, "diff.html", &data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

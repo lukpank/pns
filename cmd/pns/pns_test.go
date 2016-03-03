@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -323,5 +324,88 @@ func TestAddedRemoved(t *testing.T) {
 		if s := strings.Join(removed, " "); s != test.removed {
 			t.Errorf("for (%q, %q) expected added=%q but got %q", test.old, test.new, test.removed, s)
 		}
+	}
+}
+
+func TestSplitTokens(t *testing.T) {
+	input := "  aąbc[i++] = test;\nąę"
+	expected := []string{" ", " ", "aąbc", "[", "i", "+", "+", "]", " ", "=", " ", "test", ";", "\n", "ąę"}
+	got := splitTokens(input)
+	if len(got) != len(expected) {
+		t.Errorf("expected %d tokens but got %d", len(expected), len(got))
+	}
+	n := len(expected)
+	if len(got) < n {
+		n = len(got)
+	}
+	for i := 0; i < n; i++ {
+		if got[i] != expected[i] {
+			t.Errorf("got[%d] = %q but expected %q", i, got[i], expected[i])
+		}
+	}
+}
+
+const testOldText = `Test1 delete:
+"Delete" this text.
+
+Test2 insert:
+
+Test3 replace:
+"Delete" what follows: Zażółć gęślą jaźń. Test.
+"Replace": The brown dogs enter into a dense fog.
+
+The end.
+`
+
+const testNewText = `Test1 delete:
+
+Test2 insert:
+"Insert" this text.
+
+Test3 replace:
+"Delete" what follows. Test. Inserted "Za".
+"Replace": The brown "fox" enters into a dense fog.
+
+The end.
+`
+
+const testExpectedDiff = `<div class="context">Test1 delete:
+</div><div class="del">&#34;Delete&#34; this text.
+</div><div class="context">
+Test2 insert:
+</div><div class="ins">&#34;Insert&#34; this text.
+</div><div class="context">
+Test3 replace:
+</div><div class="del">&#34;Delete&#34; what follows<del>: Zażółć gęślą jaźń</del>. Test.
+&#34;Replace&#34;: The brown <del>dogs</del> <del>enter</del> into a dense fog.
+</div><div class="ins">&#34;Delete&#34; what follows. Test.<ins> Inserted &#34;Za&#34;.</ins>
+&#34;Replace&#34;: The brown <ins>&#34;fox&#34;</ins> <ins>enters</ins> into a dense fog.
+</div><div class="context">
+The end.
+</div>`
+
+func TestHtmlDiff(t *testing.T) {
+	var b bytes.Buffer
+	err := htmlDiff(&b, "Test", "Test")
+	if err != NoDifference {
+		t.Error("expected NoDifference")
+	}
+	if b.Len() != 0 {
+		t.Error("expected no data written")
+		b.Reset()
+	}
+	checkHtmlDiff(t, `Test abc`, `Test def`, `<div class="del">Test <del>abc</del></div><div class="ins">Test <ins>def</ins></div>`)
+	checkHtmlDiff(t, testOldText, testNewText, testExpectedDiff)
+}
+
+func checkHtmlDiff(t *testing.T, oldText, newText, expectedDiff string) {
+	var b bytes.Buffer
+	err := htmlDiff(&b, oldText, newText)
+	if err != nil {
+		t.Error("expected no error but got: ", err.Error())
+		return
+	}
+	if b.String() != expectedDiff {
+		t.Errorf(`expected "%s" but got "%s"`, expectedDiff, b.String())
 	}
 }

@@ -14,16 +14,9 @@
 {{end}}
 </div>
 {{end}}
-{{with .Diff}}
-<pre class="diff">{{/*
-*/}}{{range .}}{{/*
-*/}}{{if eq .Type -1}}<div class="del">{{.Text}}</div>{{/*
-*/}}{{else if eq .Type 0}}<div class="context">{{.Text}}</div>{{/*
-*/}}{{else if eq .Type 1}}<div class="ins">{{.Text}}</div>{{/*
-*/}}{{end}}{{/*
-*/}}{{end}}
+<pre class="diff">
+{{.Diff}}
 </pre>
-{{end}}
 </body>
 
 </html>

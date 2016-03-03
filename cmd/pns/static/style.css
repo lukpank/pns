@@ -223,6 +223,16 @@ pre.diff {
     color: #aa2222;
 }
 
+ins {
+    background-color: #cceecc;
+    text-decoration: none;
+}
+
+del {
+    background-color: #eecccc;
+    text-decoration: none;
+}
+
 .context {
     color: #7f7f7f
 }
