@@ -3,7 +3,7 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PNS: {{if .Edit}}Edit note #{{.ID}}{{else}}Add note{{end}}</title>
+<title>PNS: {{if .Edit}}Edit note #{{.ID}}{{else if .Copy}}Adding copy of note #{{.ID}}{{else}}Add note{{end}}</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link type="text/css" rel="stylesheet" href="/_/static/edit.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
@@ -51,7 +51,7 @@ function setup() {
 
 <div class="content">
 <textarea name="text" id="text">{{.Text}}</textarea>
-<iframe name="preview" src="{{if and .Edit (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
+<iframe name="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
 </form>

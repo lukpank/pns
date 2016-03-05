@@ -68,6 +68,12 @@ function noteKeyDown(event) {
 			document.location = "/_/edit/" + n;
 		}
 		return false;
+	} else if (event.keyCode == 67 && (event.altKey || id != "tag")) { // "c" -- copy
+		if (id.substring(0, 4) == "note") {
+			var n = id.substring(4, id.length);
+			document.location = "/_/copy/" + n;
+		}
+		return false;
 	} else if (event.keyCode == 65 && (event.altKey || id != "tag")) { // "a" -- add
 		document.location = "/_/add";
 		return false;

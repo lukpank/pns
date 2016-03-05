@@ -64,6 +64,7 @@ On the pages with notes the following shortcuts are available
 | `Alt+l` | switch between tag editing field and current note (just `l` if not in tag editing field)
 | `Alt+a` | add new note (just `a` will work if tag editing field is not selected; as "Add note" button)
 | `e`     | edit selected note (as "Edit" link)
+| `c`     | copy selected note (as "Copy" link)
 
 
 On the note editing/adding pages the following shortcuts are available

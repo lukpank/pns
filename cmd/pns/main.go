@@ -141,6 +141,7 @@ func main() {
 	http.HandleFunc("/_/edit/submit/", s.authenticate(s.serveEditSubmit))
 	http.HandleFunc("/_/add", s.authenticate(s.serveAdd))
 	http.HandleFunc("/_/add/submit", s.authenticate(s.serveAddSubmit))
+	http.HandleFunc("/_/copy/", s.authenticate(s.serveCopy))
 	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(newDir("static/"))))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
@@ -284,9 +285,10 @@ func (s *server) editPage(w http.ResponseWriter, r *http.Request, note *Note, no
 		NoteTopicsAndTags  string
 		Edit               bool
 		EditConflict       bool
+		Copy               bool
 		SHA1Sum            string
 		Referer            string
-	}{note, strings.Join(tt, ", "), noteTopicsAndTags, true, editConflict, sha1sum, r.Header.Get("Referer")}
+	}{note, strings.Join(tt, ", "), noteTopicsAndTags, true, editConflict, false, sha1sum, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -499,8 +501,47 @@ func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 		NoteTopicsAndTags  string
 		Edit               bool
 		EditConflict       bool
+		Copy               bool
 		Referer            string
-	}{"", strings.Join(tt, ", "), "", false, false, r.Header.Get("Referer")}
+	}{"", strings.Join(tt, ", "), "", false, false, false, r.Header.Get("Referer")}
+	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *server) serveCopy(w http.ResponseWriter, r *http.Request) {
+	id, err := idFromPath(r.URL.Path, "/_/copy/")
+	if err != nil {
+		s.notFound(w, r)
+		return
+	}
+	note, err := s.db.Note(id)
+	if err == sql.ErrNoRows {
+		s.notFound(w, r)
+		return
+	} else if err != nil {
+		s.internalError(w, err)
+		return
+	}
+	ntt := append(note.Topics, note.Tags...)
+
+	topics, tags, err := s.db.TopicsAndTags()
+	if err != nil {
+		s.internalError(w, err)
+		return
+	}
+	tt := append(topics, tags...)
+	noteEx := struct {
+		*Note
+		TopicsAndTagsComma string
+		NoteTopicsAndTags  string
+		Edit               bool
+		EditConflict       bool
+		Copy               bool
+		Referer            string
+	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), false, false, true, r.Header.Get("Referer")}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
