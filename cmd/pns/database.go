@@ -51,8 +51,7 @@ func (db *DB) Init() (err error) {
 	if err != nil {
 		return err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 	_, err = tx.Exec("CREATE TABLE notes(note TEXT, created INTEGER, modified INTEGER)")
 	if err == nil {
 		_, err = tx.Exec("CREATE VIRTUAL TABLE ftsnotes USING fts4(note)")
@@ -75,24 +74,7 @@ func (db *DB) Init() (err error) {
 	if err != nil {
 		return err
 	}
-	done = true
-	return nil
-}
-
-func commitOrRollback(tx *sql.Tx, done *bool, err *error) {
-	var e error
-	if *done {
-		e = tx.Commit()
-	} else {
-		e = tx.Rollback()
-	}
-	if *err != nil {
-		if e != nil {
-			*err = MultiError{*err, e}
-		}
-	} else {
-		*err = e
-	}
+	return tx.Commit()
 }
 
 func (db *DB) Import(notes []*Note) (err error) {
@@ -100,8 +82,7 @@ func (db *DB) Import(notes []*Note) (err error) {
 	if err != nil {
 		return err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	m := make(map[string]int64)
 	for _, n := range notes {
@@ -152,8 +133,7 @@ func (db *DB) Import(notes []*Note) (err error) {
 			}
 		}
 	}
-	done = true
-	return nil
+	return tx.Commit()
 }
 
 func (db *DB) AddUser(login string, password []byte) error {
@@ -291,8 +271,7 @@ func (db *DB) AllNotes() (notes []*Note, err error) {
 	if err != nil {
 		return nil, err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	rows, err := tx.Query("SELECT rowid, note, created, modified FROM notes ORDER BY rowid")
 	if err != nil {
@@ -305,7 +284,9 @@ func (db *DB) AllNotes() (notes []*Note, err error) {
 	for _, n := range notes {
 		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
 	}
-	done = true
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	return notes, nil
 
 }
@@ -361,8 +342,7 @@ func (db *DB) Notes(topic string, tags []string, fts string, start int, orderedB
 	if err != nil {
 		return nil, err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	if topic != "/-" || len(tags) == 0 {
 		tags = append(tags, topic)
@@ -399,7 +379,9 @@ func (db *DB) Notes(topic string, tags []string, fts string, start int, orderedB
 	for _, n := range notes {
 		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
 	}
-	done = true
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	return notes, nil
 
 }
@@ -424,8 +406,7 @@ func (db *DB) FTS(q string, start int) ([]*Note, error) {
 	if err != nil {
 		return nil, err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	rows, err := tx.Query(fmt.Sprintf(ftsQueryFormat, queryLimit+1, start), q)
 	if err != nil {
@@ -438,7 +419,9 @@ func (db *DB) FTS(q string, start int) ([]*Note, error) {
 	for _, n := range notes {
 		n.Topics, n.Tags, err = topicsAndTags(tx, n.ID)
 	}
-	done = true
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	return notes, nil
 }
 
@@ -609,8 +592,7 @@ func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum strin
 	if err != nil {
 		return err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	// 0. Check sha1sum matches db record
 	if note, err := db.Note(noteID); err != nil {
@@ -667,8 +649,7 @@ func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum strin
 		}
 	}
 	if len(newIDs) == 0 {
-		done = true
-		return nil
+		return tx.Commit()
 	}
 
 	// 4. associate new tags with the note
@@ -682,8 +663,7 @@ func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum strin
 		return err
 	}
 
-	done = true
-	return nil
+	return tx.Commit()
 }
 
 func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
@@ -691,8 +671,7 @@ func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
 	if err != nil {
 		return 0, err
 	}
-	done := false
-	defer commitOrRollback(tx, &done, &err)
+	defer tx.Rollback()
 
 	// 1. Update note.
 	now := time.Now()
@@ -726,7 +705,9 @@ func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
 		return 0, err
 	}
 
-	done = true
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
 	return
 }
 
