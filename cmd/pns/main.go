@@ -224,7 +224,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		activeTags = append([]string{"/" + tags[1]}, tags[2:]...)
 	}
-	if allTags == nil {
+	if allTags == nil && err == nil {
 		var topics, tags []string
 		topics, tags, err = s.db.TopicsAndTags()
 		allTags = append(topics, tags...)
