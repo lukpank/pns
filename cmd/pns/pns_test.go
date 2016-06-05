@@ -409,3 +409,24 @@ func checkHtmlDiff(t *testing.T, oldText, newText, expectedDiff string) {
 		t.Errorf(`expected "%s" but got "%s"`, expectedDiff, b.String())
 	}
 }
+
+func TestIdToGitName(t *testing.T) {
+	tests := []struct {
+		input    int64
+		expected string
+	}{
+		{1, "00/01.md"},
+		{12, "00/12.md"},
+		{123, "01/23.md"},
+		{1234, "12/34.md"},
+		{12345, "01/23/45.md"},
+		{123456, "12/34/56.md"},
+		{1234567, "01/23/45/67.md"},
+		{12345678, "12/34/56/78.md"},
+	}
+	for _, test := range tests {
+		if got := idToGitName(test.input); got != test.expected {
+			t.Errorf("idToGitName(%d) = %q but expected %q", test.input, got, test.expected)
+		}
+	}
+}

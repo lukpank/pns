@@ -42,6 +42,7 @@ var (
 	keyFile    = flag.String("https_key", "", "HTTPS server private key file")
 	hostname   = flag.String("host", "", "reject requests with host other than this")
 	version    = flag.Bool("v", false, "show program version")
+	update     = flag.String("update", "", `update database (argument may be "git" or "nogit")`)
 
 	Version = "pns-0.1-(REV?)"
 )
@@ -116,6 +117,21 @@ func main() {
 		if err != nil {
 			log.Fatal("failed to export: ", err)
 		}
+	}
+	if *update != "" {
+		var git bool
+		switch *update {
+		case "git":
+			git = true
+		case "nogit":
+			git = false
+		default:
+			log.Fatal(`value of option -update must be either "git" or "nogit"`)
+		}
+		if err := updateDB(db, *dbFileName, git); err != nil {
+			log.Fatal("failed to update: ", err)
+		}
+		return
 	}
 	if *dbInit || *importFrom != "" || *dbAddUser != "" || *exportPath != "" {
 		return
