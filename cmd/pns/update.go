@@ -6,14 +6,18 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func updateDB(db *DB, filename string, git bool) error {
-	if !git {
+const maxInt = int(^uint(0) >> 1)
+
+func updateDB(db *DB, filename string, useGit bool) error {
+	if !useGit {
 		return nil
 	}
 	notes, err := db.AllNotes()
@@ -24,22 +28,50 @@ func updateDB(db *DB, filename string, git bool) error {
 	if err := g.Init(); err != nil {
 		return err
 	}
+	ref, first, err := g.getHEAD()
+	if err != nil {
+		return err
+	}
+	if !first {
+		return errors.New("git: unexpected commits in fresh created repository")
+	}
+
 	var b bytes.Buffer
+	var parent SHA1
 	p := NewProgress(len(notes))
 	for i, n := range notes {
 		tags := strings.Join(append(n.Topics, n.Tags...), " ")
 		b.Reset()
 		fmt.Fprintf(&b, "%s\n%s\n\n%s", tags, n.Created.Format(timeLayout), n.Text)
-		name := idToGitName(n.ID)
-		if err := g.Add(name, b.Bytes()); err != nil {
+
+		h, err := g.hashObject(objectBlob, b.Bytes())
+		if err != nil {
 			return err
 		}
-		if err := g.Commit(strconv.FormatInt(n.ID, 10), n.Modified); err != nil {
+		if n.ID < 0 {
+			return fmt.Errorf("unsupported ID=%d, is negative", n.ID)
+		}
+		if n.ID > int64(maxInt) {
+			return fmt.Errorf("unsupported, ID=%d exceeds size of int", n.ID)
+		}
+		g.addToIndex(idToGitName(n.ID), h)
+		h, err = g.addWriteTree(int(n.ID), h)
+		if err != nil {
+			return err
+		}
+		parent, err = g.writeCommit(int(n.ID), h, parent, n.Modified)
+		if err != nil {
 			return err
 		}
 		if i%5000 == 4999 || i == len(notes)-1 {
+			if err := g.updateRef(ref, hex.EncodeToString(parent[:])); err != nil {
+				return err
+			}
+			if err := g.updateIndex(); err != nil {
+				return err
+			}
 			os.Stderr.WriteString("\n")
-			if err = g.GC(); err != nil {
+			if err := g.GC(); err != nil {
 				return err
 			}
 		}
