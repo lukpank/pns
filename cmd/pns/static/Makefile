@@ -4,6 +4,7 @@ COMPONENTS = \
 	components/input.css \
 	components/menu.css \
 	components/message.css \
+	components/segment.css \
 	components/site.css \
 	components/reset.css
 

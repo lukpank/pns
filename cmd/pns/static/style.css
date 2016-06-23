@@ -136,14 +136,10 @@ pre {
 }
 
 div.login {
-    background-color: #ffffff;
     position: absolute;
     bottom: 50%;
     right: 50%;
     transform: translate(50%,50%);
-    border: solid 1px #e0e0e0;
-    border-radius: 5px;
-    padding: 1em 2em 1em 2em;
 }
 
 .R {

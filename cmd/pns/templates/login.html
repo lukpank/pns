@@ -20,7 +20,8 @@ Note to login you need to have
 
 <form action="/_/login" method="post">
 <div class="login">
-<div class="ui form{{if .Message}} error{{end}}">
+
+<div class="ui form {{if .Message}} top attached fluid{{end}} segment">
 
 <div class="field">
 <label for="login">Login</label>
@@ -32,14 +33,15 @@ Note to login you need to have
 <input class="ui input" type="password" name="password">
 </div>
 
-{{with .Message}}
-<div class="ui error message"><p>{{.}}</p></div>
-{{end}}
-
 <input type="hidden" name="redirect" value="{{.Redirect}}">
-<input class="ui submit button" type="submit" value="Submit">
+<input class="ui blue submit button" type="submit" value="Submit">
 
 </div>
+
+{{with .Message}}
+<div class="ui bottom attached error message"><p>{{.}}</p></div>
+{{end}}
+
 </div>
 </form>
 
