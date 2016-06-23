@@ -27,7 +27,7 @@ function setup() {
 <body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form class="edit" action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 
-<div class="ui borderless menu">
+<div class="ui borderless top fixed menu">
 <div class="left item">
 <div class="small ui input">
 <input type="text" name="tag" id="tag" placeholder="Topics and tags" class="taginput"
