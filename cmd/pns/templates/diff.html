@@ -6,9 +6,9 @@
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 </head>
 
-<body>
+<body class="diff">
 {{if .Messages}}
-<div class="messages">
+<div class="ui warning message">
 {{range .Messages}}
 <p>{{.}}</p>
 {{end}}

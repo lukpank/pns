@@ -50,7 +50,7 @@ function setup() {
 {{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
 <div class="content">
-<textarea name="text" id="text">{{.Text}}</textarea>
+<textarea class="edit" name="text" id="text">{{.Text}}</textarea>
 <iframe name="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
