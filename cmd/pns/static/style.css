@@ -3,91 +3,47 @@
  * license. See LICENSE file for details.
  */
 
-body {
+body.body {
     background-color: #fafafa;
-    margin: 0;
-    padding: 0;
 }
 
-.topbar {
-    background-color: #757575;
+.ui.menu {
     position: fixed;
     width: 100%;
-    margin: 0;
+    height: 65px;
 }
 
-.topbar-left {
-    float: left;
-    margin: 0 0 0 10%;
-    padding: 0;
-}
-
-.topbar-right {
-    float: right;
-    margin: 0 10% 0 0;
-    padding-right: -30px;
-}
-
-ul.tagbar {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-ul.tagbar li {
-    float: left;
-}
-
-ul.tagbar li a {
-    display: block;
-    color: white;
-    padding: 15px;
-}
-ul.tagbar li a:hover {
+a.ui.tagbar.button:hover {
     background-color: #dd2c00;
     text-decoration: line-through;
 }
 
-ul.tagbar li a.green:hover {
-    background-color: #00c853;
-    text-decoration: none;
+.left.item {
+    margin-left: 10%;
 }
 
+.right.item {
+    margin-right: 10%;
+}
 
-.topbar-count {
-    display: block;
-    padding: 15px;
-    color: #ffffff;
+.pad-left {
+    padding-left: 1em;
+}
+
+.pad-right {
+    padding-right: 1em;
 }
 
 .topbar-message {
     display: block;
     width: 100%;
     text-align: center;
-    padding: 15px;
-}
-
-.topbar-message {
-    color: #ffffff;
+    padding: 20px;
 }
 
 .topbar-message a, .topbar-message a:visited {
     text-decoration: underline;
-    color: #ffffff;
-}
-
-.taginput {
-    margin: 11px 0 8px 0;
-    padding: 0;
-    width: 20em;
-    height: 20px;
-}
-
-.button {
-    margin: 12px 0 11px 5px;
-    padding: 0 5px 0 5px;
-    height: 25px;
-    font-size: 15px;
+    color: #000000;
 }
 
 .inline {
@@ -96,20 +52,21 @@ ul.tagbar li a.green:hover {
 
 .content {
     width: 80%;
-    padding-top: 60px;
+    padding-top: 80px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .anchor {
     display: block;
-    height: 60px;
-    margin: -60px 0 0 0;
+    height: 80px;
+    margin: -80px 0 0 0;
 }
 
 .note {
+    background-color: #ffffff;
     border: solid 1px #e0e0e0;
-    padding: 0 15px 15px 15px;
+    padding: 10px 15px 15px 15px;
     margin-bottom: 5px;
 }
 

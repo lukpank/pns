@@ -5,6 +5,7 @@
 {{$activeTagsURLs := .ActiveTagsURLs}}
 <title>PNS{{with $activeTagsURLs}}:{{range .}} {{.Name}}{{end}}{{end}}</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
+<link rel="stylesheet" href="/_/static/semantic.css" />
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
@@ -26,42 +27,47 @@ function setup() {
 </script>
 </head>
 
-<body onload="setup();" onkeydown="return noteKeyDown(event);">
+<body class="body" onload="setup();" onkeydown="return noteKeyDown(event);">
 
-<div class="topbar">
-<div class="topbar-left">
-<ul class="tagbar">
+<div class="ui borderless menu">
+
+<div class="left item">
+
+<div class="small ui buttons">
 {{range $activeTagsURLs}}
-<li><a href="{{.URL}}">{{.Name}}</a></li>
+<a class="tagbar ui button" href="{{.URL}}">{{.Name}}</a>
 {{end}}
-{{with .Count}}<li><span class="topbar-count">({{.}})</span></li>{{end}}
-{{if gt .Start 0}}<li><a class="green" href="{{.PrevPage}}">&lt;</a></li>{{end}}
-{{if .More}}<li><a class="green" href="{{.NextPage}}">&gt;</a></li>{{end}}
-</ul>
 </div>
-<div class="topbar-right">
-<ul class="tagbar">
-<li>
+
+{{if .Count}}<span class="pad-left{{if or (gt .Start 0) .More}} pad-right{{end}}">({{.Count}})</span>{{end}}
+
+<div class="small ui buttons">
+{{if gt .Start 0}}<a class="ui button" href="{{.PrevPage}}">&lt;</a>{{end}}
+{{if .More}}<a class="ui button" href="{{.NextPage}}">&gt;</a>{{end}}
+</div>
+
+</div>
+
+<div class="right item">
+
 <form action="{{.URL}}" class="inline">
-<div class="awesomplete">
-<input type="text" name="tag" id="tag" placeholder="Add tag(s)" class="taginput"
+<div class="pad-right small ui input">
+<input type="text" name="tag" id="tag" placeholder="Search..."
        data-multiple autofocus></input>
 {{with .FTSQuery}}<input type="hidden" name="q" value="{{.}}">{{end}}
 </div>
 </form>
-</li>
-<li>
+
 <form action="/_/add" class="inline">
-<input type="submit" value="Add note" class="button"></input>
+<input type="submit" value="Add note" class="small ui button"></input>
 </form>
-</li>
-<li>
+
 <form action="/_/logout{{.URL}}" class="inline">
-<input type="submit" value="Logout" class="button"></input>
+<input type="submit" value="Logout" class="small ui button"></input>
 </form>
-</li>
-</ul>
+
 </div>
+
 </div>
 
 <div class="content">

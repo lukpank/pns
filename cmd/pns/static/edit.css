@@ -2,10 +2,6 @@ html, body, form, .content {
     height: 100%;
 }
 
-.topbar-inner {
-    margin-left: 100px; /* hack: align buttons with textarea and iframe */
-}
-
 input.taginput {
     width: 40em;
 }

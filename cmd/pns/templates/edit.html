@@ -6,6 +6,7 @@
 <title>PNS: {{if .Edit}}Edit note #{{.ID}}{{else if .Copy}}Adding copy of note #{{.ID}}{{else}}Add note{{end}}</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link type="text/css" rel="stylesheet" href="/_/static/edit.css">
+<link rel="stylesheet" href="/_/static/semantic.css" />
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
@@ -23,31 +24,30 @@ function setup() {
 </script>
 </head>
 
-<body onload="setup();" onkeydown="return editKeyDown(event, referer);">
-<form action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
-<input type="hidden" name="action" id="action" value="Preview">
-{{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
+<body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
+<form class="edit" action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 
-<div class="topbar">
-<div class="topbar-left">
-<div class="awesomplete">
+<div class="ui borderless menu">
+<div class="left item">
+<div class="small ui input">
 <input type="text" name="tag" id="tag" placeholder="Topics and tags" class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
 </div>
-<div class="topbar-inner">
-<div class="topbar-right">
-<ul class="tagbar">
-{{with .Referer}}<li><input type="button" value="Cancel" class="button" onclick="location = referer"></input></li>{{end}}
-<li><input type="submit" value="Preview" class="button" onclick="setTargetAndAction('preview', 'Preview')"></input></li>
+<div class="right item">
+<div class="small ui buttons">
+{{with .Referer}}<input type="button" value="Cancel" class="ui button" onclick="location = referer"></input>{{end}}
+<input type="submit" value="Preview" class="ui button" onclick="setTargetAndAction('preview', 'Preview')"></input>
 {{if .Edit}}
-<li><input type="submit" value="Diff" class="button" onclick="setTargetAndAction('preview', 'Diff')"></input></li>
+<input type="submit" value="Diff" class="ui button" onclick="setTargetAndAction('preview', 'Diff')"></input>
 {{end}}
-<li><input type="submit" value="Submit" class="button" onclick="setTargetAndAction('', 'Submit')"></input></li>
-</ul>
+<input type="submit" value="Submit" class="ui button" onclick="setTargetAndAction('', 'Submit')"></input>
 </div>
 </div>
 </div>
+
+<input type="hidden" name="action" id="action" value="Preview">
+{{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
 <div class="content">
 <textarea name="text" id="text">{{.Text}}</textarea>
