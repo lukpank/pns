@@ -5,45 +5,43 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>PNS: Login</title>
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
+<link rel="stylesheet" href="/_/static/semantic.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 </head>
 
-<body>
+<body class="body">
 
-<div class="topbar">
+<div class="ui borderless menu">
 <span class="topbar-message">
 Note to login you need to have
 <a href="https://en.wikipedia.org/wiki/HTTP_cookie">cookies</a> enabled.
 </span>
 </div>
 
-<div class="login">
 <form action="/_/login" method="post">
-<table class="login">
+<div class="login">
+<div class="ui form{{if .Message}} error{{end}}">
 
-<tr>
-<td class="R"><label for="login">Login:</label></td>
-<td><input type="text" name="login" autofocus></td>
-</tr>
-
-<tr>
-<td class="R"><label for="password">Password:</label></td>
-<td><input type="password" name="password"></td>
-</tr>
-
-<tr>
-<td></td>
-<td class="R">
-<input type="hidden" name="redirect" value="{{.Redirect}}">
-<input type="submit" value="Submit">
-</td>
-</tr>
-
-{{with .Message}}<tr><td class="login-message" colspan="2">{{.}}</td></tr>{{end}}
-
-</table>
-</form>
+<div class="field">
+<label for="login">Login</label>
+<input class="ui input" type="text" name="login" autofocus>
 </div>
+
+<div class="field">
+<label for="password">Password</label>
+<input class="ui input" type="password" name="password">
+</div>
+
+{{with .Message}}
+<div class="ui error message"><p>{{.}}</p></div>
+{{end}}
+
+<input type="hidden" name="redirect" value="{{.Redirect}}">
+<input class="ui submit button" type="submit" value="Submit">
+
+</div>
+</div>
+</form>
 
 </body>
 </html>

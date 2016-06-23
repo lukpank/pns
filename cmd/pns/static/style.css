@@ -142,18 +142,8 @@ div.login {
     bottom: 50%;
     right: 50%;
     transform: translate(50%,50%);
-}
-
-table.login {
-     border: solid 1px #e0e0e0;
-     padding: 30px;
-}
-
-.login-message {
-    color: red;
-    text-align: center;
-    height: 30px;
-    vertical-align: bottom;
+    border: solid 1px #e0e0e0;
+    padding: 1em 2em 1em 2em;
 }
 
 .R {
