@@ -1,0 +1,1844 @@
+@ semantic.orig2.css
+@ * # Semantic UI 2.1.7 - Reset
+# Reset
+#### Border-Box
+#### iPad Input Shadows
+# Theme Overrides
+@ normalize.css v3.0.1 | MIT License | git.io/normalize */
+@ normalize.css v3.0.1 | MIT License | git.io/normalize */
+# Site Overrides
+@ * # Semantic UI 2.1.7 - Site
+# Page
+# Headers
+# Text
+## Links
+# Highlighting
+#### Site
+#### Form
+# Global Overrides
+# Site Overrides
+@ * # Semantic UI 2.1.7 - Button
+# Button
+# States
+## Hover
+## Focus
+## Down
+-## Active
+-## Loading
+#### Specificity hack
+-## Disabled
+#### Basic Group With Disabled
+-# Types
+## Animated
+#### Horizontal
+#### Vertical
+#### Fade
+## Inverted
+#### Group
+#### States
+#### Hover
+#### Active / Focus
+#### Active Focus
+## Labeled Button
+#### Tag
+#### Right
+#### Left Side
+## Social
+#### Facebook
+#### Twitter
+#### Google Plus
+#### Linked In
+#### YouTube
+#### Instagram
+#### Pinterest
+#### VK
+## Icon
+# Variations
+-## Floated
+-## Compact
+## Sizes
+-## Icon Only
+-## Basic
+#### Vertical
+#### Standard Basic Inverted
+#### Basic Group
+-## Labeled Icon
+#### Left Labeled
+#### Left Labeled
+#### Right Labeled
+#### Fluid Labeled
+-## Toggle
+#### Toggle (Modifies active state to give affordances)
+-## Circular
+-## Or Buttons
+#### Fluid Or
+-## Attached
+#### Singular
+#### Top / Bottom
+#### Left / Right
+#### Plural
+#### Top / Bottom
+#### Left / Right
+-## Fluid
+#### Fluid Vertical Buttons
+## Colors
+-### Black
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Grey
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Brown
+#### Basic
+#### Inverted
+#### Inverted Basic
+### Blue
+-#### Basic
+-#### Inverted
+-#### Inverted Basic
+-### Green
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Orange
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Pink
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Violet
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Purple
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Red
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Teal
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Olive
+#### Basic
+#### Inverted
+#### Inverted Basic
+-### Yellow
+#### Basic
+#### Inverted
+#### Inverted Basic
+-## Primary
+-## Secondary
+-## Positive
+-## Negative
+# Groups
+-#### Clearfix
+#### Standard Group
+-#### Vertical  Style
+-# Theme Overrides
+-# Site Overrides
+-@ * # Semantic UI 2.1.7 - Container
+# Container
+#### All Sizes
+#### Mobile
+#### Tablet
+#### Small Monitor
+#### Large Monitor
+# Types
+#### Text Container
+#### Fluid
+# Variations
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Divider
+# Divider
+## Basic
+## Coupling
+#### Allow divider between each column row
+## Horizontal
+## Vertical
+#### Inside grid
+## Icon
+# Variations
+## Hidden
+## Inverted
+## Fitted
+## Clearing
+## Section
+## Sizes
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Flag
+# Flag
+#### Sprite
+#### Flag Sprite Based On http://www.famfamfam.com/lab/icons/flags/
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Header
+# Header
+#### Standard
+## Sub Header
+## Icon
+#### With Text Node
+## Image
+## Content
+#### After Image
+#### After Icon
+## Loose Coupling
+#### Positioning
+# Types
+## Page
+#### Sub Header
+## Content Heading
+#### Sub Header
+## Sub Heading
+## Icon
+# States
+# Variations
+## Inverted
+## Colors
+### Red
+#### Inverted
+### Orange
+#### Inverted
+### Olive
+#### Inverted
+### Yellow
+#### Inverted
+### Green
+#### Inverted
+### Teal
+#### Inverted
+### Blue
+#### Inverted
+### Violet
+#### Inverted
+### Purple
+#### Inverted
+### Pink
+#### Inverted
+### Brown
+#### Inverted
+### Grey
+#### Inverted
+## Aligned
+## Floated
+## Fittted
+## Dividing
+## Block
+## Attached
+#### Attached Sizes
+## Sizing
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Icon
+# Icon
+# Types
+## Loading
+# States
+# Variations
+## Fitted
+## Link
+## Circular
+## Flipped
+## Rotated
+## Bordered
+## Inverted
+#### Inverted Shapes
+## Colors
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+## Sizes
+# Groups
+#### Corner Icon
+# 
+# Icons
+#### Web Content
+#### User Actions
+#### Messages
+#### Users
+#### Gender & Sexuality
+#### View Adjustment
+#### Literal Objects
+#### Shapes
+#### Item Selection
+#### Media
+#### Pointers
+#### Computer
+#### File System
+#### Technologies
+#### Rating
+#### Audio
+#### Map, Locations, & Transportation
+#### Tables
+#### Text Editor
+#### Currency
+#### Payment Options
+# Aliases
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Image
+# Image
+# States
+# Variations
+## Inline
+## Vertical Aligned
+## Rounded
+## Bordered
+## Circular
+## Fluid
+## Avatar
+## Spaced
+## Floated
+## Sizes
+# Groups
+# Theme Overrides
+# Site Overrides
+@ * # Semantic UI 2.1.7 - Input
+# Standard
+## Inputs
+## Placeholder
+#### browsers require these rules separate
+# States
+-## Disabled
+## Active
+-## Loading
+## Focus
+-## Error
+#### Error Placeholder
+#### Focused Error Placeholder
+# Variations
+-## Transparent
+#### Transparent Icon
+#### Transparent Inverted
+-## Icon
+#### Left Icon Input
+#### Focus
+-## Labeled
+#### Adjacent Label
+#### Regular Label on Left
+#### Regular Label on Right
+#### Corner Label
+#### Spacing with corner label
+#### Left Labeled
+#### Corner Label Position
+-## Action
+#### Button on Right
+#### Input Focus
+#### Button on Left
+#### Input Focus
+-## Inverted
+#### Standard
+-## Fluid
+## Size
+-# Theme Overrides
+-# Site Overrides
+-@ * # Semantic UI 2.1.7 - Label
+# Label
+#### Link
+#### Inside Link
+#### Image
+#### Icon
+#### Detail
+#### Removable label
+## Group
+## Coupling
+#### Remove border radius on attached segment
+#### Padding on next content after a label
+# Types
+## Tag
+## Corner Label
+#### Icon Label
+#### Left Corner
+#### Segment
+## Ribbon
+#### Positioning
+#### Right Ribbon
+#### Inside Table
+#### Inside Table
+## Attached
+# States
+## Disabled
+## Hover
+## Active
+## Active Hover
+## Visible
+## Hidden
+# Variations
+## Colors
+### Red
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Orange
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Yellow
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Olive
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Green
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Teal
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Blue
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Violet
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Purple
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Pink
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Brown
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Grey
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+### Black
+#### Link
+#### Corner
+#### Ribbon
+#### Basic
+## Basic
+#### Link
+#### Pointing
+## Fluid
+## Inverted
+## Horizontal
+## Circular
+## Pointing
+#### Arrow
+### Above
+### Below
+### Left
+### Right
+#### Basic Pointing
+### Above
+### Below
+### Left
+### Right
+## Floating Label
+## Sizes
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - List
+# List
+# Content
+#### List Item
+#### Child List
+#### Child Item
+#### Icon
+#### Image
+#### Content
+#### Header
+#### Description
+#### Child Link
+#### Linking Item
+#### Linked Item Icons
+#### Header Link
+#### Floated Content
+# Coupling
+# Types
+## Horizontal
+#### Padding on all elements
+#### Horizontal List
+# States
+## Disabled
+## Hover
+# Variations
+## Inverted
+#### Item Link
+#### Linking Content
+## Aligned
+## Link
+#### Inverted
+## Selection
+#### Inverted
+#### Celled / Divided Selection List
+## Animated
+## Fitted
+## Bulleted
+#### Horizontal Bulleted
+## Ordered
+#### Value
+#### Child Lists
+#### Horizontal Ordered
+## Divided
+#### Sub Menu
+#### Divided bulleted
+#### Divided Ordered
+#### Divided Selection
+#### Divided horizontal
+#### Inverted
+## Celled
+#### Padding on all elements
+#### Sub Menu
+#### Celled Bulleted
+#### Celled Ordered
+#### Celled Horizontal
+#### Inverted
+## Relaxed
+#### Very Relaxed
+## Sizes
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Loader
+# Loader
+#### Standard Size
+#### Static Shape
+#### Active Shape
+#### Active Animation
+#### Sizes
+## Coupling
+#### Show inside active dimmer
+#### Black Dimmer
+#### White Dimmer (Inverted)
+# Types
+## Text
+# States
+# Variations
+## Sizes
+#### Loader
+#### Text Loader
+## Inverted
+## Inline
+#### Centered Inline
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Rail
+# Rails
+# Variations
+## Internal
+## Dividing
+## Distance
+## Attached
+## Sizing
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Reveal
+# Reveal
+#### Make sure hovered element is on top of other reveal
+# Types
+## Slide
+## Fade
+## Move
+## Rotate
+# States
+# Variations
+## Visible
+## Instant
+## Sizing
+# Theme Overrides
+# Site Overrides
+@ * # Semantic UI 2.1.7 - Segment
+# Segment
+-#### Vertical
+-## Loose Coupling
+#### Header
+#### Label
+#### Grid
+#### Table
+-# Types
+## Piled
+#### Piled Attached
+## Stacked
+#### Add additional page
+#### Inverted
+## Padded
+## Compact
+#### Compact Group
+## Circular
+## Raised
+-# Groups
+#### Group
+#### Nested Segment
+#### Bottom
+#### Nested Group
+#### Horizontal Group
+#### Nested Horizontal Group
+#### Horizontal Segment
+#### Border Fixes
+-# States
+## Disabled
+## Loading
+# Variations
+-## Basic
+-## Clearing
+-## Colors
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+-## Aligned
+-## Floated
+-## Inverted
+#### Nested
+#### Attached
+-## Emphasis
+#### Secondary
+#### Tertiary
+## Attached
+#### Middle
+#### Top
+#### Bottom
+-# Theme Overrides
+-# Site Overrides
+-@ * # Semantic UI 2.1.7 - Step
+# Plural
+#### First Steps
+#### Last Steps
+# Singular
+#### Arrow
+#### First Step
+#### Last Step
+#### Only Step
+# Content
+#### Title
+#### Description
+#### Icon
+#### Horizontal Icon
+#### Link
+# Types
+## Ordered
+## Vertical
+#### Arrow
+## Responsive
+#### Mobile (Default)
+# States
+#### Link Hover
+#### Link Down
+#### Active
+#### Active Arrow
+#### Active Hover
+#### Completed
+#### Disabled
+# Variations
+## Stackable
+#### Tablet Or Below
+## Fluid
+#### Fluid
+## Attached
+#### Top
+#### Bottom
+## Evenly Divided
+## Sizes
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Breadcrumb
+# Breadcrumb
+# Content
+#### Divider
+#### Link
+#### Icon Divider
+#### Section
+#### Loose Coupling
+# States
+# Variations
+# Theme Overrides
+# Site Overrides
+@ * # Semantic UI 2.1.7 - Form
+# Elements
+## Form
+## Content
+## Field
+## Labels
+## Standard Inputs
+#### Set max height on unusual input
+-#### Text Area
+-## Input w/ attached Button
+-## Basic Select
+-## Dropdown
+#### Block
+#### Inline
+-## UI Input
+#### Block
+#### Inline
+#### Auto Input
+#### Full Width Input
+-## Types of Messages
+#### Assumptions
+-## Validation Prompt
+# States
+-## Autofilled
+#### Focus
+-#### Error
+-## Placeholder
+#### browsers require these rules separate
+#### Error Placeholder
+## Focus
+-## Success
+#### On Form
+-## Warning
+#### On Form
+-## Error
+#### On Form
+#### On Field(s)
+#### Preserve Native Select Stylings
+-## Dropdown Error
+#### Hover
+#### Selected
+#### Active
+-## Checkbox Error
+-## Disabled
+-## Loading
+-# Element Types
+## Required Field
+-# Variations
+## Inverted Colors
+#### Inverted Field
+## Field Groups
+#### Grouped Vertically
+## Fields
+#### Split fields
+#### Other Combinations
+#### Swap to full width on mobile
+#### Sizing Combinations
+#### Swap to full width on mobile
+## Equal Width
+## Inline Fields
+#### Inline Label
+#### Grouped Inline Label
+#### Inline Input
+#### Label
+#### Wide
+## Sizes
+#### Standard
+#### Medium
+#### Large
+#### Huge
+-# Theme Overrides
+-# Site Overrides
+-@ * # Semantic UI 2.1.7 - Grid
+# Standard
+## Remove Gutters
+#### Preserve Rows Spacing on Consecutive Grids
+## Columns
+#### Standard 16 column
+## Rows
+## Columns
+#### Vertical padding when no rows
+## Content
+## Loose Coupling
+#### Collapse Margin on Consecutive Grid
+#### Segment inside Aligned Grid
+#### Align Dividers with Gutter
+#### Remove Border on Last Horizontal Segment
+# Variations
+## Page Grid
+## Column Count
+#### Assume full width with one column
+#### Grid Based
+#### Row Based Overrides
+#### Celled Page
+## Column Width
+#### Sizing Combinations
+## Width per Device
+#### Mobile Sizing Combinations
+#### Tablet Sizing Combinations
+#### Computer/Desktop Sizing Combinations
+#### Large Monitor Sizing Combinations
+#### Widescreen Sizing Combinations
+## Centered
+## Relaxed
+#### Coupling with UI Divider
+## Padded
+## "Floated"
+## Divided
+#### Swap from padding to margin on columns to have dividers align
+#### No divider on first column on row
+#### Divided Row
+#### Vertically Divided
+#### Padded Horizontally Divided
+#### First Row Vertically Divided
+#### Inverted Divided
+#### Relaxed
+## Celled
+#### Internally Celled
+## Vertically Aligned
+#### Top Aligned
+#### Middle Aligned
+#### Bottom Aligned
+#### Stretched
+## Horizontally Centered
+#### Left Aligned
+#### Center Aligned
+#### Right Aligned
+#### Justified
+## Colored
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+## Equal Width
+## Reverse
+#### Mobile
+#### Tablet
+#### Computer
+## Doubling
+#### Tablet Only
+#### Mobily Only
+## Stackable
+## Only (Device)
+#### These include arbitrary class repetitions for forced specificity
+#### Mobile Only Hide
+#### Tablet Only Hide
+#### Computer Only Hide
+#### Large Screen Only Hide
+#### Widescreen Only Hide
+# Theme Overrides
+# Site Overrides
+@ # Semantic - Menu
+# Standard
+## Menu
+-## Sub-Menu
+## Item
+#### Border
+-## Text Content
+-## Icons
+-## Button
+-## Grid / Container
+-## Inputs
+-## Header
+-## Popup
+-## Dropdowns
+#### Dropdown Icon
+#### Menu
+#### Menu Items
+#### Secondary
+#### Pointing
+#### Inverted
+#### Vertical
+#### Evenly Divided
+-## Labels
+-## Images
+-# Coupling
+## Sidebar
+#### Show vertical dividers below last
+## Container
+-# States
+## Hover
+## Pressed
+## Active
+## Active Hover
+## Disabled
+# Types
+## Floated Menu / Item
+#### Left Floated
+#### Right Floated
+-#### Swapped Borders
+-## Vertical
+### Item
+### Label
+### Icon
+### Border
+### Sub Menu
+#### Vertical Active
+-## Tabular
+#### Hover
+#### Active
+#### Coupling with segment for attachment
+#### Bottom Vertical Tabular
+#### Vertical Tabular (Left)
+#### Vertical Right Tabular
+#### Dropdown
+-## Pagination
+#### Active
+-## Secondary
+#### Item
+#### No Divider
+#### Header
+#### Image
+#### Hover
+#### Active
+#### Active Hover
+#### Inverted
+#### Fix item margins
+#### Sub Menu
+-## Secondary Vertical
+#### Sub Menu
+#### Inverted
+-## Secondary Pointing
+#### Item Types
+#### Hover
+#### Pressed
+#### Active
+#### Active Hover
+#### Active Dropdown
+#### Vertical Pointing
+#### Vertical Active
+#### Inverted
+#### Hover
+#### Active
+-## Text Menu
+#### Border
+#### Header
+#### Image
+### fluid text
+### vertical text
+#### Vertical Sub Menu
+### hover
+### active
+### active hover
+#### Disable Bariations
+#### Inverted
+#### Fluid
+-## Icon Only
+#### Vertical Menu
+#### Item
+#### Icon
+#### Icon Gylph
+#### (x) Item Icon
+#### Vertical Icon
+#### Inverted
+-## Labeled Icon
+#### Menu
+#### Item
+#### Icon
+#### Fluid
+# Variations
+-## Stackable
+-## Colors
+### Standard Colors
+-## Inverted
+#### Menu Item
+### Border
+#### Sub Menu
+#### Header
+#### Disabled
+### Hover
+### Pressed
+### Active
+### Active Hover
+-## Floated
+-## Inverted
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+-## Fitted
++## Borderless
+-## Compact
+-## Fluid
+-## Evenly Sized
+## Fixed
+#### Coupling with Grid
+-## Pointing
+#### Active
+#### Don't double up pointers
+#### Colors
+-## Attached
+#### Middle
+#### Top
+#### Bottom
+#### Attached Menu Item
+#### Tabular Attached
+## Sizes
+#### Small
+-#### Medium
+-#### Large
+-#### Huge
+-# Theme Overrides
+-# Site Overrides
+@ * # Semantic UI 2.1.7 - Message
+# Message
+-## Content
+#### Header
+#### Default font size
+#### Paragraph
+#### List
+#### Icon
+#### Close Icon
+#### First / Last Element
+-# Coupling
+-# States
+## Visible
+## Hidden
+# Variations
+-## Compact
+## Attached
+-## Icon
+-## Floating
+-## Colors
+## Types
+-#### Positive
+-#### Negative
+-#### Info
+#### Warning
+#### Error
+-#### Success
+-#### Colors
+-## Sizes
+-# Theme Overrides
+-# Site Overrides
+-@ * # Semantic UI 2.1.7 - Table
+# Table
+#### Prototype
+# Parts
+#### Table Content
+#### Headers
+#### Footer
+#### Table Row
+#### Table Cells
+#### Icons
+#### Table Segment
+#### Responsive
+# Coupling
+#### UI Image
+# Types
+## Complex
+## Definition
+#### Remove Border
+#### Highlight Defining Column
+#### Fix 2nd Column
+# States
+## Positive
+## Negative
+## Error
+## Warning
+## Active
+## Disabled
+# Variations
+## Stackable
+## Text Alignment
+## Vertical Alignment
+## Collapsing
+## Fixed
+## Selectable
+#### Selectable Cell Link
+#### Other States
+## Attached
+#### Middle
+#### Top
+#### Bottom
+## Striped
+#### Table Striping
+#### Stripes
+## Single Line
+## Colors
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+## Column Count
+#### Grid Based
+#### Column Width
+## Sortable
+#### Hover
+#### Sorted
+#### Sorted Hover
+#### Inverted
+## Inverted
+#### Text Color
+#### Definition
+## Collapsing
+## Basic
+#### Very Basic
+## Celled
+## Padded
+#### Very
+## Compact
+#### Very
+## Sizes
+#### Small
+#### Standard
+#### Large
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Ad
+# Advertisement
+## Common
+#### Leaderboard
+#### Medium Rectangle
+#### Large Rectangle
+#### Half Page
+## Square
+#### Square
+#### Small Square
+## Rectangle
+#### Small Rectangle
+#### Vertical Rectangle
+## Button
+## Skyscrapers
+#### Skyscraper
+#### Wide Skyscraper
+## Banners
+#### Banner
+#### Vertical Banner
+#### Top Banner
+#### Half Banner
+## Boards
+#### Leaderboard
+#### Billboard
+## Panorama
+#### Panorama
+## Netboard
+#### Netboard
+## Mobile
+#### Large Mobile Banner
+#### Mobile Leaderboard
+# Types
+#### Mobile Sizes
+# Variations
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Item
+# Standard
+## Card
+## Cards
+#### Clearing
+#### Consecutive Card Groups Preserve Row Spacing
+## Rounded Edges
+## Images
+## Content
+#### Default Header Size
+## Floated Content
+## Aligned
+## Content Image
+## Description
+## Paragraph
+## Meta
+## Links
+#### Generic
+#### Header
+#### Meta
+## Buttons
+## Dimmer
+## Labels
+## 
+#### Icon
+## 
+#### Icon
+## Extra Content
+# Variations
+## Centered
+## Fluid
+## Link
+## Colors
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+## Card Count
+## Doubling
+#### Mobily Only
+#### Tablet Only
+## Stackable
+## Size
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Comment
+# Standard
+## Comments
+## Comment
+## Nested Comments
+## Avatar
+## Content
+#### If there is an avatar move content over
+## Author
+## Metadata
+## Comment Text
+## User Actions
+## Reply Form
+# State
+# Variations
+## Threaded
+## Minimal
+## Sizes
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Feed
+# Activity Feed
+# Content
+#### Event
+#### Event Label
+## Content
+#### Content
+#### Link
+## Date
+## Summary
+#### Summary Image
+## User
+## Inline Date
+#### Date inside Summary
+## Extra Summary
+#### Images
+#### Text
+## Meta
+#### First element
+#### Action
+# Variations
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Item
+# Standard
+## Item
+## Items
+## Item
+## Images
+## Content
+#### Default Header Size
+## Floated
+## Content Image
+## Description
+## Paragraph
+## Meta
+## Links
+#### Generic
+#### Header
+#### Meta
+## Labels
+## 
+#### Icon
+## 
+#### Icon
+## Extra Content
+# Responsive
+#### Default Image Width
+#### Tablet Only
+#### Mobily Only
+# Variations
+## Aligned
+## Relaxed
+## Divided
+#### Relaxed Divided
+## Link
+## Size
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Statistic
+# Statistic
+#### Standalone
+# Group
+#### Grouped
+#### Clearing
+# Content
+## Value
+## Label
+#### Top Label
+#### Bottom Label
+# Types
+## Icon Value
+## Text Value
+## Image Value
+# Variations
+## Count
+## Horizontal
+## Colors
+## Inverted
+## Floated
+## Sizes
+#### Mini
+#### Tiny
+#### Small
+#### Medium
+#### Large
+#### Huge
+# Theme Overrides
+# User Variable Overrides
+-@ * # Semantic UI 2.1.7 - Accordion
+# Accordion
+#### Title
+#### Default Styling
+#### Content
+#### Default Styling
+#### Arrow
+## Coupling
+#### Menu
+#### Header
+# States
+# Types
+## Styled
+#### Content
+#### Hover
+#### Active
+# States
+## Active
+# Variations
+## Fluid
+## Inverted
+# Theme Overrides
+#### Dropdown Icon
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Checkbox
+# Checkbox
+## Content
+#### HTML Checkbox
+## Box
+## Checkmark
+## Label
+#### Inside
+#### Outside
+# States
+## Hover
+## Down
+## Focus
+## Active
+## Indeterminate
+## Active Focus
+## Read-Only
+## Disabled
+## Hidden
+#### Selectable Label
+# Types
+## Radio
+#### Box
+#### Bullet
+#### Radio Checkbox
+#### Focus
+#### Indeterminate
+#### Active
+#### Active Focus
+## Slider
+#### Input
+#### Label
+#### Line
+#### Handle
+#### Focus
+#### Hover
+#### Active
+#### Active Focus
+## Toggle
+#### Input
+#### Label
+#### Switch
+#### Handle
+#### Focus
+#### Hover
+#### Active
+#### Active Focus
+# Variations
+## Fitted
+# Theme Overrides
+#### Checkmark
+#### Checked
+#### Indeterminate
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Dimmer
+# Dimmer
+#### Dimmer Content
+#### Loose Coupling
+# States
+# Variations
+## Page
+## Blurring
+#### Dimmer Color
+## Aligned
+## Inverted
+## Simple
+#### Displays without javascript
+# Theme Overrides
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Dropdown
+# Dropdown
+# Content
+## Menu
+## Hidden Input
+## Dropdown Icon
+## Text
+## Menu Item
+## Floated Content
+## Menu Divider
+## Item Description
+## Message
+## Sub Menu
+#### Hide Arrow
+## Sub Elements
+#### Icons / Flags / Labels / Image
+## Image
+# Coupling
+## Menu
+#### Remove Menu Item Divider
+#### Prevent Menu Item Border
+#### Automatically float dropdown menu right on last menu item
+## Label
+#### Dropdown Menu
+## Button
+#### No Margin On Icon Button
+# Types
+## Selection
+#### Displays like a select box
+#### Compact
+#### Selection Menu
+## Message
+#### Menu Item
+#### Hover
+#### Active
+#### Focus
+#### Visible
+#### Visible Hover
+#### Dropdown Icon
+#### Connecting Border
+## Searchable
+#### Search Selection
+#### Search Dropdown
+#### Text Layering
+#### Search Selection
+#### Active/Visible Search
+#### Filtered Text
+#### Search Menu
+## Multiple
+#### Multiple Selection
+#### Multiple Search Selection
+#### Selection Label
+#### Dropdown Icon
+#### Text
+## Multiple Search
+#### Prompt Text
+#### Search
+## Inline
+# States
+## Active
+#### Menu Item Active
+## Hover
+#### Menu Item Hover
+## Loading
+#### Positioning
+#### Coupling
+## Default Text
+## Loading
+#### Used To Check Position
+## Keyboard Select
+#### Selected Item
+## Search Filtered
+#### Filtered Item
+## Error
+#### Item Hover
+#### Item Active
+## Disabled
+#### Disabled
+# Variations
+## Direction
+#### Flyout Direction
+#### Default Side (Right)
+#### Left Flyout Menu
+## Upward
+#### Upward Main Menu
+#### Upward Sub Menu
+#### Active Upward
+#### Selection
+#### Active Upward
+#### Visible Upward
+#### Visible Hover Upward
+## Simple
+#### Selection Menu
+#### Scrollbar in IE
+## Simple
+#### Displays without javascript
+#### Visible
+## Fluid
+## Floating
+## Pointing
+#### Top Left Pointing
+#### Top Right  Pointing
+#### Left Pointing
+#### Right Pointing
+#### Bottom Pointing
+#### Reverse Sub-Menu Direction
+#### Bottom Left
+#### Bottom Right
+#### Upward pointing
+# Theme Overrides
+#### Dropdown Carets
+#### Sub Menu
+#### Vertical Menu Dropdown
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Video
+# Types
+## Embedded Content
+## Embed
+## Placeholder
+## Icon
+# States
+## Hover
+## Active
+# Video Overrides
+# Site Overrides
+# Variations
+-@ * # Semantic UI 2.1.7 - Modal
+# Modal
+# Content
+## Close
+## Header
+## Content
+#### Image
+#### Description
+## Actions
+## Responsive
+#### Modal Width
+#### Tablet and Mobile
+#### Mobile
+## Coupling
+# Types
+#### Tablet and Mobile
+# States
+# Variations
+## Scrolling
+#### A modal that cannot fit on the page
+#### undetached scrolling
+#### Coupling with Sidebar
+## Full Screen
+## Size
+#### Small
+#### Small Modal Width
+#### Large Modal Width
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Nag
+# Nag
+# States
+#### Hover
+# Variations
+## Static
+## Fixed
+## Bottom
+## White
+# Groups
+# Theme Overrides
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Popup
+# Popup
+# Types
+## Spacing
+#### Extending from Top
+#### Extending from Vertical Center
+#### Extending from Bottom
+## Pointer
+### Below
+### Above
+### Left Center
+### Right Center
+#### Arrow Color By Location
+#### Inverted Arrow Color
+# Coupling
+#### Immediate Nested Grid
+# States
+# Variations
+## Basic
+## Wide
+## Fluid
+## Colors
+#### Inverted colors
+## Flowing
+## Sizes
+# Theme Overrides
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Progress Bar
+# Progress
+# Content
+#### Activity Bar
+#### Percent Complete
+#### Label
+# Types
+#### Indicating
+#### Indicating Label
+#### Single Digits
+#### Indicating Success
+# States
+## Success
+## Warning
+## Error
+## Active
+## Disabled
+# Variations
+## Inverted
+## Attached
+#### bottom attached
+#### top attached
+#### Coupling
+## Colors
+#### Red
+#### Orange
+#### Yellow
+#### Olive
+#### Green
+#### Teal
+#### Blue
+#### Violet
+#### Purple
+#### Pink
+#### Brown
+#### Grey
+#### Black
+## Sizes
+# Progress
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Rating
+# Rating
+#### Icon
+# Types
+## Standard
+#### Inactive Icon
+#### Active Icon
+#### Selected Icon
+## Star
+#### Inactive
+#### Active Star
+#### Selected Star
+## Heart
+#### Active Heart
+#### Selected Heart
+# States
+## Disabled
+#### disabled rating
+## User Interactive
+#### Selected Rating
+# Variations
+# Theme Overrides
+#### Empty Star
+#### Active Star
+## Star
+#### Unfilled Star
+#### Active Star
+#### Partial
+## Heart
+#### Active
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Search
+# Search
+## Icon
+## Results
+## Result
+#### Image
+## Info
+## Message
+#### View All Results
+# States
+## Focus
+## Loading
+## Hover
+## Active
+# Types
+## Selection
+#### Remove input
+## Category
+#### Category
+#### Last Category
+#### First / Last
+#### Category Result
+#### Category Result Name
+# Variations
+## Left / Right
+## Fluid
+## Sizes
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Shape
+# Shape
+# Types
+# Variations
+# States
+## Loading
+## Animating
+## CSS
+## Active
+# Theme Overrides
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Sidebar
+# Sidebar
+#### Sidebar Menu
+#### GPU Layers for Child Elements
+## Direction
+## Pushable
+#### Whole Page
+#### Page Context
+## Fixed
+## Page
+#### Pusher should inherit background from context
+## Dimmer
+## Coupling
+# States
+## Dimmed
+## Animating
+## Visible
+#### Shadow Direction
+#### Visible On Load
+#### opposite sides visible forces content overlay
+## iOS
+# Variations
+## Width
+#### Left / Right
+#### Left Visible
+#### Right Visible
+# Animations
+## Overlay
+#### Set-up
+#### Initial
+#### Animation
+#### End - Sidebar
+#### End - Pusher
+## Push
+#### Initial
+#### Sidebar - Initial
+#### End
+## Uncover
+#### Initial
+#### End
+## Slide Along
+#### Initial
+#### Sidebar - Initial
+#### Animation
+#### End
+## Slide Out
+#### Initial
+#### Sidebar - Initial
+#### Animation
+#### End
+## Scale Down
+#### Initial
+#### Sidebar - Initial
+#### Pusher - Initial
+#### Animation
+#### End
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Sticky
+# Sticky
+# States
+#### Bound
+#### Fixed
+#### Bound/Fixed Position
+# Types
+# Theme Overrides
+# Site Overrides
+-@ * # Semantic UI 2.1.7 - Tab
+# UI Tabs
+# States
+## Active
+## Loading
+# Tab Overrides
+# User Overrides
+-@ * # Semantic UI 2.1.7 - Transition
+# Transitions
+# States
+#### Animating
+#### Loading
+#### Hidden
+#### Visible
+#### Disabled
+# Variations
+# Transitions
+## Browse
+#### In
+#### Out
+## Drop
+#### Drop
+## Fade
+#### In
+#### Out
+## Flips
+#### In
+#### Out
+## Scale
+#### Out
+## Fly
+#### Inward
+#### Outward
+#### In
+#### Out
+## Slide
+#### In
+#### Out
+## Swing
+#### In
+#### Out
+# Static Animations
+## Emphasis
+#### Flash
+#### Shake
+#### Bounce
+#### Tada
+#### Pulse
+#### Rubberband
+# Site Overrides
