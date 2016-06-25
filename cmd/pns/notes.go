@@ -98,7 +98,7 @@ func (n *Notes) FTSQuery() string {
 	return ""
 }
 
-var spacePlusMinus = regexp.MustCompile(`\s*[+-]`)
+var spacePlusMinus = regexp.MustCompile(`^\s*[+-]`)
 
 // tagsURL returns destination URL from a given base URL and
 // expression specifying added and removed tags.
