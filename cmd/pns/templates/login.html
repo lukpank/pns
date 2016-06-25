@@ -13,8 +13,7 @@
 
 <div class="ui borderless top fixed menu">
 <span class="topbar-message">
-Note to login you need to have
-<a href="https://en.wikipedia.org/wiki/HTTP_cookie">cookies</a> enabled.
+{{htmlTr "Note to login you need to have <a href=\"https://en.wikipedia.org/wiki/HTTP_cookie\">cookies</a> enabled."}}
 </span>
 </div>
 
@@ -24,17 +23,17 @@ Note to login you need to have
 <div class="ui form {{if .Message}}top attached fluid {{end}}segment">
 
 <div class="field">
-<label for="login">Login</label>
+<label for="login">{{tr "Login"}}</label>
 <input class="ui input" type="text" name="login" autofocus>
 </div>
 
 <div class="field">
-<label for="password">Password</label>
+<label for="password">{{tr "Password"}}</label>
 <input class="ui input" type="password" name="password">
 </div>
 
 <input type="hidden" name="redirect" value="{{.Redirect}}">
-<input class="ui blue submit button" type="submit" value="Submit">
+<button class="ui blue submit button" type="submit" value="Submit">{{tr "login|Submit"}}</button>
 
 </div>
 

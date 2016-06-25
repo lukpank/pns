@@ -163,10 +163,10 @@ func (db *DB) AuthenticateUser(login string, password []byte) error {
 var topicsTemplate = template.Must(template.New("topics").Parse(topicsTemplateStr))
 
 const topicsTemplateStr = `
-<h1>Topics</h1>
+<h1>{{.Header}}</h1>
 
 <p>
-{{range .}}
+{{range .Tags}}
 <a href="{{.}}">{{.}}</a>
 {{end}}
 </p>
@@ -175,10 +175,10 @@ const topicsTemplateStr = `
 var tagsTemplate = template.Must(template.New("tags").Parse(tagsTemplateStr))
 
 const tagsTemplateStr = `
-<h1>Tags</h1>
+<h1>{{.Header}}</h1>
 
 <p>
-{{range .}}
+{{range .Tags}}
 <a href="/-/{{.}}">{{.}}</a>
 {{end}}
 </p>
@@ -188,16 +188,20 @@ func (db *DB) TopicsAndTags() ([]string, []string, error) {
 	return topicsAndTags(db.db, -1)
 }
 
-func (db *DB) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
-	topics, tags, err := db.TopicsAndTags()
+func (s *server) TopicsAndTagsAsNotes() ([]*Note, []string, error) {
+	topics, tags, err := s.db.TopicsAndTags()
 	if err != nil {
 		return nil, nil, err
 	}
 	var bTopics, bTags bytes.Buffer
-	if err = topicsTemplate.Execute(&bTopics, topics); err != nil {
+	type data struct {
+		Header string
+		Tags   []string
+	}
+	if err = topicsTemplate.Execute(&bTopics, &data{s.tr("Topics"), topics}); err != nil {
 		return nil, nil, err
 	}
-	if err = tagsTemplate.Execute(&bTags, tags); err != nil {
+	if err = tagsTemplate.Execute(&bTags, &data{s.tr("Tags"), tags}); err != nil {
 		return nil, nil, err
 	}
 	notes := []*Note{

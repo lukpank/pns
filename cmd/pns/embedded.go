@@ -13,7 +13,7 @@ import (
 )
 
 // newTemplates return templates parsed from static assets
-func newTemplate(filenames ...string) (TemplateExecutor, error) {
+func newTemplate(funcMap template.FuncMap, filenames ...string) (TemplateExecutor, error) {
 	var t *template.Template
 	for _, fn := range filenames {
 		var err error
@@ -23,7 +23,7 @@ func newTemplate(filenames ...string) (TemplateExecutor, error) {
 			return nil, err
 		}
 		if t == nil {
-			t, err = template.New(name).Parse(s)
+			t, err = template.New(name).Funcs(funcMap).Parse(s)
 		} else {
 			_, err = t.New(name).Parse(s)
 		}

@@ -146,11 +146,12 @@ func main() {
 		log.Fatal("-https option requires -https_cert and -https_key options")
 	}
 
-	t, err := newTemplate("templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html", "templates/diff.html")
+	m := template.FuncMap{"tr": translate, "htmlTr": htmlTranslate}
+	t, err := newTemplate(m, "templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html", "templates/diff.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != ""}
+	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != "", translate}
 	http.Handle("/", s.authenticate(s.ServeHTTP))
 	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
 	http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
@@ -180,6 +181,7 @@ type server struct {
 	md     *markdown.Markdown
 	s      *sessions
 	secure bool
+	tr     func(string) string
 }
 
 type TemplateExecutor interface {
@@ -218,7 +220,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			count = len(notes)
 		} else {
-			notes, availableTags, err = s.db.TopicsAndTagsAsNotes()
+			notes, availableTags, err = s.TopicsAndTagsAsNotes()
 			allTags = availableTags
 			isHTML = true
 		}
@@ -256,7 +258,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(notes) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		notes = append(notes, &Note{
-			Text:     "# No such notes",
+			Text:     s.tr("# No such notes"),
 			NoFooter: true,
 		})
 	}
@@ -335,7 +337,7 @@ func (s *server) serveEditPreview(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
+		s.error(w, s.tr("Method not allowed"), s.tr("Please use POST."), http.StatusMethodNotAllowed)
 		return
 	}
 	id, err := idFromPath(r.URL.Path, "/_/edit/submit/")
@@ -356,7 +358,7 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 	case "Submit":
 		s.updateNote(w, r, id, text, tags, r.PostForm.Get("sha1sum"))
 	default:
-		http.Error(w, "unsupported action", http.StatusBadRequest)
+		http.Error(w, s.tr("unsupported action"), http.StatusBadRequest)
 	}
 }
 
@@ -401,12 +403,12 @@ func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text str
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	if conflict {
-		messages = append([]string{"Conflicting edits detected. Please join the changes and click submit again when done."}, messages...)
+		messages = append([]string{s.tr(`Conflicting edits detected. Please join the changes and click "Submit" again when done.`)}, messages...)
 	}
 	var b bytes.Buffer
 	err = htmlDiff(&b, strings.Replace(note.Text, "\r\n", "\n", -1), strings.Replace(text, "\r\n", "\n", -1))
 	if err == NoDifference {
-		messages = append(messages, "No differences found.")
+		messages = append(messages, s.tr("No differences found."))
 	}
 	data := struct {
 		Diff     template.HTML
@@ -421,15 +423,8 @@ func (s *server) diff(w http.ResponseWriter, r *http.Request, id int64, text str
 
 func (s *server) preSubmitWarnings(tags, dbTags []string, edit bool) ([]string, error) {
 	var messages []string
-	hasTopic := false
-	for _, s := range tags {
-		if s[0] == '/' {
-			hasTopic = true
-			break
-		}
-	}
-	if !hasTopic {
-		messages = append(messages, "Please specify at least one topic.")
+	if len(tags) == 0 {
+		messages = append(messages, s.tr("Please specify at least one topic or tag."))
 	}
 	if len(tags) > 0 {
 		newTags, err := s.db.NewTags(tags)
@@ -437,19 +432,19 @@ func (s *server) preSubmitWarnings(tags, dbTags []string, edit bool) ([]string, 
 			return nil, err
 		}
 		if len(newTags) > 0 {
-			newStr := strings.Join(newTags, `" and "`)
-			messages = append(messages, fmt.Sprintf(`Note that the following tags/topics are new: "%s".`, newStr))
+			newStr := strings.Join(newTags, s.tr(`" and "`))
+			messages = append(messages, fmt.Sprintf(s.tr(`Note that the following tags/topics are new: "%s".`), newStr))
 		}
 	}
 	if edit {
 		added, removed := addedRemoved(dbTags, tags)
 		if len(added) > 0 {
-			s := strings.Join(added, `" and "`)
-			messages = append(messages, fmt.Sprintf(`You are adding the following tags/topics: "%s".`, s))
+			t := strings.Join(added, `" and "`)
+			messages = append(messages, fmt.Sprintf(s.tr(`You are adding the following tags/topics: "%s".`), t))
 		}
 		if len(removed) > 0 {
-			s := strings.Join(removed, `" and "`)
-			messages = append(messages, fmt.Sprintf(`You are removing the following tags/topics: "%s".`, s))
+			t := strings.Join(removed, `" and "`)
+			messages = append(messages, fmt.Sprintf(s.tr(`You are removing the following tags/topics: "%s".`), t))
 		}
 	}
 	return messages, nil
@@ -491,7 +486,7 @@ func (s *server) updateNote(w http.ResponseWriter, r *http.Request, id int64, te
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
 	err := s.db.updateNote(id, text, append(topics, tags...), sha1sum)
 	if err == ErrNoTags {
-		s.error(w, "Error", "Please specify at least one topic or tag.", http.StatusBadRequest)
+		s.error(w, s.tr("Error"), s.tr("Please specify at least one topic or tag."), http.StatusBadRequest)
 		return
 	} else if e, ok := err.(*EditConflictError); ok {
 		s.editPage(w, r, &Note{ID: id, Text: text}, topicsAndTags, e.SHA1Sum, true)
@@ -567,7 +562,7 @@ func (s *server) serveCopy(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
+		s.error(w, s.tr("Method not allowed"), s.tr("Please use POST."), http.StatusMethodNotAllowed)
 		return
 	}
 	r.ParseForm()
@@ -579,7 +574,7 @@ func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
 	case "Submit":
 		s.addNote(w, r, text, tags)
 	default:
-		http.Error(w, "unsupported action", http.StatusBadRequest)
+		http.Error(w, s.tr("unsupported action"), http.StatusBadRequest)
 	}
 }
 
@@ -587,7 +582,7 @@ func (s *server) addNote(w http.ResponseWriter, r *http.Request, text, topicsAnd
 	topics, tags := topicsAndTagsFromEditField(topicsAndTags)
 	id, err := s.db.addNote(text, append(topics, tags...))
 	if err == ErrNoTags {
-		s.error(w, "Error", "Please specify at least one topic or tag.", http.StatusBadRequest)
+		s.error(w, s.tr("Error"), s.tr("Please specify at least one topic or tag."), http.StatusBadRequest)
 		return
 	} else if err != nil {
 		s.internalError(w, err)
@@ -612,11 +607,11 @@ func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 }
 
 func (s *server) notFound(w http.ResponseWriter, r *http.Request) {
-	s.error(w, "Page not found", "", http.StatusNotFound)
+	s.error(w, s.tr("Page not found"), "", http.StatusNotFound)
 }
 
 func (s *server) internalError(w http.ResponseWriter, err error) {
-	s.error(w, "Internal server error", err.Error(), http.StatusInternalServerError)
+	s.error(w, s.tr("Internal server error"), err.Error(), http.StatusInternalServerError)
 }
 
 func editRedirectionPath(topics, tags []string, id int64) string {
@@ -664,7 +659,7 @@ func (s *server) authenticate(h http.HandlerFunc) http.HandlerFunc {
 
 func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		s.error(w, "Method not allowed", "Please use POST.", http.StatusMethodNotAllowed)
+		s.error(w, s.tr("Method not allowed"), s.tr("Please use POST."), http.StatusMethodNotAllowed)
 		return
 	}
 	err := r.ParseForm()
@@ -678,7 +673,7 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 	if err := s.db.AuthenticateUser(login, []byte(password)); err != nil {
 		if err == ErrAuth {
 			w.WriteHeader(http.StatusUnauthorized)
-			s.loginPage(w, r, redirect, "Incorrect login or password.")
+			s.loginPage(w, r, redirect, s.tr("Incorrect login or password."))
 		} else {
 			s.internalError(w, err)
 		}

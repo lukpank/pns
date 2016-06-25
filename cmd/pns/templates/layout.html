@@ -52,18 +52,18 @@ function setup() {
 
 <form action="{{.URL}}" class="inline">
 <div class="pad-right small ui input">
-<input type="text" name="tag" id="tag" placeholder="Search..."
+<input type="text" name="tag" id="tag" placeholder='{{tr "Search..."}}'
        data-multiple autofocus></input>
 {{with .FTSQuery}}<input type="hidden" name="q" value="{{.}}">{{end}}
 </div>
 </form>
 
 <form action="/_/add" class="inline">
-<input type="submit" value="Add note" class="small ui button"></input>
+<input type="submit" value='{{tr "Add note"}}' class="small ui button"></input>
 </form>
 
 <form action="/_/logout{{.URL}}" class="inline">
-<input type="submit" value="Logout" class="small ui button"></input>
+<input type="submit" value='{{tr "Logout"}}' class="small ui button"></input>
 </form>
 
 </div>
@@ -71,6 +71,9 @@ function setup() {
 </div>
 
 <div class="content">
+
+{{$Edit := tr "Edit"}}
+{{$Copy := tr "Copy"}}
 
 {{range $n := .Notes}}
 <a id="{{.ID}}" class="anchor"></a>
@@ -93,7 +96,7 @@ function setup() {
 </span> ·
 
 <span class="tag">
-<a href="/_/edit/{{.ID}}" class="tag">Edit</a>
+<a href="/_/edit/{{.ID}}" class="tag">{{$Edit}}</a>
 </span> ·
 
 <span class="tag">
@@ -101,7 +104,7 @@ function setup() {
 </span> ·
 
 <span class="tag">
-<a href="/_/copy/{{.ID}}" class="tag">Copy</a>
+<a href="/_/copy/{{.ID}}" class="tag">{{$Copy}}</a>
 </span>
 
 </div>

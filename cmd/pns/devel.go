@@ -14,14 +14,17 @@ import (
 
 // newTemplates template executor which reloads templates before every
 // use. Used for development of templates.
-func newTemplate(filenames ...string) (TemplateExecutor, error) {
-	return tmpl(filenames), nil
+func newTemplate(funcMap template.FuncMap, filenames ...string) (TemplateExecutor, error) {
+	return &tmpl{filenames, funcMap}, nil
 }
 
-type tmpl []string
+type tmpl struct {
+	filenames []string
+	funcMap   template.FuncMap
+}
 
-func (filenames tmpl) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
-	t, err := template.ParseFiles(filenames...)
+func (tt *tmpl) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
+	t, err := template.New("html").Funcs(tt.funcMap).ParseFiles(tt.filenames...)
 	if err != nil {
 		return err
 	}

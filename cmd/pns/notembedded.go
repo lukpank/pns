@@ -12,8 +12,8 @@ import (
 )
 
 // newTemplates return templates parsed from filesystem
-func newTemplate(filenames ...string) (TemplateExecutor, error) {
-	return template.ParseFiles(filenames...)
+func newTemplate(funcMap template.FuncMap, filenames ...string) (TemplateExecutor, error) {
+	return template.New("html").Funcs(funcMap).ParseFiles(filenames...)
 }
 
 func newDir(path string) http.Dir {

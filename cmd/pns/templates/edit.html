@@ -30,18 +30,18 @@ function setup() {
 <div class="ui borderless top fixed menu">
 <div class="left item">
 <div class="small ui input">
-<input type="text" name="tag" id="tag" placeholder="Topics and tags" class="taginput"
+<input type="text" name="tag" id="tag" placeholder='{{tr "Topics and tags"}}' class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
 </div>
 <div class="right item">
 <div class="small ui buttons">
-{{with .Referer}}<input type="button" value="Cancel" class="ui button" onclick="location = referer"></input>{{end}}
-<input type="submit" value="Preview" class="ui button" onclick="setTargetAndAction('preview', 'Preview')"></input>
+{{with .Referer}}<button type="button" value="Cancel" class="ui button" onclick="location = referer">{{tr "Cancel"}}</button>{{end}}
+<button type="submit" value="Preview" class="ui button" onclick="setTargetAndAction('preview', 'Preview')">{{tr "Preview"}}</button>
 {{if .Edit}}
-<input type="submit" value="Diff" class="ui button" onclick="setTargetAndAction('preview', 'Diff')"></input>
+<button type="submit" value="Diff" class="ui button" onclick="setTargetAndAction('preview', 'Diff')">{{tr "Diff"}}</button>
 {{end}}
-<input type="submit" value="Submit" class="ui button" onclick="setTargetAndAction('', 'Submit')"></input>
+<button type="submit" value="Submit" class="ui button" onclick="setTargetAndAction('', 'Submit')">{{tr "edit|Submit"}}</button>
 </div>
 </div>
 </div>
