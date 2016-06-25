@@ -32,7 +32,7 @@
   box-sizing: inherit;
 }
 
-html {
+html.login {
   box-sizing: border-box;
 }
 
