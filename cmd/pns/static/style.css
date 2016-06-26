@@ -91,11 +91,11 @@ a {
 a:hover {
     text-decoration: underline;
 }
-a:visited {
+a:visited a.tag:visited {
     color: #9c27b0;
 }
 
-.tag, .tag:visited {
+.tag {
     color: #bdbdbd;
 }
 
