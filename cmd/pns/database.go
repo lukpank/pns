@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"html/template"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,7 +22,8 @@ import (
 const queryLimit = 100
 
 type DB struct {
-	db *sql.DB
+	db  *sql.DB
+	git *GitRepo
 }
 
 var (
@@ -39,7 +41,7 @@ func OpenDB(filename string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db}, nil
+	return &DB{db, NewGitRepo(filename + ".git")}, nil
 }
 
 type Querier interface {
@@ -599,7 +601,8 @@ func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum strin
 	defer tx.Rollback()
 
 	// 0. Check sha1sum matches db record
-	if note, err := db.Note(noteID); err != nil {
+	note, err := db.Note(noteID)
+	if err != nil {
 		return err
 	} else {
 		dbSHA1Sum := note.sha1sum()
@@ -652,19 +655,31 @@ func (db *DB) updateNote(noteID int64, text string, tags []string, sha1sum strin
 			newIDs = append(newIDs, id)
 		}
 	}
-	if len(newIDs) == 0 {
-		return tx.Commit()
-	}
 
 	// 4. associate new tags with the note
-	var args []interface{}
-	for _, id := range newIDs {
-		args = append(args, noteID, id)
+	if len(newIDs) > 0 {
+		var args []interface{}
+		for _, id := range newIDs {
+			args = append(args, noteID, id)
+		}
+		q = repeatNoLastChar("(?,?),", len(newIDs))
+		_, err = tx.Exec(fmt.Sprintf("INSERT INTO tags (noteid, tagid) VALUES %s", q), args...)
+		if err != nil {
+			return err
+		}
 	}
-	q = repeatNoLastChar("(?,?),", len(newIDs))
-	_, err = tx.Exec(fmt.Sprintf("INSERT INTO tags (noteid, tagid) VALUES %s", q), args...)
-	if err != nil {
-		return err
+
+	// 5. save to git
+	if db.git != nil {
+		var b bytes.Buffer
+		sort.Strings(tags)
+		fmt.Fprintf(&b, "%s\n%s\n\n%s", strings.Join(tags, " "), note.Created.Format(timeLayout), text)
+		if err = db.git.Add(idToGitName(noteID), b.Bytes()); err != nil {
+			return err
+		}
+		if err = db.git.Commit(strconv.FormatInt(noteID, 10), now); err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
@@ -707,6 +722,19 @@ func (db *DB) addNote(text string, tags []string) (noteID int64, err error) {
 	_, err = tx.Exec(fmt.Sprintf("INSERT INTO tags (noteid, tagid) VALUES %s", q), args...)
 	if err != nil {
 		return 0, err
+	}
+
+	// 4. save to git
+	if db.git != nil {
+		var b bytes.Buffer
+		sort.Strings(tags)
+		fmt.Fprintf(&b, "%s\n%s\n\n%s", strings.Join(tags, " "), now.Format(timeLayout), text)
+		if err = db.git.Add(idToGitName(noteID), b.Bytes()); err != nil {
+			return 0, err
+		}
+		if err = db.git.Commit(strconv.FormatInt(noteID, 10), now); err != nil {
+			return 0, err
+		}
 	}
 
 	if err = tx.Commit(); err != nil {
