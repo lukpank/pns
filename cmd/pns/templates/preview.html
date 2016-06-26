@@ -8,6 +8,8 @@
 </head>
 
 <body>
+<div class="preview-note">
+
 {{if .Messages}}
 <div class="ui warning message">
 {{range .Messages}}
@@ -15,10 +17,11 @@
 {{end}}
 </div>
 {{end}}
-<div class="preview-note">
+
 {{range .Notes}}
 {{$.Render .}}
 {{end}}
+
 </div>
 </body>
 
