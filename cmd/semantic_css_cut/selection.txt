@@ -325,9 +325,9 @@
 #### Error Placeholder
 #### Focused Error Placeholder
 # Variations
--## Transparent
-#### Transparent Icon
-#### Transparent Inverted
+## Transparent
+-#### Transparent Icon
+-#### Transparent Inverted
 -## Icon
 #### Left Icon Input
 #### Focus
@@ -882,17 +882,17 @@
 ## Sidebar
 #### Show vertical dividers below last
 ## Container
--# States
+# States
 ## Hover
-## Pressed
-## Active
-## Active Hover
-## Disabled
+-## Pressed
+-## Active
+-## Active Hover
+-## Disabled
 # Types
 ## Floated Menu / Item
 #### Left Floated
 #### Right Floated
--#### Swapped Borders
+#### Swapped Borders
 -## Vertical
 ### Item
 ### Label

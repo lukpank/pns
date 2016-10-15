@@ -1034,6 +1034,17 @@ input::selection {
 *******************************/
 
 /*--------------------
+      Transparent
+---------------------*/
+
+.ui.transparent.input input {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  padding: 0em !important;
+  box-shadow: none !important;
+}
+
+/*--------------------
         Size
 ---------------------*/
 
@@ -1411,6 +1422,23 @@ input::selection {
 }
 
 /*******************************
+             States
+*******************************/
+
+/*--------------
+      Hover
+---------------*/
+
+.ui.link.menu .item:hover,
+.ui.menu .dropdown.item:hover,
+.ui.menu .link.item:hover,
+.ui.menu a.item:hover {
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.95);
+}
+
+/*******************************
              Types
 *******************************/
 
@@ -1438,6 +1466,14 @@ Floated Menu / Item
   display: -ms-flexbox;
   display: flex;
   margin-left: auto !important;
+}
+
+/* Swapped Borders */
+
+.ui.menu .right.item::before,
+.ui.menu .right.menu > .item::before {
+  right: auto;
+  left: 0;
 }
 
 /*******************************

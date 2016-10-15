@@ -27,23 +27,35 @@ function setup() {
 <body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form class="edit" action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 
-<div class="ui borderless top fixed menu">
-<div class="left item">
-<div class="small ui input">
+<div class="ui top fixed menu">
+
+<div class="item ui transparent input">
 <input type="text" name="tag" id="tag" placeholder='{{tr "Topics and tags"}}' class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
-</div>
-<div class="right item">
-<div class="small ui buttons">
-{{with .Referer}}<button type="button" value="Cancel" class="ui button" onclick="location = referer">{{tr "Cancel"}}</button>{{end}}
-<button type="submit" value="Preview" class="ui button" onclick="setTargetAndAction('preview', 'Preview')">{{tr "Preview"}}</button>
-{{if .Edit}}
-<button type="submit" value="Diff" class="ui button" onclick="setTargetAndAction('preview', 'Diff')">{{tr "Diff"}}</button>
+
+<div class="right menu">
+
+{{with .Referer}}
+<a class="item" onclick="location = referer">{{tr "Cancel"}}</a>
 {{end}}
-<button type="submit" value="Submit" class="ui button" onclick="setTargetAndAction('', 'Submit')">{{tr "edit|Submit"}}</button>
+
+<a class="item ui transparent input">
+<input type="submit" value='{{tr "Preview"}}' onclick="setTargetAndAction('preview', 'Preview')"></input>
+</a>
+
+{{if .Edit}}
+<a class="item ui transparent input">
+<input type="submit" value='{{tr "Diff"}}' onclick="setTargetAndAction('preview', 'Diff')"></input>
+</a>
+{{end}}
+
+<a class="item ui transparent input">
+<input type="submit" value='{{tr "edit|Submit"}}' onclick="setTargetAndAction('', 'Submit')"></input>
+</a>
+
 </div>
-</div>
+
 </div>
 
 <input type="hidden" name="action" id="action" value="Preview">

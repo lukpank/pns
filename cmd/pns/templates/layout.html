@@ -29,42 +29,35 @@ function setup() {
 
 <body class="body" onload="setup();" onkeydown="return noteKeyDown(event);">
 
-<div class="ui borderless small top fixed menu">
+<div class="ui top fixed menu">
 
-<div class="left item">
-
-<div class="small ui buttons">
 {{range $activeTagsURLs}}
-<a class="tagbar ui button" href="{{.URL}}">{{.Name}}</a>
+<a class="tagbar item" href="{{.URL}}">{{.Name}}</a>
 {{end}}
-</div>
 
-{{if .Count}}<span class="pad-left{{if or (gt .Start 0) .More}} pad-right{{end}}">({{.Count}})</span>{{end}}
+{{if .Count}}<span class="item">({{.Count}})</span>{{end}}
+{{if gt .Start 0}}<a class="item" href="{{.PrevPage}}">&lt;</a>{{end}}
+{{if .More}}<a class="item" href="{{.NextPage}}">&gt;</a>{{end}}
 
-<div class="small ui buttons">
-{{if gt .Start 0}}<a class="ui button" href="{{.PrevPage}}">&lt;</a>{{end}}
-{{if .More}}<a class="ui button" href="{{.NextPage}}">&gt;</a>{{end}}
-</div>
+<div class="right menu">
 
-</div>
-
-<div class="right item">
-
+<div class="item ui transparent input">
 <form action="{{.URL}}" class="inline">
-<div class="pad-right small ui input">
-<input type="text" name="tag" id="tag" placeholder='{{tr "Search..."}}'
-       data-multiple autofocus></input>
-{{with .FTSQuery}}<input type="hidden" name="q" value="{{.}}">{{end}}
+<input placeholder='{{tr "Search..."}}' name="tag" id="tag" type="text" data-multiple autofocus></input>
+</form>
 </div>
-</form>
 
+<a class="item ui transparent input">
 <form action="/_/add" class="inline">
-<input type="submit" value='{{tr "Add note"}}' class="small ui button"></input>
+<input type="submit" value='{{tr "Add note"}}'></input>
 </form>
+</a>
 
+<a class="item ui transparent input">
 <form action="/_/logout{{.URL}}" class="inline">
-<input type="submit" value='{{tr "Logout"}}' class="small ui button"></input>
+<input type="submit" value='{{tr "Logout"}}'></input>
 </form>
+</a>
 
 </div>
 
