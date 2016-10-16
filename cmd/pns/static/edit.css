@@ -6,7 +6,7 @@ input.taginput {
     width: 30em;
 }
 
-textarea.edit {
+textarea.ui.segment {
     width: 100%;
     height: 50%;
     padding: 5px;
@@ -16,7 +16,7 @@ textarea.edit {
     font-family: monospace;
 }
 
-iframe {
+iframe.ui.segment {
     width: 100%;
     height: 90%;
     border: solid 1px #e0e0e0;

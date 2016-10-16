@@ -70,7 +70,7 @@ function setup() {
 
 {{range $n := .Notes}}
 <a id="{{.ID}}" class="anchor"></a>
-<div class="note" id="note{{.ID}}" tabindex="-1" >
+<div class="ui segment note" id="note{{.ID}}" tabindex="-1" >
 {{$.Render .}}
 
 {{if (not .NoFooter)}}
@@ -105,6 +105,8 @@ function setup() {
 
 </div>
 {{end}}
+
+<div></div>
 
 </div>
 </body>

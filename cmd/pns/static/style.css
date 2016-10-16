@@ -41,17 +41,10 @@ a.tagbar.item:hover {
 .anchor {
     display: block;
     height: 60px;
-    margin: -60px 0 0 0;
+    margin: -75px 0 0 0;
 }
 
-.note {
-    background-color: #ffffff;
-    border: solid 1px #e0e0e0;
-    padding: 10px 15px 15px 15px;
-    margin-bottom: 5px;
-}
-
-.note:focus {
+.ui.segment.note:focus {
     border: solid 1px #2196f3;
     outline: none;
 }

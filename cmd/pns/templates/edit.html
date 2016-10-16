@@ -62,8 +62,8 @@ function setup() {
 {{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
 <div class="content">
-<textarea class="edit" name="text" id="text">{{.Text}}</textarea>
-<iframe name="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
+<textarea class="ui segment" name="text" id="text">{{.Text}}</textarea>
+<iframe class="ui segment" name="preview" id="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
 </form>
