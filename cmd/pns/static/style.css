@@ -19,7 +19,7 @@ a.tagbar.item:hover {
     display: block;
     width: 100%;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
 }
 
 .topbar-message a, .topbar-message a:visited {
