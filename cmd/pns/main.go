@@ -191,7 +191,10 @@ type TemplateExecutor interface {
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	tags := strings.Split(path, "/")
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		s.parseFormError(w, err)
+		return
+	}
 	if tag := r.Form.Get("tag"); tag != "" {
 		http.Redirect(w, r, tagsURL(path, tag, r.Form.Get("q")), http.StatusMovedPermanently)
 		return
@@ -345,7 +348,10 @@ func (s *server) serveEditSubmit(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		s.parseFormError(w, err)
+		return
+	}
 	text := r.PostForm.Get("text")
 	tags := r.PostForm.Get("tag")
 	switch r.PostForm.Get("action") {
@@ -565,7 +571,10 @@ func (s *server) serveAddSubmit(w http.ResponseWriter, r *http.Request) {
 		s.error(w, s.tr("Method not allowed"), s.tr("Please use POST."), http.StatusMethodNotAllowed)
 		return
 	}
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		s.parseFormError(w, err)
+		return
+	}
 	text := r.PostForm.Get("text")
 	tags := r.PostForm.Get("tag")
 	switch r.PostForm.Get("action") {
@@ -608,6 +617,10 @@ func (s *server) error(w http.ResponseWriter, title, text string, code int) {
 
 func (s *server) notFound(w http.ResponseWriter, r *http.Request) {
 	s.error(w, s.tr("Page not found"), "", http.StatusNotFound)
+}
+
+func (s *server) parseFormError(w http.ResponseWriter, err error) {
+	s.error(w, s.tr("Bad request: error parsing form"), err.Error(), http.StatusBadRequest)
 }
 
 func (s *server) internalError(w http.ResponseWriter, err error) {
@@ -662,9 +675,8 @@ func (s *server) serveLogin(w http.ResponseWriter, r *http.Request) {
 		s.error(w, s.tr("Method not allowed"), s.tr("Please use POST."), http.StatusMethodNotAllowed)
 		return
 	}
-	err := r.ParseForm()
-	if err != nil {
-		s.internalError(w, err)
+	if err := r.ParseForm(); err != nil {
+		s.parseFormError(w, err)
 		return
 	}
 	login := r.PostForm.Get("login")
