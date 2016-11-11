@@ -48,13 +48,17 @@ type Querier interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 }
 
-func (db *DB) Init() (err error) {
+func (db *DB) Init(useGit bool, lang string) (err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = tx.Exec("CREATE TABLE notes(note TEXT, created INTEGER, modified INTEGER)")
+
+	err = createPNSTable(tx, useGit, lang)
+	if err == nil {
+		_, err = tx.Exec("CREATE TABLE notes(note TEXT, created INTEGER, modified INTEGER)")
+	}
 	if err == nil {
 		_, err = tx.Exec("CREATE VIRTUAL TABLE ftsnotes USING fts4(note)")
 	}
@@ -77,6 +81,68 @@ func (db *DB) Init() (err error) {
 		return err
 	}
 	return tx.Commit()
+}
+
+func createPNSTable(tx *sql.Tx, useGit bool, lang string) error {
+	_, err := tx.Exec("CREATE TABLE pns(key TEXT UNIQUE, value TEXT)")
+	if err == nil {
+		_, err = tx.Exec("INSERT INTO pns (key, value) VALUES ('db_version', '1')")
+	}
+	if err == nil {
+		_, err = tx.Exec("INSERT INTO pns (key, value) VALUES ('use_git', ?)", useGit)
+	}
+	if err == nil {
+		_, err = tx.Exec("INSERT INTO pns (key, value) VALUES ('lang', ?)", lang)
+	}
+	return err
+}
+
+func (db *DB) getPNSOptions() (git bool, lang string, err error) {
+	rows, err := db.db.Query("SELECT key, value FROM pns")
+	if err != nil {
+		return false, "", err
+	}
+	defer rows.Close()
+	mask := 0
+	var key, value string
+	for rows.Next() {
+		err := rows.Scan(&key, &value)
+		if err != nil {
+			return false, "", err
+		}
+		switch key {
+		case "db_version":
+			mask |= 1
+			i, err := strconv.Atoi(value)
+			if err != nil {
+				return false, "", fmt.Errorf("error parsing db_version: %v", err)
+			}
+			if i != 1 {
+				return false, "", fmt.Errorf("expected db_version 1 but found %d", i)
+			}
+		case "use_git":
+			mask |= 2
+			i, err := strconv.Atoi(value)
+			if err != nil {
+				return false, "", fmt.Errorf("error parsing use_git: %v", err)
+			}
+			git = i != 0
+
+		case "lang":
+			mask |= 4
+			lang = value
+		}
+	}
+	if mask&1 == 0 {
+		return false, "", errors.New("missing db_version in pns table")
+	}
+	if mask&2 == 0 {
+		return false, "", errors.New("missing use_git in pns table")
+	}
+	if mask&3 == 0 {
+		return false, "", errors.New("missing lang in pns table")
+	}
+	return
 }
 
 func (db *DB) Import(notes []*Note) (err error) {

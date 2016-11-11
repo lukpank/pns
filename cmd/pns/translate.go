@@ -4,14 +4,32 @@
 
 package main
 
-import (
-	"fmt"
-	"html/template"
-)
+import "html/template"
 
-// TODO: en "login|Submit", "edit|Submit",
+var translations = map[string]translation{
+	"en": enTranslation,
+	"pl": plTranslation,
+}
 
-var translations = map[string]string{
+type translation map[string]string
+
+func (t translation) translate(s string) string {
+	if t[s] != "" {
+		return t[s]
+	}
+	return s
+}
+
+func (t translation) htmlTranslate(s string) template.HTML {
+	return template.HTML(t.translate(s))
+}
+
+var enTranslation = translation{
+	"login|Submit": "Submit",
+	"edit|Submit":  "Submit",
+}
+
+var plTranslation = translation{
 	"# No such notes":                 "# Brak takich notatek",
 	"Add note":                        "Dodaj notatkę",
 	"Bad request: error parsing form": "Błędne zapytanie: błąd parsowania formularza",
@@ -44,22 +62,4 @@ var translations = map[string]string{
 	`Note to login you need to have <a href="https://en.wikipedia.org/wiki/HTTP_cookie">cookies</a> enabled.`: `Aby się zalogować musisz mieć aktywne <a href="https://en.wikipedia.org/wiki/HTTP_cookie">cookie</a>.`,
 	`You are adding the following tags/topics: "%s".`:                                                         `Dodajesz następujące tematy/etykiety: "%s".`,
 	`You are removing the following tags/topics: "%s".`:                                                       `Usuwasz następujące tematy/etykiety: "%s".`,
-}
-
-func translate(s string) string {
-	if translations[s] != "" {
-		return translations[s]
-	}
-	translations[s] = ""
-	fmt.Println()
-	for k, v := range translations {
-		if v == "" {
-			fmt.Printf("%q: %q\n", k, v)
-		}
-	}
-	return s
-}
-
-func htmlTranslate(s string) template.HTML {
-	return template.HTML(translate(s))
 }

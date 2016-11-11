@@ -31,7 +31,7 @@ const (
 
 var (
 	dbFileName = flag.String("f", "", "sqlite3 database file name")
-	dbInit     = flag.Bool("init", false, "initialize the database file")
+	dbInit     = flag.String("init", "", "initialize the database file (argument is options such as git,lang=en or nogit,lang=pl)")
 	dbAddUser  = flag.String("adduser", "", "add user with given login to the database file (asks for the password)")
 	importFrom = flag.String("import", "", "import notes from given file")
 	exportPath = flag.String("export", "", `export path, use "/" for all notes`)
@@ -42,7 +42,7 @@ var (
 	keyFile    = flag.String("https_key", "", "HTTPS server private key file")
 	hostname   = flag.String("host", "", "reject requests with host other than this")
 	version    = flag.Bool("v", false, "show program version")
-	update     = flag.String("update", "", `update database (argument may be "git" or "nogit")`)
+	update     = flag.String("update", "", "update database (argument is options such as git,lang=en or nogit,lang=pl)")
 
 	Version = "pns-0.1-(REV?)"
 )
@@ -60,8 +60,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *dbInit {
-		if err = db.Init(); err != nil {
+	if *dbInit != "" {
+		git, lang, err := parseOptions(*dbInit)
+		if err != nil {
+			log.Fatal("failed to initialize database: ", err)
+		}
+		if err = db.Init(git, lang); err != nil {
 			log.Fatal("failed to initialize database: ", err)
 		}
 	}
@@ -119,21 +123,16 @@ func main() {
 		}
 	}
 	if *update != "" {
-		var git bool
-		switch *update {
-		case "git":
-			git = true
-		case "nogit":
-			git = false
-		default:
-			log.Fatal(`value of option -update must be either "git" or "nogit"`)
+		git, lang, err := parseOptions(*update)
+		if err != nil {
+			log.Fatal("failed to update: ", err)
 		}
-		if err := updateDB(db, *dbFileName, git); err != nil {
+		if err := updateDB(db, *dbFileName, git, lang); err != nil {
 			log.Fatal("failed to update: ", err)
 		}
 		return
 	}
-	if *dbInit || *importFrom != "" || *dbAddUser != "" || *exportPath != "" {
+	if *dbInit != "" || *importFrom != "" || *dbAddUser != "" || *exportPath != "" {
 		return
 	}
 	if *httpAddr == "" && *httpsAddr == "" {
@@ -146,12 +145,24 @@ func main() {
 		log.Fatal("-https option requires -https_cert and -https_key options")
 	}
 
-	m := template.FuncMap{"tr": translate, "htmlTr": htmlTranslate}
+	useGit, lang, err := db.getPNSOptions()
+	if err != nil {
+		log.Fatal("db options error: ", err)
+	}
+	if !useGit {
+		db.git = nil
+	}
+	tr := translations[lang]
+	if tr == nil {
+		log.Printf("unsupported translation language %s, using en (i.e., English) instead", lang)
+		tr = translations["en"]
+	}
+	m := template.FuncMap{"tr": tr.translate, "htmlTr": tr.htmlTranslate}
 	t, err := newTemplate(m, "templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html", "templates/diff.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != "", translate}
+	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != "", tr.translate}
 	http.Handle("/", s.authenticate(s.ServeHTTP))
 	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
 	http.HandleFunc("/_/edit/preview/", s.authenticate(s.serveEditPreview))
@@ -173,6 +184,35 @@ func main() {
 	} else {
 		log.Fatal(http.ListenAndServe(*httpAddr, h))
 	}
+}
+
+func parseOptions(options string) (git bool, lang string, err error) {
+	mask := 0
+	for _, s := range strings.Split(options, ",") {
+		switch {
+		case s == "git":
+			git = true
+			mask |= 1
+		case s == "nogit":
+			git = false
+			mask |= 1
+		case strings.HasPrefix(s, "lang="):
+			lang = strings.TrimPrefix(s, "lang=")
+			if lang != "en" && lang != "pl" {
+				return false, "", fmt.Errorf("unsupported language: %s", lang)
+			}
+			mask |= 2
+		default:
+			return false, "", fmt.Errorf("unsupported option: %s", s)
+		}
+	}
+	if mask&1 == 0 {
+		return false, "", errors.New("please specify either option git or nogit")
+	}
+	if mask&2 == 0 {
+		return false, "", errors.New("please specify option lang=en or lang=pl")
+	}
+	return
 }
 
 type server struct {

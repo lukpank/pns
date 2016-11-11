@@ -16,9 +16,19 @@ import (
 
 const maxInt = int(^uint(0) >> 1)
 
-func updateDB(db *DB, filename string, useGit bool) error {
+func updateDB(db *DB, filename string, useGit bool, lang string) error {
+	tx, err := db.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	err = createPNSTable(tx, useGit, lang)
+	if err != nil {
+		return err
+	}
 	if !useGit {
-		return nil
+		return tx.Commit()
 	}
 	notes, err := db.AllNotes()
 	if err != nil {
@@ -77,7 +87,7 @@ func updateDB(db *DB, filename string, useGit bool) error {
 		}
 		p.Done()
 	}
-	return nil
+	return tx.Commit()
 }
 
 func idToGitName(id int64) string {
