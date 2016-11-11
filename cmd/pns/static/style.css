@@ -31,8 +31,25 @@ a.tagbar.item:hover {
     display: inline;
 }
 
+@media all and (min-width: 2000px) {
+    .content {
+	width: 50%;
+    }
+    .ui.menu .item.padding {
+	width: 300px;
+    }
+}
+
+@media all and (max-width: 2000px) {
+    .content {
+	width: 80%;
+    }
+    .ui.menu .item.padding {
+	padding: 0px;
+    }
+}
+
 .content {
-    width: 80%;
     padding-top: 55px;
     margin-left: auto;
     margin-right: auto;

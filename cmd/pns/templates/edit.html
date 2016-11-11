@@ -29,6 +29,8 @@ function setup() {
 
 <div class="ui top fixed menu">
 
+<span class="ui item padding"></span>
+
 <div class="item ui transparent input">
 <input type="text" name="tag" id="tag" placeholder='{{tr "Topics and tags"}}' class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
@@ -53,6 +55,8 @@ function setup() {
 <a class="item ui transparent input">
 <input type="submit" value='{{tr "edit|Submit"}}' onclick="setTargetAndAction('', 'Submit')"></input>
 </a>
+
+<span class="ui item padding"></span>
 
 </div>
 
