@@ -139,7 +139,7 @@ func (db *DB) getPNSOptions() (git bool, lang string, err error) {
 	if mask&2 == 0 {
 		return false, "", errors.New("missing use_git in pns table")
 	}
-	if mask&3 == 0 {
+	if mask&4 == 0 {
 		return false, "", errors.New("missing lang in pns table")
 	}
 	return
