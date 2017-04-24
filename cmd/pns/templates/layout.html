@@ -4,8 +4,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 {{$activeTagsURLs := .ActiveTagsURLs}}
 <title>PNS{{with $activeTagsURLs}}:{{range .}} {{.Name}}{{end}}{{end}}</title>
+<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
-<link rel="stylesheet" href="/_/static/semantic.css" />
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
@@ -29,54 +30,51 @@ function setup() {
 
 <body class="body" onload="setup();" onkeydown="return noteKeyDown(event);">
 
-<div class="ui top fixed menu">
+<div class="top-menu">
 
-{{if $activeTagsURLs}}
-<span class="ui item padding"></span>
-{{end}}
+<div class="float-left tagbar">
 
 {{range $activeTagsURLs}}
-<a class="tagbar item" href="{{.URL}}">{{.Name}}</a>
+<a class="button button-clear tagbar" href="{{.URL}}">{{.Name}}</a>
 {{end}}
 
-{{if .Count}}<span class="item">({{.Count}})</span>{{end}}
-{{if gt .Start 0}}<a class="item" href="{{.PrevPage}}">&lt;</a>{{end}}
-{{if .More}}<a class="item" href="{{.NextPage}}">&gt;</a>{{end}}
+{{if .Count}}<span class="count">({{.Count}})</span>{{end}}
+{{if gt .Start 0}}<a class="button button-clear prevnext" href="{{.PrevPage}}">&lt;</a>{{end}}
+{{if .More}}<a class="button button-clear prevnext" href="{{.NextPage}}">&gt;</a>{{end}}
 
-<div class="right menu">
+</div>
 
-<div class="item ui transparent input">
+<div class="float-right">
+
+<div class="float-left with-margin">
 <form action="{{.URL}}" class="inline">
 <input placeholder='{{tr "Search..."}}' name="tag" id="tag" type="text" data-multiple autofocus></input>
 </form>
 </div>
 
-<a class="item ui transparent input">
+<div class="float-left with-margin">
+
 <form action="/_/add" class="inline">
-<input type="submit" value='{{tr "Add note"}}'></input>
+<input class="button button-clear" type="submit" value='{{tr "Add note"}}'></input>
 </form>
-</a>
 
-<a class="item ui transparent input">
 <form action="/_/logout{{.URL}}" class="inline">
-<input type="submit" value='{{tr "Logout"}}'></input>
+<input class="button button-clear" type="submit" value='{{tr "Logout"}}'></input>
 </form>
-</a>
-
-<span class="ui item padding"></span>
 
 </div>
 
 </div>
+</div>
 
-<div class="content">
+<div class="container">
 
 {{$Edit := tr "Edit"}}
 {{$Copy := tr "Copy"}}
 
 {{range $n := .Notes}}
 <a id="{{.ID}}" class="anchor"></a>
-<div class="ui segment note" id="note{{.ID}}" tabindex="-1" >
+<div class="note" id="note{{.ID}}" tabindex="-1" >
 {{$.Render .}}
 
 {{if (not .NoFooter)}}

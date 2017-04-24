@@ -23,7 +23,7 @@ div.awesomplete > ul {
 	list-style: none;
 	padding: 0;
 	border-radius: .3em;
-	margin: 10px 0 0;
+	margin: -10px 0 0;
 	background: hsla(0,0%,100%,.9);
 	background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));
 	border: 1px solid rgba(0,0,0,.3);

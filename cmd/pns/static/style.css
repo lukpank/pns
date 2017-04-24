@@ -3,23 +3,60 @@
  * license. See LICENSE file for details.
  */
 
+@import url('Lato/latofonts.css');
+
 body.body {
     background-color: #fafafa;
 }
 
-.ui.top.fixed.menu {
-    height: 45px;
+.top-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background-color: #fff;
+    border-bottom: solid 1px #d1d1d1;
+    box-shadow: 0px 0px 5px #d1d1d1;
+    z-index: 1;
 }
 
-a.tagbar.item:hover {
+.float-left.tagbar {
+    margin-left: 10px;
+    margin-top: 12px;
+}
+
+a.button.tagbar {
+    text-transform: none;
+    font-size: 1.5rem;
+}
+
+a.button.tagbar:hover {
     text-decoration: line-through;
+}
+
+.count {
+    padding-right: 10px;
+    font-size: 1.5rem;
+}
+
+.button.prevnext {
+    font-size: 1.5rem;
+}
+
+.float-left.with-margin, .float-right.with-margin {
+    margin: 12px;
+}
+
+a.button:hover  {
+    text-decoration: none;
 }
 
 .topbar-message {
     display: block;
     width: 100%;
     text-align: center;
-    padding: 12px;
+    padding-top: 19px;
 }
 
 .topbar-message a, .topbar-message a:visited {
@@ -32,36 +69,38 @@ a.tagbar.item:hover {
 }
 
 @media all and (min-width: 2000px) {
-    .content {
-	width: 50%;
-    }
-    .ui.menu .item.padding {
-	width: 300px;
+    .top-menu {
+	padding-left: 300px;
+	padding-right: 300px;
     }
 }
 
 @media all and (max-width: 2000px) {
-    .content {
-	width: 80%;
-    }
-    .ui.menu .item.padding {
+    .top-menu {
 	padding: 0px;
     }
 }
 
-.content {
-    padding-top: 55px;
-    margin-left: auto;
-    margin-right: auto;
+div.container {
+    padding-top: 90px;
 }
 
 .anchor {
     display: block;
-    height: 40px;
-    margin: -55px 0 0 0;
+    height: 80px;
+    margin: -90px 0 0 0;
 }
 
-.ui.segment.note:focus {
+.note {
+    background: #fff;
+    border-radius: 4px;
+    padding: 15px;
+    border: solid 1px #d1d1d1;
+    box-shadow: 0px 0px 3px #d1d1d1;
+    margin-bottom: 30px;
+}
+
+.note:focus {
     border: solid 1px #2196f3;
     outline: none;
 }
@@ -77,15 +116,8 @@ a.tagbar.item:hover {
     margin-bottom: 5px;
 }
 
-a {
-    color: #2196f3;
-    text-decoration: none;
-}
 a:hover {
     text-decoration: underline;
-}
-a:visited a.tag:visited {
-    color: #9c27b0;
 }
 
 .tag {
@@ -96,57 +128,43 @@ code {
     font-family: Inconsolata, monospace;
 }
 
-:not(pre) > code {
-    background-color: #f5f5f5;
-    border-radius: 2px;
-    padding-left: 3px;
-    padding-right: 3px;
-}
-
-pre {
-    background-color: #f5f5f5;
-    border-radius: 2px;
-    padding: 10px;
-    font-family: Inconsolata, monospace;
-    overflow: auto;
-}
-
-.note table, .preview-note table {
-    border: solid 1px #e0e0e0;
-    border-collapse: collapse;
-}
-.note tbody, .preview-note tbody {
-    border: solid 1px #e0e0e0;
-}
-.note td, .note th, .preview-note td, .preview-note th {
-    border-left: solid 1px #e0e0e0;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-}
-.note th, .preview-note th {
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
-}
-
 div.login {
     position: absolute;
     bottom: 50%;
     right: 50%;
     transform: translate(50%,50%);
+    border: solid 1px #d1d1d1;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 15px 15px 0px 15px;
+    box-shadow: 0px 0px 3px #d1d1d1;
 }
 
-.R {
-    text-align: right;
+input.button.button-clear, a.button.button-clear {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-.messages {
-    background-color: #fff59d;
-    padding: 10px 30px 10px 30px;
+.warning.messages {
+    background-color: #fffaf3;
+    color: #ff9500;
+    border: 1px solid #ff9500;
+    border-radius: 4px;
+    padding: 14px 20px 5px 20px;
+}
+
+.error.messages {
+    background-color: #ffdddd;
+    color:  #aa2222;
+    border: 1px solid  #aa2222;
+    border-radius: 4px;
+    padding: 14px 20px 5px 20px;
 }
 
 pre.diff {
     background-color: #ffffff;
     padding: 0;
+    border: none;
 }
 
 .ins {

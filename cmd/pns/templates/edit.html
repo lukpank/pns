@@ -4,9 +4,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>PNS: {{if .Edit}}Edit note #{{.ID}}{{else if .Copy}}Adding copy of note #{{.ID}}{{else}}Add note{{end}}</title>
+<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link type="text/css" rel="stylesheet" href="/_/static/edit.css">
-<link rel="stylesheet" href="/_/static/semantic.css" />
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
@@ -27,36 +28,26 @@ function setup() {
 <body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form class="edit" action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
 
-<div class="ui top fixed menu">
+<div class="top-menu">
 
-<span class="ui item padding"></span>
-
-<div class="item ui transparent input">
+<div class="float-left tagbar">
 <input type="text" name="tag" id="tag" placeholder='{{tr "Topics and tags"}}' class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
 
-<div class="right menu">
+<div class="float-right with-margin">
 
 {{with .Referer}}
-<a class="item" onclick="location = referer">{{tr "Cancel"}}</a>
+<a class="button button-clear" onclick="location = referer">{{tr "Cancel"}}</a>
 {{end}}
 
-<a class="item ui transparent input">
-<input type="submit" value='{{tr "Preview"}}' onclick="setTargetAndAction('preview', 'Preview')"></input>
-</a>
+<input class="button button-clear" type="submit" value='{{tr "Preview"}}' onclick="setTargetAndAction('preview', 'Preview')"></input>
 
 {{if .Edit}}
-<a class="item ui transparent input">
-<input type="submit" value='{{tr "Diff"}}' onclick="setTargetAndAction('preview', 'Diff')"></input>
-</a>
+<input class="button button-clear" type="submit" value='{{tr "Diff"}}' onclick="setTargetAndAction('preview', 'Diff')"></input>
 {{end}}
 
-<a class="item ui transparent input">
-<input type="submit" value='{{tr "edit|Submit"}}' onclick="setTargetAndAction('', 'Submit')"></input>
-</a>
-
-<span class="ui item padding"></span>
+<input class="button button-clear" type="submit" value='{{tr "edit|Submit"}}' onclick="setTargetAndAction('', 'Submit')"></input>
 
 </div>
 
@@ -65,9 +56,10 @@ function setup() {
 <input type="hidden" name="action" id="action" value="Preview">
 {{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
-<div class="content">
-<textarea class="ui segment" name="text" id="text">{{.Text}}</textarea>
+<div class="container">
+<textarea class="note" name="text" id="text">{{.Text}}</textarea>
 <iframe class="ui segment" name="preview" id="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
+<iframe name="preview" id="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
 </div>
 
 </form>

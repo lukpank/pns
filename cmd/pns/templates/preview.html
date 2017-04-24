@@ -3,15 +3,16 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link type="text/css" rel="stylesheet" href="/_/static/style.css">
-<link rel="stylesheet" href="/_/static/semantic.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/style.css" />
 </head>
 
 <body>
 <div class="preview-note">
 
 {{if .Messages}}
-<div class="ui warning message">
+<div class="warning messages">
 {{range .Messages}}
 <p>{{.}}</p>
 {{end}}
