@@ -29,8 +29,8 @@ function newAwesomplete(list) {
 		replace: function(text) {
 			if (this.input.selectionStart) {
 				var s = this.input.value;
-				var before = s.substring(0, this.input.selectionStart).match(/^.+\s+[-+]?|[-+]?/)[0]
-				var after = s.substring(this.input.selectionEnd, s.lenght).match(/\s+.*|$/)[0]
+				var before = s.substring(0, this.input.selectionStart).match(/^.+\s+[-+]?|[-+]?/)[0];
+				var after = s.substring(this.input.selectionEnd, s.lenght).match(/\s+.*|$/)[0];
 				this.input.value = before + text + " " + after;
 				var n = before.length+text.length + 1;
 				this.input.setSelectionRange(n, n);
@@ -119,6 +119,7 @@ function editKeyDown(event, referer) {
 		document.getElementById("form").submit();
 		return false;
 	}
+	return true;
 }
 
 function focusNote(index) {
