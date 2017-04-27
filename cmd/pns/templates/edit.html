@@ -14,19 +14,16 @@
 <script src="/_/static/pns.js" async></script>
 <script>
 referer = {{.Referer}};
+connErrMsg = {{tr "Connection error."}};
 
 function setup() {
 	newAwesomplete(null);
-{{if .EditConflict}}
-	setTargetAndAction('preview', 'DiffConflict');
-	document.getElementById("form").submit();
-{{end}}
 }
 </script>
 </head>
 
 <body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
-<form class="edit" action="{{if .Edit}}/_/edit/submit/{{.ID}}{{else}}/_/add/submit{{end}}" method="post" id="form">
+<form class="edit" enctype="multipart/form-data" action="{{if .Edit}}/_/api/edit/submit/{{.ID}}{{else}}/_/api/add/submit{{end}}" method="post" id="form">
 
 <div class="top-menu">
 
@@ -41,13 +38,13 @@ function setup() {
 <a class="button button-clear" onclick="location = referer">{{tr "Cancel"}}</a>
 {{end}}
 
-<input class="button button-clear" type="submit" value='{{tr "Preview"}}' onclick="setTargetAndAction('preview', 'Preview')"></input>
+<input class="button button-clear" type="button" value='{{tr "Preview"}}' onclick="getPreview('Preview')"></input>
 
 {{if .Edit}}
-<input class="button button-clear" type="submit" value='{{tr "Diff"}}' onclick="setTargetAndAction('preview', 'Diff')"></input>
+<input class="button button-clear" type="button" value='{{tr "Diff"}}' onclick="getPreview('Diff')"></input>
 {{end}}
 
-<input class="button button-clear" type="submit" value='{{tr "edit|Submit"}}' onclick="setTargetAndAction('', 'Submit')"></input>
+<input class="button button-clear" type="submit" value='{{tr "edit|Submit"}}' onclick="return editSubmit();"></input>
 
 </div>
 
@@ -58,8 +55,9 @@ function setup() {
 
 <div class="container">
 <textarea class="note" name="text" id="text">{{.Text}}</textarea>
-<iframe class="ui segment" name="preview" id="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
-<iframe name="preview" id="preview" src="{{if and (or .Edit .Copy) (not .EditConflict)}}/_/edit/preview/{{.ID}}{{end}}"></iframe>
+<div id="error" class="hidden"><div class="error messages"><p id="error-msg"></p></div></div>
+<div id="preview">{{.Preview}}</div>
+<div id="login"></div>
 </div>
 
 </form>

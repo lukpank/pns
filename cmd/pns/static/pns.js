@@ -42,9 +42,111 @@ function newAwesomplete(list) {
 	});
 }
 
-function setTargetAndAction(target, action) {
-	document.getElementById("form").setAttribute("target", target);
+function getPreview(action) {
 	document.getElementById("action").value = action;
+	var form = document.getElementById("form");
+	var preview = document.getElementById("preview");
+	var error = document.getElementById("error");
+	var errorMsg = document.getElementById("error-msg");
+	var req = new XMLHttpRequest();
+	req.open("POST", form.getAttribute("action"));
+	req.onerror = function() {
+		errorMsg.innerHTML = connErrMsg;
+		error.setAttribute("class", "");
+		preview.innerHTML = "";
+	};
+	req.onload = function() {
+		error.setAttribute("class", "hidden");
+		if (req.status == 200) {
+			preview.innerHTML = req.response;
+		} else if (req.status == 401) {
+			modalLogin(req.response, function() { getPreview(action); });
+		} else {
+			errorMsg.innerHTML = req.response;
+			error.setAttribute("class", "");
+			preview.innerHTML = "";
+		}
+	};
+	req.send(new FormData(form));
+}
+
+var loginCallback = null;
+
+function editSubmit() {
+	if (document.getElementById("modal") != null) {
+		loginOnClick(loginCallback);
+		return false;
+	}
+	document.getElementById("action").value = 'Submit';
+	var form = document.getElementById("form");
+	var error = document.getElementById("error");
+	var errorMsg = document.getElementById("error-msg");
+	var req = new XMLHttpRequest();
+	req.open("POST", form.getAttribute("action"));
+	req.onerror = function() {
+		errorMsg.innerHTML = connErrMsg;
+		document.getElementById("error").setAttribute("class", "");
+		preview.innerHTML = "";
+	};
+	req.onload = function() {
+		error.setAttribute("class", "hidden");
+		if (req.status == 200) {
+			window.location = JSON.parse(req.response).redirect_location;
+		} else if (req.status == 401) {
+			modalLogin(req.response, function() { editSubmit(); });
+		} else if (req.status == 409) {
+			preview.innerHTML = req.response;
+			form.elements["sha1sum"].value = form.elements["new_sha1sum"].value;
+		} else {
+			errorMsg.innerHTML = req.response;
+			error.setAttribute("class", "");
+			preview.innerHTML = "";
+		}
+	};
+	req.send(new FormData(form));
+	return false;
+}
+
+function modalLogin(response, callback) {
+	loginCallback = callback;
+	var login = document.getElementById("login");
+	login.innerHTML = response;
+	document.getElementById("login-name").focus();
+	var modal = document.getElementById("modal");
+	modal.onclick = function(event) {
+		if (event.target == modal) {
+			login.innerHTML = "";
+		}
+	};
+	document.getElementById("login-submit").onclick = function() { return loginOnClick(callback); }
+}
+
+function loginOnClick(callback) {
+	var login = document.getElementById("login");
+	var loginName = document.getElementById("login-name");
+	var password = document.getElementById("password");
+	var req = new XMLHttpRequest();
+	var loginError = document.getElementById("login-error");
+	req.open("POST", "/_/api/login");
+		req.onerror = function() {
+			loginError.innerHTML = document.getElementById("error").innerHTML;
+		};
+	req.onload = function() {
+		if (req.status == 200) {
+			login.innerHTML = "";
+			callback();
+		} else {
+			loginName.value = "";
+			password.value = "";
+			loginName.focus();
+			loginError.innerHTML = req.response;
+		}
+	};
+	var data = new FormData();
+	data.append("login", loginName.value);
+	data.append("password", password.value);
+	req.send(data);
+	return false;
 }
 
 function noteKeyDown(event) {
@@ -111,12 +213,10 @@ function editKeyDown(event, referer) {
 		document.location = referer;
 		return false;
 	} else if (event.keyCode == 82) { // Alt+r -- reload preview
-		setTargetAndAction('preview', 'Preview');
-		document.getElementById("form").submit();
+		getPreview('Preview');
 		return false;
 	} else if (event.keyCode == 83) { // Alt+s -- submit
-		setTargetAndAction('', 'Submit');
-		document.getElementById("form").submit();
+		editSubmit();
 		return false;
 	}
 	return true;

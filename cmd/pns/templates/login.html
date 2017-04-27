@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{if .FullPage}}<!DOCTYPE html>
 <html>
 
 <head>
@@ -19,29 +19,39 @@
 </div>
 
 <form action="/_/login" method="post">
+{{else}}
+<div id="modal">
+{{end}}
+
 <div class="login">
 
 <fieldset>
 
 <div>
 <label for="login">{{tr "Login"}}</label>
-<input type="text" name="login" autofocus>
+<input type="text" name="login" id="login-name" autofocus>
 
 <label for="password">{{tr "Password"}}</label>
-<input type="password" name="password">
+<input type="password" name="password" id="password">
 </div>
 
 <input type="hidden" name="redirect" value="{{.Redirect}}">
-<button class="button" type="submit" value="Submit">{{tr "login|Submit"}}</button>
+<button class="button" id="login-submit" type="submit" value="Submit">{{tr "login|Submit"}}</button>
 
+<div id="login-error">
 {{with .Message}}
 <div class="error messages"><p >{{.}}</p></div>
 {{end}}
+</div>
 
 </fieldset>
 
 </div>
-</form>
 
+{{if .FullPage}}
+</form>
 </body>
 </html>
+{{else}}
+</div>
+{{end}}
