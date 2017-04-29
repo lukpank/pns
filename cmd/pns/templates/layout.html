@@ -79,31 +79,12 @@ function setup() {
 
 {{if (not .NoFooter)}}
 <div class="note-footer">
-
-{{range .Topics}}
-<a href="{{$.TagURL .}}" class="tag">{{.}}</a> ·
-{{end}}
-
-{{range .Tags}}
-<a href="{{$.TagURL .}}" class="tag">{{.}}</a> ·
-{{end}}
-
-<span class="tag">
-{{.Modified.Format "2006-01-02 15:04:05 -0700"}}
-</span> ·
-
-<span class="tag">
-<a href="/_/edit/{{.ID}}" class="tag">{{$Edit}}</a>
-</span> ·
-
-<span class="tag">
-<a href="#{{.ID}}" class="tag">#</a>
-</span> ·
-
-<span class="tag">
-<a href="/_/copy/{{.ID}}" class="tag">{{$Copy}}</a>
-</span>
-
+{{range .Topics}}<a href="{{$.TagURL .}}">{{.}}</a> ·
+{{end}}{{range .Tags}}<a href="{{$.TagURL .}}">{{.}}</a> ·
+{{end}}{{.Modified.Format "2006-01-02 15:04:05 -0700"}} ·
+<a href="/_/edit/{{.ID}}">{{$Edit}}</a> ·
+<a href="#{{.ID}}">#</a> ·
+<a href="/_/copy/{{.ID}}">{{$Copy}}</a>
 </div>
 {{end}}
 

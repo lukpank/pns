@@ -107,7 +107,21 @@ div.container {
 
 .note-footer {
     margin-top: 15px;
-    font-size: 80%;
+    font-size: 90%;
+    color: #bdbdbd;
+}
+
+.note-footer > a {
+    color: #bdbdbd;
+}
+
+.note-footer:hover {
+
+    color: #606c76;
+}
+
+.note-footer:hover > a {
+    color: #606c76;
 }
 
 .preview-note {
@@ -122,10 +136,6 @@ div.container {
 
 a:hover {
     text-decoration: underline;
-}
-
-.tag {
-    color: #bdbdbd;
 }
 
 code {
