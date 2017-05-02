@@ -22,7 +22,7 @@ function setup() {
 </script>
 </head>
 
-<body class="body" onload="setup();" onkeydown="return editKeyDown(event, referer);">
+<body onload="setup();" onkeydown="return editKeyDown(event, referer);">
 <form class="edit" enctype="multipart/form-data" action="{{if .Edit}}/_/api/edit/submit/{{.ID}}{{else}}/_/api/add/submit{{end}}" method="post" id="form">
 
 <div class="top-menu">
