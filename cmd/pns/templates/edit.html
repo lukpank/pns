@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="edit">
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -7,7 +7,6 @@
 <link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
 <link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
-<link type="text/css" rel="stylesheet" href="/_/static/edit.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
 <script src="/_/static/awesomplete.js"></script>
@@ -53,7 +52,7 @@ function setup() {
 <input type="hidden" name="action" id="action" value="Preview">
 {{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}
 
-<div class="container">
+<div class="container edit">
 <textarea class="note" name="text" id="text">{{.Text}}</textarea>
 <div id="error" class="hidden"><div class="error messages"><p id="error-msg"></p></div></div>
 <div id="preview">{{.Preview}}</div>
