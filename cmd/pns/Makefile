@@ -10,7 +10,7 @@ pnse: $(GOFILES) embedded-assets.go
 
 embedded-assets.go: $(ASSETSFILES)
 	@which esc > /dev/null || ( echo "error: no 'esc' found: you probably need to 'go get github.com/mjibson/esc'" && ! : )
-	( echo '// +build embedded'; esc -ignore '.*~' static templates ) > embedded-assets.go
+	( echo '// +build embedded'; echo; esc -ignore '.*~' static templates ) > embedded-assets.go
 
 # pns-devel is for development of templates (no restart needed to reload a template)
 pns-devel: $(GOFILES)
