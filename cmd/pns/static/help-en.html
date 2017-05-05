@@ -1,0 +1,355 @@
+<div class="preview-note">
+
+<p></p>
+
+<div class="float-right">
+  <a class="button button-clear" href="#formatting">Formatting</a>
+  <a class="button button-clear" href="#keyboard-shortcuts">Keyboard shortcuts</a>
+  <a class="button button-clear" href="#topics-and-tags">Topics and tags</a>
+</div>
+
+<a id="formatting" class="anchor"></a>
+
+<h1>Formatting</h1>
+
+<p>Notes in PNS are written in so-called <i>Markdown</i> format or actually
+in its dialect called <a href="http://commonmark.org/">CommonMark</a>.
+This is a lightweight markup, that is it looks almost like plain text
+but some characters have special meaning triggering some kind of
+formatting.</p>
+
+<p>There are two kinds of formating: <i>inline formating</i> which can
+be used inside any paragraph and <i>paragraph formating</i> which
+determines division of the text into headings, paragraphs, ordered and
+unordered lists, tables, and preformatted blocks of text.</p>
+
+<h2>Inline formating</h2>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>You want</th><th>You write</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i>Italic</i></td>
+      <td><code>*Italic*</code></td>
+    </tr>
+    <tr>
+      <td><b>Bold</b></td>
+      <td><code>**Bold**</code></td>
+    </tr>
+    <tr>
+      <td><b><i>Bold italic</i></b></td>
+      <td><code>***Bold italic***</code></td>
+    </tr>
+    <tr>
+      <td><code>Preformatted text</code></td>
+      <td><code>`Preformatted text`</code></td>
+    </tr>
+    <tr>
+      <td>Link to <a href="http://google.com">google.com</a></td>
+      <td><code>Link to google.com</code></td>
+    </tr>
+    <tr>
+      <td><a href="http://google.com">The same link with description</a></td>
+      <td><code>[The same link with description](http://google.com)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Paragraph formating</h2>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>You want</th><th>You write</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><h1>Header level 1</h1><h2>Header level 2</h2><h3>Header level 3</h3>
+	<h4>Header level 4</h4><h5>Header level 5</h5><h6>Header level 6</h6>
+	<h1>Header level 1</h1><h2>Header level 2</h2></td>
+      <td><pre><code># Header level 1
+## Header level 2
+### Header level 3
+#### Header level 4
+##### Header level 5
+###### Header level 6
+
+Header level 1
+==============
+
+Header level 2
+--------------</code></pre>
+    </td></tr>
+
+    <tr><td><p>First paragraph. Same paragraph.</p><p>Second paragraph. Blank line starts a new paragraph.</p></td>
+      <td><pre><code>First paragraph.
+Same paragraph.
+
+Second paragraph.
+Blank line starts a new paragraph.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Ordered list:</p><ol><li>First item.</li><li>Second item.</li></ol></td>
+      <td><pre><code>Ordered list:
+1. First item.
+2. Second item.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Unordered list:</p><ul><li>First item.</li><li>Second item.</li></ul></td>
+      <td><pre><code>Unordered list:
+- First item.
+- Second item.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Nested lists:</p><ol><li><p>First item.</p><ul><li>First item.</li><li>Second item.</li></ul></li><li>Second item.</li></ol></td>
+      <td><pre><code>Nested lists:
+1. First item.
+   - First item.
+   - Second item.
+2. Second item.</code></pre>
+    </td></tr>
+
+    <tr><td>
+	<table>
+	  <thead>
+	    <tr><th>First row title</th><th>Second row title</th></tr>
+	  </thead>
+	  <tbody>
+	    <tr><td>Item 1</td><td>Item 2</td></tr>
+	    <tr><td>Item 3</td><td>Item 4</td></tr>
+	  </tbody>
+	</table>
+      </td>
+      <td><pre><code>| First row title | Second row title |
+|-----------------|------------------|
+| Item 1          | Item 2           |
+| Item 3          | Item 4           |</code></pre>
+      </td></tr>
+
+    <tr><td><p>Block of preformatted text using indentation:</p>
+	<pre><code>First line.
+  Second line.
+Third line.
+    Here *inline formating* has **no** effect.</code></pre>
+	<p>Block of preformatted text using so-called fencing:</p>
+	<pre><code>First line.    Here *inline formating* has **no** effect.
+  Second line.
+Third line.</code></pre>
+      </td>
+      <td><pre><code>Block of preformatted text using indentation:
+
+    First line.
+      Second line.
+    Third line.
+        Here *inline formating* has **no** effect.
+
+Block of preformatted text using so-called fencing:
+
+```
+First line.
+  Second line.
+Third line.
+    Here *inline formating* has **no** effect.
+```</code></pre>
+
+    </td></tr>
+
+    <tr><td><p>Horizontal line:</p><hr /></td>
+      <td><pre><code>Horizontal line:
+
+----</code></pre>
+    </td></tr>
+
+  </tbody>
+</table>
+
+
+<a id="keyboard-shortcuts" class="anchor"></a>
+
+<h1>Keyboard shortcuts</h1>
+
+<p>PNS pages can be navigated using keyboard shortcuts.</p>
+
+<h2>View mode</h2>
+
+<p>On the pages that display notes the following shortcuts are available</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>n</code></td>
+      <td>select next note (just <code>n</code> will work if some note is already selected)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>p</code></td>
+      <td>select previous note (just <code>p</code> will work if some note is already selected)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>l</code></td>
+      <td>switch between search field and current note (just <code>l</code> will work if not in search field)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>a</code></td>
+      <td>add new note (just <code>a</code> will work unless search field is selected; works as “<i>Add note</i>” button)</td>
+    </tr>
+    <tr>
+      <td><code>e</code></td>
+      <td>edit selected note (works as “<i>Edit</i>” link)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Editing mode</h2>
+
+<p>On the note editing/adding pages the following shortcuts are available</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>l</code></td>
+      <td>switch between tag editing field and note editing field</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>r</code></td>
+      <td>reload preview (works as “<i>Preview</i>” button)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>s</code></td>
+      <td>submit note (works as “<i>Submit</i>” button)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Common shortcuts</h2>
+
+<p>These shortcuts work in Firefox and Chrome</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>&larr;</code></td>
+      <td>back to previous page</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>&rarr;</code></td>
+      <td>forward to next page</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<a id="topics-and-tags" class="anchor"></a>
+
+<h1>Topics and tags</h1>
+
+<p>Each note must be connected with one or more topics and tags (names
+of topics start with a slash, such as <code>/mytopic</code>, and names
+of tags start with a letter, such as <code>mytag</code>). PNS starts
+with and index page containing list all of the defined topics and
+tags. You can click on a particular topic or a tag to view notes
+connected with this topic or tag.</p>
+
+<p>On the left side of the top panel (in the view mode) there are
+buttons for the currently selected topic and tags (only one topic may
+be selected at a given time but more than one tag). Only notes that
+are connected with selected topic (if any) and selected tags (if any)
+are displayed. Clicking on any of these buttons will remove the given
+topic or tag from the selection.</p>
+
+<p>Each note has a footer listing all topics and tags it is connected
+to. Clicking on any of its topics and tags in the footer will add this
+topic or tag to the selected ones (if a topic is clicked and another
+topic is already selected the new topic will replace the old one in
+the selection).</p>
+
+<p>Selected topics and tags may also be changed using the search
+field. Search field may also be used for full text search in the
+notes. Here are example searches:</p>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>You want</th><th>You write in search field</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Search for all notes connected with topic <code>/mytopic</code></td>
+      <td><code>/mytopic</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes connected with topic <code>/mytopic</code> and tag <code>mytag</code></td>
+      <td><code>/mytopic mytag</code></td>
+    </tr>
+    <tr>
+      <td>Add tags <code>favorite</code> and <code>best</code> to the current selection</td>
+      <td><code>+favorite best</code></td>
+    </tr>
+    <tr>
+      <td>Remove tags <code>favorite</code> and <code>best</code> from the current selection</td>
+      <td><code>-favorite best</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes containing word <code>funny</code></td>
+      <td><code>'funny'</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes containing words staring with prefix <code>fun</code></td>
+      <td><code>'fun*'</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes containing words <code>funny</code> and <code>joke</code></td>
+      <td><code>'funny joke'</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes containing word <code>funny</code> followed by <code>joke</code></td>
+      <td><code>"funny joke"</code></td>
+    </tr>
+    <tr>
+      <td>Search for all notes connected with tag <code>best</code> and containing word <code>funny</code></td>
+      <td><code>best 'funny'</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>

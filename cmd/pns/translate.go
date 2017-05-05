@@ -25,11 +25,15 @@ func (t translation) htmlTranslate(s string) template.HTML {
 }
 
 var enTranslation = translation{
+	"lang-code": "en",
+
 	"login|Submit": "Submit",
 	"edit|Submit":  "Submit",
 }
 
 var plTranslation = translation{
+	"lang-code": "pl",
+
 	"# No such notes":                 "# Brak takich notatek",
 	"Add note":                        "Dodaj notatkę",
 	"Bad request: error parsing form": "Błędne zapytanie: błąd parsowania formularza",

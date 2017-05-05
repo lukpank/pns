@@ -1,0 +1,363 @@
+<div class="preview-note">
+
+<p></p>
+
+<div class="float-right">
+  <a class="button button-clear" href="#formatowanie">Formatowanie</a>
+  <a class="button button-clear" href="#skroty-klawiszowe">Skróty klawiszowe</a>
+  <a class="button button-clear" href="#tematy-i-etykiety">Tematy i etykiety</a>
+</div>
+
+<a id="formatowanie" class="anchor"></a>
+
+<h1>Formatowanie</h1>
+
+<p>Notatki w programie PNS pisze się wykorzystując format o nazwie
+<i>Markdown</i> a dokładniej jego dialekt o nazwie
+<a href="http://commonmark.org/">CommonMark</a>. Jest to format
+wyglądający prawie jak zwykły tekst, ale pewne znaki mają w nim
+specjalne naczenie.</p>
+
+<p>Można wyróżnić dwa rodzaje formatowania: <i>formatowanie wewnątrz
+akapitowe</i>, które może być wykorzystane w obrębie dowolnego akapitu
+oraz <i>formatowanie akapitów</i>, które określa podział tekstu na
+nagłówki, akapity, numerowane listy, wypunktowania, tabele i literalne
+bloki tekstu.</p>
+
+<h2>Formatowanie wewnątrz akapitowe</h2>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>Chcesz uzyskać</th><th>Piszesz</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i>Kursywa</i></td>
+      <td><code>*Kursywa*</code></td>
+    </tr>
+    <tr>
+      <td><b>Pogrubienie</b></td>
+      <td><code>**Pogrubienie**</code></td>
+    </tr>
+    <tr>
+      <td><b><i>Pogrubiona kursywa</i></b></td>
+      <td><code>***Pogrubiona kursywa***</code></td>
+    </tr>
+    <tr>
+      <td><code>Literalny tekst</code></td>
+      <td><code>`Literalny tekst`</code></td>
+    </tr>
+    <tr>
+      <td>Odnośnik do <a href="http://google.com">google.com</a></td>
+      <td><code>Odnośnik do google.com</code></td>
+    </tr>
+    <tr>
+      <td><a href="http://google.com">Ten sam odnośnik z opisem</a></td>
+      <td><code>[Ten sam odnośnik z opisem](http://google.com)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Formatowanie akapitów</h2>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>Chcesz uzyskać</th><th>Piszesz</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><h1>Nagłówek poziomu 1</h1><h2>Nagłówek poziomu 2</h2><h3>Nagłówek poziomu 3</h3>
+	<h4>Nagłówek poziomu 4</h4><h5>Nagłówek poziomu 5</h5><h6>Nagłówek poziomu 6</h6>
+	<h1>Nagłówek poziomu 1</h1><h2>Nagłówek poziomu 2</h2></td>
+      <td><pre><code># Nagłówek poziomu 1
+## Nagłówek poziomu 2
+### Nagłówek poziomu 3
+#### Nagłówek poziomu 4
+##### Nagłówek poziomu 5
+###### Nagłówek poziomu 6
+
+Nagłówek poziomu 1
+==================
+
+Nagłówek poziomu 2
+------------------</code></pre>
+    </td></tr>
+
+    <tr><td><p>Pierwszy akapit. Ten sam akapit.</p><p>Drugi akapit. Pusta linia rozpoczyna nowy akapit.</p></td>
+      <td><pre><code>Pierwszy akapit.
+Ten sam akapit.
+
+Drugi akapit.
+Pusta linia rozpoczyna nowy akapit.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Numerowana lista:</p><ol><li>Pierwszy element.</li><li>Drugi element.</li></ol></td>
+      <td><pre><code>Numerowana lista:
+1. Pierwszy element.
+2. Drugi element.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Wypunktowanie:</p><ul><li>Pierwszy element.</li><li>Drugi element.</li></ul></td>
+      <td><pre><code>Wypunktowanie:
+- Pierwszy element.
+- Drugi element.</code></pre>
+    </td></tr>
+
+    <tr><td><p>Nested lists:</p><ol><li><p>Pierwszy element.</p><ul><li>Pierwszy element.</li><li>Drugi element.</li></ul></li><li>Drugi element.</li></ol></td>
+      <td><pre><code>Nested lists:
+1. Pierwszy element.
+   - Pierwszy element.
+   - Drugi element.
+2. Drugi element.</code></pre>
+    </td></tr>
+
+    <tr><td>
+	<table>
+	  <thead>
+	    <tr><th>Tytuł pierwszej kolumny</th><th>Tytuł drugiej kolumny</th></tr>
+	  </thead>
+	  <tbody>
+	    <tr><td>Element 1</td><td>Element 2</td></tr>
+	    <tr><td>Element 3</td><td>Element 4</td></tr>
+	  </tbody>
+	</table>
+      </td>
+      <td><pre><code>| Tytuł pierwszej kolumny | Tytuł drugiej kolumny |
+|-------------------------|-----------------------|
+| Element 1               | Element 2             |
+| Element 3               | Element 4             |</code></pre>
+      </td></tr>
+
+    <tr><td><p>Blok literalny wcięty:</p>
+	<pre><code>Pierwsza linia.
+  Druga linia.
+Trzecia linia.
+    *Formatowanie wewnątrz akapitowe* **nie** ma efektu.</code></pre>
+	<p>Blok literalny z ogranicznikami:</p>
+	<pre><code>Pierwsza linia.
+  Druga linia.
+Trzecia linia.
+    *Formatowanie wewnątrz akapitowe* **nie** ma efektu.</code></pre>
+      </td>
+      <td><pre><code>Blok literalny wcięty:
+
+    Pierwsza linia.
+      Druga linia.
+    Trzecia linia.
+        *Formatowanie wewnątrz akapitowe* **nie** ma efektu.
+
+Blok literalny z ogranicznikami:
+
+```
+Pierwsza linia.
+  Druga linia.
+Trzecia linia.
+    *Formatowanie wewnątrz akapitowe* **nie** ma efektu.
+```</code></pre>
+    </td></tr>
+
+    </td></tr>
+
+    <tr><td><p>Pozioma linia:</p><hr /></td>
+      <td><pre><code>Pozioma linia:
+
+----</code></pre>
+    </td></tr>
+
+  </tbody>
+</table>
+
+
+<a id="skroty-klawiszowe" class="anchor"></a>
+
+<h1>Skróty klawiszowe</h1>
+
+<p>Strony programu PNS mogą być obsługiwany przy użyciu skrótów klawiszowych.</p>
+
+<h2>Tryb przeglądania notatek</h2>
+
+<p>Na stronach służących do przeglądania notatek są dostępne następujące skróty</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Skrót klawiszowy</th>
+      <th>Akcja</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>n</code></td>
+      <td>zaznacza następną notatkę (wystarcz klawisz <code>n</code> jeśli któraś notatka jest już zaznaczona)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>p</code></td>
+      <td>zaznacza poprzednią notatkę (wystarczy klawisz <code>p</code> jeśli któraś notatka jest już zaznaczona)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>l</code></td>
+      <td>przełącza między polem wyszukiwania a zaznaczoną notatką (wystarczy klawisz <code>l</code> jeśli nie jesteś w polu wyszukiwania)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>a</code></td>
+      <td>dodaje nową notatkę (wystarczy klawisz <code>a</code> jeśli nie jesteś w polu wyszukiwania; działa jak przycisk „<i>Dodaj notatkę</i>”)</td>
+    </tr>
+    <tr>
+      <td><code>e</code></td>
+      <td>rozpoczyna edycję zaznaczonej notatki (działa jak odnośnik „<i>Edytuj</i>” u dołu notatki)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Tryb edycji notatek</h2>
+
+<p>Na stronach edycji/dodawania notatek są dostępne następujące skróty</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Skrót klawiszowy</th>
+      <th>Akcja</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>l</code></td>
+      <td>przełącza między polem edycji tematów i etykiet a polem edycji notatki</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>r</code></td>
+      <td>odświeża podgląd (działa jak przycisk „<i>Podgląd</i>”)</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>s</code></td>
+      <td>zapisuje notatkę (działa jak przycisk „<i>Zapisz</i>”)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Wspólne skróty</h2>
+
+<p>Poniższe skróty działają w przeglądarkach Firefox i Chrome</p>
+
+<table>
+  <colgroup>
+    <col style="width: 20%">
+    <col style="width: 80%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Skrót klawiszowy</th>
+      <th>Akcja</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Alt</code> + <code>&larr;</code></td>
+      <td>cofa do poprzedniej strony</td>
+    </tr>
+    <tr>
+      <td><code>Alt</code> + <code>&rarr;</code></td>
+      <td>przechodzi do następnej strony</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<a id="tematy-i-etykiety" class="anchor"></a>
+
+<h1>Tematy i etykiety</h1>
+
+<p>Każda notatka musi być powiązana z jednym lub więcej tematem bądź
+etykietą (nazwy tematów rozpoczynają się od ukośnika,
+np. <code>/mój-temat</code>, zaś nazwy etykiet rozpoczynają się od
+litery, np. <code>moja-etykieta</code>). Główna strona PNS wyświetla
+listę wszystkich zdefiniowanych tematów i etykiet. Możesz kliknąć na
+określony temat lub etykietę aby zobaczyć notatki powiązane z wybranym
+tematem lub etykietą.</p>
+
+<p>W lewej części górnego panelu (w trybie przeglądania notatek)
+znajdują się przyciski odpowiadające aktualnie wybranemu tematowi i
+etykietom (tylko jeden temat może być w danym momencie wybrany
+natomiast jednocześnie może być wybranych więcej etykiet). Tylko
+notatki powiązane z wybranym tematem (jeśli wybrano) i wybranymi
+etykietami (jeśli wybrano) są wyświetlane. Kliknięcie na dowolny z
+tych przycisków spowoduje usunięcie klikniętego tematu lub etykiety z
+aktualnej listy wybranych tematów i etykiet.</p>
+
+<p>Każda notatka ma stopkę zawierającą listę tematów i etykiet z
+którymi jest powiązana. Kliknięcie na dowolny z nich spowoduje dodanie
+klikniętego tematu lub etykiety do aktualnej listy wybranych tematów i
+etykiet (jeśli kliknięto temat a inny temat był już wybrany spowoduje
+to zastąpienie poprzedniego tematu nowym na liście wybranych tematów i
+etykiet).</p>
+
+<p>Wybrane tematy i etykiety mogą być również zmieniane za pomocą pola
+wyszukiwania.  Pole wyszukiwania może być również użyte do
+wyszukiwania słów lub fraz zawartych w poszczególnych
+notatkach. Poniżej znajduje się lista przykładowych wyszukiwań:</p>
+
+<table>
+  <colgroup>
+    <col style="width: 50%">
+    <col style="width: 50%">
+  </colgroup>
+  <thead>
+    <tr><th>Chcesz</th><th>Piszesz w polu wyszukiwania</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Znaleźć wszystkie notatki związane z tematem <code>/mój-temat</code></td>
+      <td><code>/mój-temat</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki związane z tematem <code>/mój-temat</code> i etykietą <code>moja-etykieta</code></td>
+      <td><code>/mój-temat moja-etykieta</code></td>
+    </tr>
+    <tr>
+      <td>Dodać etykiety <code>ulubione</code> i <code>najlepsze</code> do  listy wybranych tematów i etykiet</td>
+      <td><code>+ulubione najlepsze</code></td>
+    </tr>
+    <tr>
+      <td>Usunąć etykiety <code>ulubione</code> i <code>najlepsze</code> z  listy wybranych tematów i etykiet</td>
+      <td><code>-ulubione najlepsze</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki zawierające wyraz <code>śmieszny</code></td>
+      <td><code>'śmieszny'</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki zawierające wyrazy rozpoczynające się od prefiksu <code>śmie</code></td>
+      <td><code>'śmie*'</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki zawierające wyrazy <code>śmieszny</code> i <code>dowcip</code></td>
+      <td><code>'śmieszny dowcip'</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki zawierające następujące bezpośrednio po sobie wyrazy <code>śmieszny</code> i <code>dowcip</code></td>
+      <td><code>"śmieszny dowcip"</code></td>
+    </tr>
+    <tr>
+      <td>Znaleźć wszystkie notatki związane z etykietą <code>najlepsze</code> i zawierające wyraz <code>śmieszne</code></td>
+      <td><code>najlepsze 'śmieszne'</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>

@@ -12,7 +12,7 @@
 <script src="/_/static/awesomplete.js"></script>
 <script src="/_/static/pns.js" async></script>
 <script>
-referer = {{.Referer}};
+lang = {{tr "lang-code"}};
 connErrMsg = {{tr "Connection error."}};
 
 function setup() {
@@ -21,7 +21,7 @@ function setup() {
 </script>
 </head>
 
-<body onload="setup();" onkeydown="return editKeyDown(event, referer);">
+<body onload="setup();" onkeydown="return editKeyDown(event);">
 <form class="edit" enctype="multipart/form-data" action="{{if .Edit}}/_/api/edit/submit/{{.ID}}{{else}}/_/api/add/submit{{end}}" method="post" id="form">
 
 <div class="top-menu">
@@ -33,9 +33,7 @@ function setup() {
 
 <div class="float-right with-margin">
 
-{{with .Referer}}
-<a class="button button-clear" onclick="location = referer">{{tr "Cancel"}}</a>
-{{end}}
+<input class="button button-clear" type="button" value='{{tr "?"}}' onclick="getPreview('Help')"></input>
 
 <input class="button button-clear" type="button" value='{{tr "Preview"}}' onclick="getPreview('Preview')"></input>
 

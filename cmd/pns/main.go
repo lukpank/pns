@@ -164,14 +164,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != "", tr.translate}
+	dir := newDir("static/")
+	s := &server{db, t, markdown.New(), NewSessions(), *httpsAddr != "", tr.translate, dir}
 	http.Handle("/", s.authenticate(s.ServeHTTP))
 	http.HandleFunc("/_/edit/", s.authenticate(s.serveEdit))
 	http.HandleFunc("/_/api/edit/submit/", s.authenticate(s.serveAPIEditSubmit))
 	http.HandleFunc("/_/add", s.authenticate(s.serveAdd))
 	http.HandleFunc("/_/api/add/submit", s.authenticate(s.serveAPIAddSubmit))
 	http.HandleFunc("/_/copy/", s.authenticate(s.serveCopy))
-	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(newDir("static/"))))
+	http.Handle("/_/static/", http.StripPrefix("/_/static/", http.FileServer(dir)))
 	http.HandleFunc("/_/login", s.serveLogin)
 	http.HandleFunc("/_/api/login", s.serveAPILogin)
 	http.HandleFunc("/_/logout/", s.serveLogout)
@@ -224,6 +225,7 @@ type server struct {
 	s      *sessions
 	secure bool
 	tr     func(string) string
+	dir    http.FileSystem
 }
 
 type TemplateExecutor interface {
@@ -355,9 +357,8 @@ func (s *server) editPage(w http.ResponseWriter, r *http.Request, note *Note, no
 		Edit               bool
 		Copy               bool
 		SHA1Sum            string
-		Referer            string
 		Preview            template.HTML
-	}{note, strings.Join(tt, ", "), noteTopicsAndTags, true, false, sha1sum, r.Header.Get("Referer"), template.HTML(b.String())}
+	}{note, strings.Join(tt, ", "), noteTopicsAndTags, true, false, sha1sum, template.HTML(b.String())}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -560,9 +561,8 @@ func (s *server) serveAdd(w http.ResponseWriter, r *http.Request) {
 		Edit               bool
 		EditConflict       bool
 		Copy               bool
-		Referer            string
 		Preview            template.HTML
-	}{"", strings.Join(tt, ", "), "", false, false, false, r.Header.Get("Referer"), ""}
+	}{"", strings.Join(tt, ", "), "", false, false, false, ""}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -599,8 +599,7 @@ func (s *server) serveCopy(w http.ResponseWriter, r *http.Request) {
 		Edit               bool
 		EditConflict       bool
 		Copy               bool
-		Referer            string
-	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), false, false, true, r.Header.Get("Referer")}
+	}{note, strings.Join(tt, ", "), strings.Join(ntt, " "), false, false, true}
 	err = s.t.ExecuteTemplate(w, "edit.html", noteEx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

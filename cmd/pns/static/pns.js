@@ -49,7 +49,11 @@ function getPreview(action) {
 	var error = document.getElementById("error");
 	var errorMsg = document.getElementById("error-msg");
 	var req = new XMLHttpRequest();
-	req.open("POST", form.getAttribute("action"));
+	if (action == "Help") {
+		req.open("GET", "/_/static/help-" + lang + ".html");
+	} else {
+		req.open("POST", form.getAttribute("action"));
+	}
 	req.onerror = function() {
 		errorMsg.innerHTML = connErrMsg;
 		error.setAttribute("class", "");
@@ -67,7 +71,13 @@ function getPreview(action) {
 			preview.innerHTML = "";
 		}
 	};
-	req.send(new FormData(form));
+	if (action == "Help") {
+		data = new FormData();
+		data.append("action", "Help");
+		req.send(data);
+	} else {
+		req.send(new FormData(form));
+	}
 }
 
 var loginCallback = null;
@@ -198,7 +208,7 @@ function noteKeyDown(event) {
 	return true;
 }
 
-function editKeyDown(event, referer) {
+function editKeyDown(event) {
 	if (event.ctrlKey || !event.altKey) {
 		return true;
 	}
@@ -208,9 +218,6 @@ function editKeyDown(event, referer) {
 		} else {
 			document.getElementById("tag").focus();
 		}
-		return false;
-	} else if (event.keyCode == 81) { // Alt+q -- quit editing note
-		document.location = referer;
 		return false;
 	} else if (event.keyCode == 82) { // Alt+r -- reload preview
 		getPreview('Preview');
