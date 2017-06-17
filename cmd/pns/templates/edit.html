@@ -3,9 +3,9 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PNS: {{if .Edit}}Edit note #{{.ID}}{{else if .Copy}}Adding copy of note #{{.ID}}{{else}}Add note{{end}}</title>
-<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/picnic.min.css">
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
@@ -24,28 +24,32 @@ function setup() {
 <body onload="setup();" onkeydown="return editKeyDown(event);">
 <form class="edit" enctype="multipart/form-data" action="{{if .Edit}}/_/api/edit/submit/{{.ID}}{{else}}/_/api/add/submit{{end}}" method="post" id="form">
 
-<div class="top-menu">
+<nav>
+<input id="bmenu" type="checkbox" class="show">
+<label for="bmenu" class="burger pseudo button">&#8801;</label>
+<div class="my menu">
 
-<div class="float-left input-with-margin">
+<div class="menu-left">
 <input type="text" name="tag" id="tag" placeholder='{{tr "Topics and tags"}}' class="taginput"
        data-list="{{.TopicsAndTagsComma}}" data-multiple autofocus value="{{.NoteTopicsAndTags}}"></input>
 </div>
 
-<div class="float-right with-margin">
+<div class="menu-right">
 
-<input class="button button-clear" type="button" value='{{tr "?"}}' onclick="getPreview('Help')"></input>
+<input class="pseudo button" type="button" value='{{tr "?"}}' onclick="getPreview('Help')"></input>
 
-<input class="button button-clear" type="button" value='{{tr "Preview"}}' onclick="getPreview('Preview')"></input>
+<input class="pseudo button" type="button" value='{{tr "Preview"}}' onclick="getPreview('Preview')"></input>
 
 {{if .Edit}}
-<input class="button button-clear" type="button" value='{{tr "Diff"}}' onclick="getPreview('Diff')"></input>
+<input class="pseudo button" type="button" value='{{tr "Diff"}}' onclick="getPreview('Diff')"></input>
 {{end}}
 
-<input class="button button-clear" type="submit" value='{{tr "edit|Submit"}}' onclick="return editSubmit();"></input>
+<input class="pseudo button" type="submit" value='{{tr "edit|Submit"}}' onclick="return editSubmit();"></input>
 
 </div>
 
 </div>
+</nav>
 
 <input type="hidden" name="action" id="action" value="Preview">
 {{if .Edit}}<input type="hidden" name="sha1sum" value="{{.SHA1Sum}}">{{end}}

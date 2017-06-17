@@ -21,11 +21,6 @@ body {
     z-index: 1;
 }
 
-.float-left.tagbar {
-    margin-left: 10px;
-    margin-top: 7px;
-}
-
 a.button.tagbar:hover {
     text-decoration: line-through;
 }
@@ -50,14 +45,6 @@ nav > .my.menu {
 
 .count {
     padding-right: 10px;
-}
-
-.float-left.with-margin, .float-right.with-margin {
-    margin: 7px;
-}
-
-.input-with-margin {
-    margin: 9px 7px 7px 7px;
 }
 
 a.button:hover  {
@@ -139,14 +126,18 @@ div.container {
     color: #606c76;
 }
 
-.note > h1, .note > h2, .note > h3, .note > h4, .note > h5, .note h6 {
+.note > h1, .note > h2, .note > h3, .note > h4, .note > h5, .note > h6 {
+    padding-bottom: 0px;
+}
+
+.preview-note > h1, .preview-note > h2, .preview-note > h3, .preview-note > h4, .preview-note > h5, .preview-note > h6 {
     padding-bottom: 0px;
 }
 
 .preview-note {
     background: #fff;
     border-radius: 4px;
-    padding: 15px;
+    padding: 0px 15px;
     border: solid 1px #d1d1d1;
     box-shadow: 0px 0px 3px #d1d1d1;
     margin-top: 5px;
@@ -203,7 +194,7 @@ input.button.button-clear, a.button.button-clear {
     color: #ff9500;
     border: 1px solid #ff9500;
     border-radius: 4px;
-    padding: 14px 20px 5px 20px;
+    padding: 0px 20px;
 }
 
 .error.messages {
@@ -211,7 +202,7 @@ input.button.button-clear, a.button.button-clear {
     color:  #aa2222;
     border: 1px solid  #aa2222;
     border-radius: 4px;
-    padding: 14px 20px 5px 20px;
+    padding: 0px 20px;
 }
 
 .hidden {
@@ -224,6 +215,7 @@ html.edit, html.edit > body, html.edit > body > form, div.container.edit {
 
 input.taginput {
     width: 30em;
+    margin-top: 0.2em;
 }
 
 textarea.note {
@@ -241,6 +233,10 @@ pre.diff {
     padding: 0;
     margin: 0;
     border: none;
+}
+
+.hidden {
+    display: none;
 }
 
 .ins {
