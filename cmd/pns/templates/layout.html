@@ -2,10 +2,10 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 {{$activeTagsURLs := .ActiveTagsURLs}}
 <title>PNS{{with $activeTagsURLs}}:{{range .}} {{.Name}}{{end}}{{end}}</title>
-<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
+<link type="text/css" rel="stylesheet" href="/_/static/picnic.min.css">
 <link type="text/css" rel="stylesheet" href="/_/static/style.css">
 <link rel="stylesheet" href="/_/static/awesomplete.css" />
 <link rel="icon" href="/_/static/favicon.png" />
@@ -30,42 +30,43 @@ function setup() {
 
 <body onload="setup();" onkeydown="return noteKeyDown(event);">
 
-<div class="top-menu">
+<nav>
 
-<div class="float-left tagbar">
+<input id="bmenu" type="checkbox" class="show">
+<label for="bmenu" class="burger pseudo button">&#8801;</label>
 
+<div class="my menu">
+
+<div class="menu-left">
 {{range $activeTagsURLs}}
-<a class="button button-clear tagbar" href="{{.URL}}">{{.Name}}</a>
+<a class="pseudo button tagbar" href="{{.URL}}">{{.Name}}</a>
 {{end}}
 
 {{if .Count}}<span class="count">({{.Count}})</span>{{end}}
-{{if gt .Start 0}}<a class="button button-clear prevnext" href="{{.PrevPage}}">&lt;</a>{{end}}
-{{if .More}}<a class="button button-clear prevnext" href="{{.NextPage}}">&gt;</a>{{end}}
+{{if gt .Start 0}}<a class="pseudo button prevnext" href="{{.PrevPage}}">&lt;</a>{{end}}
+{{if .More}}<a class="pseudo button prevnext" href="{{.NextPage}}">&gt;</a>{{end}}
 
 </div>
 
-<div class="float-right">
+<!-- <div class="menu"> -->
 
-<div class="float-left input-with-margin">
+<div class="menu-right">
+
 <form action="{{.URL}}" class="inline">
 <input placeholder='{{tr "Search..."}}' name="tag" id="tag" type="text" data-multiple autofocus></input>
 </form>
-</div>
-
-<div class="float-left with-margin">
 
 <form action="/_/add" class="inline">
-<input class="button button-clear" type="submit" value='{{tr "Add note"}}'></input>
+<input class="pseudo button" type="submit" value='{{tr "Add note"}}'></input>
 </form>
 
 <form action="/_/logout{{.URL}}" class="inline">
-<input class="button button-clear" type="submit" value='{{tr "Logout"}}'></input>
+<input class="pseudo button" type="submit" value='{{tr "Logout"}}'></input>
 </form>
 
 </div>
 
-</div>
-</div>
+</nav>
 
 <div class="container">
 

@@ -26,22 +26,30 @@ body {
     margin-top: 7px;
 }
 
-a.button.tagbar {
-    text-transform: none;
-    font-size: 1.5rem;
-}
-
 a.button.tagbar:hover {
     text-decoration: line-through;
 }
 
-.count {
-    padding-right: 10px;
-    font-size: 1.5rem;
+nav {
+    padding-top: 0.2em;
+}
+nav > .my.menu {
+    display: inline;
+    float: none;
 }
 
-.button.prevnext {
-    font-size: 1.5rem;
+.menu-right {
+    display: block;
+    float: right;
+}
+
+.menu-left {
+    display: block;
+    float: left;
+}
+
+.count {
+    padding-right: 10px;
 }
 
 .float-left.with-margin, .float-right.with-margin {
@@ -50,10 +58,6 @@ a.button.tagbar:hover {
 
 .input-with-margin {
     margin: 9px 7px 7px 7px;
-}
-
-input#tag {
-    height: 3.2rem;
 }
 
 a.button:hover  {
@@ -90,7 +94,10 @@ a.button:hover  {
 }
 
 div.container {
-    padding-top: 67px;
+    padding-top: 75px;
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
 }
 
 .anchor {
@@ -130,6 +137,10 @@ div.container {
 
 .note-footer:hover > a {
     color: #606c76;
+}
+
+.note > h1, .note > h2, .note > h3, .note > h4, .note > h5, .note h6 {
+    padding-bottom: 0px;
 }
 
 .preview-note {
