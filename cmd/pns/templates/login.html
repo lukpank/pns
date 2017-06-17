@@ -1,57 +1,26 @@
-{{if .FullPage}}<!DOCTYPE html>
-<html>
-
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PNS: Login</title>
-<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/style.css" />
-<link rel="icon" href="/_/static/favicon.png" />
-</head>
-
-<body>
-
-<div class="top-menu">
-<span class="topbar-message">
-{{htmlTr "Note to login you need to have <a href=\"https://en.wikipedia.org/wiki/HTTP_cookie\">cookies</a> enabled."}}
-</span>
-</div>
-
-<form action="/_/login" method="post">
-{{else}}
-<div id="modal">
-{{end}}
-
-<div class="login">
-
-<fieldset>
-
-<div>
-<label for="login">{{tr "Login"}}</label>
-<input type="text" name="login" id="login-name" autofocus>
-
-<label for="password">{{tr "Password"}}</label>
-<input type="password" name="password" id="password">
-</div>
-
-<input type="hidden" name="redirect" value="{{.Redirect}}">
-<button class="button" id="login-submit" type="submit" value="Submit">{{tr "login|Submit"}}</button>
-
-<div id="login-error">
-{{with .Message}}
-<div class="error messages"><p >{{.}}</p></div>
-{{end}}
-</div>
-
-</fieldset>
-
-</div>
-
-{{if .FullPage}}
-</form>
-</body>
+<!DOCTYPE html>
+<html lang='{{tr "lang-code"}}'>
+    <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{tr "Login"}}</title>
+	<link type="text/css" rel="stylesheet" href="/_/static/style.css" />
+	<link type="text/css" rel="stylesheet" href="/_/static/picnic.min.css" />
+	<link rel="icon" href="/static/favicon.png" />
+    </head>
+    <body>
+	<div class="centering login">
+	    <form action="/_/login" method="post">
+		<input type="hidden" name="redirect" value="{{.Redirect}}">
+		<div>
+		    <input class="stack" type="text" name="login" placeholder='{{tr "Login"}}' autofocus>
+		    <input class="stack" type="password" name="password" placeholder='{{tr "Password"}}'>
+		    {{with .Message}}
+		    <div class="stack login-error"><span class="label error">{{.}}</span></div>
+		    {{end}}
+		    <button class="stack" type="submit" value="Submit">{{tr "login|Submit"}}</button>
+		</div>
+	    </form>
+	</div>
+    </body>
 </html>
-{{else}}
-</div>
-{{end}}

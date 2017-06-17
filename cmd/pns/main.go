@@ -159,8 +159,14 @@ func main() {
 		tr = translations["en"]
 	}
 	m := template.FuncMap{"tr": tr.translate, "htmlTr": tr.htmlTranslate}
-	t, err := newTemplate(m, "templates/layout.html", "templates/edit.html", "templates/preview.html", "templates/login.html", "templates/diff.html",
-		"templates/error.html")
+	t, err := newTemplate(m,
+		"templates/diff.html",
+		"templates/edit.html",
+		"templates/error.html",
+		"templates/layout.html",
+		"templates/login.html",
+		"templates/loginapi.html",
+		"templates/preview.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -792,7 +798,11 @@ func (s *server) setSessionCookie(w http.ResponseWriter, sid string, duration in
 }
 
 func (s *server) loginPage(w http.ResponseWriter, r *http.Request, path, msg string, fullPage bool) {
-	err := s.t.ExecuteTemplate(w, "login.html", struct {
+	t := "login.html"
+	if !fullPage {
+		t = "loginapi.html"
+	}
+	err := s.t.ExecuteTemplate(w, t, struct {
 		Redirect, Message string
 		FullPage          bool
 	}{path, msg, fullPage})
