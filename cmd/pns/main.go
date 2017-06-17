@@ -776,10 +776,8 @@ func (s *server) serveAPILogin(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 
 		}
-		err := s.t.ExecuteTemplate(w, "error.html", e)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		if _, err := io.WriteString(w, e); err != nil {
+			log.Println(err)
 		}
 		return
 	}

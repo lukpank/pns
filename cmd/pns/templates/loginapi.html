@@ -1,57 +1,23 @@
-{{if .FullPage}}<!DOCTYPE html>
-<html>
-
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>PNS: Login</title>
-<link type="text/css" rel="stylesheet" href="/_/static/normalize.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/milligram.css" />
-<link type="text/css" rel="stylesheet" href="/_/static/style.css" />
-<link rel="icon" href="/_/static/favicon.png" />
-</head>
-
-<body>
-
-<div class="top-menu">
-<span class="topbar-message">
-{{htmlTr "Note to login you need to have <a href=\"https://en.wikipedia.org/wiki/HTTP_cookie\">cookies</a> enabled."}}
-</span>
+<div class="modal">
+    <input id="modal_login" type="checkbox"/>
+    <label for="modal_login" class="overlay"></label>
+    <article>
+	<header>
+	    <h4>{{tr "Login required"}}</h4>
+	    <label for="modal_login" class="close">&times;</label>
+	</header>
+	<section id="login_stack" class="content">
+	    <input class="stack" type="text" id="login_name" placeholder='{{tr "Login"}}' autofocus>
+	    <input class="stack" type="password" id="password" placeholder='{{tr "Password"}}'>
+	</section>
+	<footer>
+	    <label for="modal_login" id="login_submit" class="button">{{tr "login|Submit"}}</label>
+	</footer>
+    </article>
+    <div id="connection_error" class="hidden">{{tr "Connection error."}}</div>
+    <div class="hidden">
+	<div id="login_error" class="stack login-error">
+	    <span id="login_msg" class="label error">&nbsp;</span>
+	</div>
+    </div>
 </div>
-
-<form action="/_/login" method="post">
-{{else}}
-<div id="modal">
-{{end}}
-
-<div class="login">
-
-<fieldset>
-
-<div>
-<label for="login">{{tr "Login"}}</label>
-<input type="text" name="login" id="login-name" autofocus>
-
-<label for="password">{{tr "Password"}}</label>
-<input type="password" name="password" id="password">
-</div>
-
-<input type="hidden" name="redirect" value="{{.Redirect}}">
-<button class="button" id="login-submit" type="submit" value="Submit">{{tr "login|Submit"}}</button>
-
-<div id="login-error">
-{{with .Message}}
-<div class="error messages"><p >{{.}}</p></div>
-{{end}}
-</div>
-
-</fieldset>
-
-</div>
-
-{{if .FullPage}}
-</form>
-</body>
-</html>
-{{else}}
-</div>
-{{end}}

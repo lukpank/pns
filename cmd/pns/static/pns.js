@@ -121,41 +121,45 @@ function modalLogin(response, callback) {
 	loginCallback = callback;
 	var login = document.getElementById("login");
 	login.innerHTML = response;
-	document.getElementById("login-name").focus();
-	var modal = document.getElementById("modal");
-	modal.onclick = function(event) {
-		if (event.target == modal) {
-			login.innerHTML = "";
-		}
-	};
-	document.getElementById("login-submit").onclick = function() { return loginOnClick(callback); }
+	document.getElementById("login_name").focus();
+	document.getElementById("modal_login").checked = true;
+	document.getElementById("login_submit").onclick = function() { return loginOnClick(callback); }
 }
 
 function loginOnClick(callback) {
 	var login = document.getElementById("login");
-	var loginName = document.getElementById("login-name");
+	var loginName = document.getElementById("login_name");
 	var password = document.getElementById("password");
-	var req = new XMLHttpRequest();
-	var loginError = document.getElementById("login-error");
-	req.open("POST", "/_/api/login");
-		req.onerror = function() {
-			loginError.innerHTML = document.getElementById("error").innerHTML;
+	var loginMsg = document.getElementById("login_msg");
+	var r = new XMLHttpRequest();
+	var loginError = document.getElementById("login_error");
+	var errorVisible = false;
+	function showError(msg) {
+		if (!errorVisible) {
+			document.getElementById("login_stack").appendChild(document.getElementById("login_error"));
+			errorVisible = true;
+		}
+		loginMsg.firstChild.nodeValue = msg;
+		document.getElementById("modal_login").checked = true;
+	}
+	r.open("POST", "/_/api/login");
+		r.onerror = function() {
+			showError(document.getElementById("connection_error").firstChild.nodeValue);
 		};
-	req.onload = function() {
-		if (req.status == 200) {
-			login.innerHTML = "";
+	r.onload = function() {
+		if (r.status == 200) {
 			callback();
 		} else {
 			loginName.value = "";
 			password.value = "";
 			loginName.focus();
-			loginError.innerHTML = req.response;
+			showError(r.response);
 		}
 	};
 	var data = new FormData();
 	data.append("login", loginName.value);
 	data.append("password", password.value);
-	req.send(data);
+	r.send(data);
 	return false;
 }
 
