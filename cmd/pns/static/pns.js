@@ -120,10 +120,19 @@ function editSubmit() {
 function modalLogin(response, callback) {
 	loginCallback = callback;
 	var login = document.getElementById("login");
+	login.onkeydown = function(e) {
+		if (e.keyCode == 13) {
+			document.getElementById("modal_login").checked = false;
+			loginOnClick(function() { callback(); });
+			return false;
+		} else if (e.keyCode == 27) {
+			document.getElementById("modal_login").checked = false;
+		}
+	};
 	login.innerHTML = response;
 	document.getElementById("login_name").focus();
 	document.getElementById("modal_login").checked = true;
-	document.getElementById("login_submit").onclick = function() { return loginOnClick(callback); }
+	document.getElementById("login_submit").onclick = function() { loginOnClick(function() { callback(); }); };
 }
 
 function loginOnClick(callback) {
