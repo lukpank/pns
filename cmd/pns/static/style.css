@@ -126,11 +126,11 @@ div.container {
     color: #606c76;
 }
 
-.note > h1, .note > h2, .note > h3, .note > h4, .note > h5, .note > h6 {
+.note h1, .note h2, .note h3, .note h4, .note h5, .note h6 {
     padding-bottom: 0px;
 }
 
-.preview-note > h1, .preview-note > h2, .preview-note > h3, .preview-note > h4, .preview-note > h5, .preview-note > h6 {
+.preview-note h1, .preview-note h2, .preview-note h3, .preview-note h4, .preview-note h5, .preview-note h6 {
     padding-bottom: 0px;
 }
 
@@ -254,4 +254,24 @@ del {
 
 .context {
     color: #7f7f7f
+}
+
+table {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.note td, .note th, .preview-note td, .preview-note th {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.note th, .preview-note th {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    color: #000;
+    background: none;
+}
+.note tr, .preview-note tr {
+    background: none;
+    border-bottom: solid 1px #e1e1e1;
 }
