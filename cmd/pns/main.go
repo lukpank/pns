@@ -162,7 +162,6 @@ func main() {
 	t, err := newTemplate(m,
 		"templates/diff.html",
 		"templates/edit.html",
-		"templates/error.html",
 		"templates/layout.html",
 		"templates/login.html",
 		"templates/loginapi.html",
