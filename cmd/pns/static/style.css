@@ -228,10 +228,6 @@ pre.diff {
     border: none;
 }
 
-.hidden {
-    display: none;
-}
-
 .ins {
     background-color: #ddffdd;
     color: #22aa22;
