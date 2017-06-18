@@ -800,10 +800,7 @@ func (s *server) loginPage(w http.ResponseWriter, r *http.Request, path, msg str
 	if !fullPage {
 		t = "loginapi.html"
 	}
-	err := s.t.ExecuteTemplate(w, t, struct {
-		Redirect, Message string
-		FullPage          bool
-	}{path, msg, fullPage})
+	err := s.t.ExecuteTemplate(w, t, &struct{ Redirect, Message string }{path, msg})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
